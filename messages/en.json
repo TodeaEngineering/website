@@ -1,0 +1,133 @@
+{
+  "Metadata": {
+    "title": "TODEA — IT Consulting & Cloud Native Solutions",
+    "description": "We help businesses modernize their infrastructure, adopt cloud-native technologies, and build software that scales."
+  },
+  "Header": {
+    "services": "Services",
+    "howWeWork": "How We Work",
+    "about": "About",
+    "techStack": "Tech Stack",
+    "contact": "Contact",
+    "getInTouch": "Get in Touch"
+  },
+  "Hero": {
+    "title": "IT Consulting & Cloud Native Solutions",
+    "description": "We help businesses modernize their infrastructure, adopt cloud-native technologies, and build software that scales. Fresh perspective, deep expertise.",
+    "cta": "Let's Talk",
+    "secondary": "See What We Do",
+    "terminal": "terminal"
+  },
+  "Services": {
+    "label": "What We Do",
+    "title": "Services Built for Modern Teams",
+    "subtitle": "Whether you're migrating to the cloud, modernizing legacy systems, or building from scratch — we're here to help.",
+    "cloudTitle": "Cloud Architecture & Migration",
+    "cloudDesc": "Design and execute cloud strategies that improve performance, strengthen security, reduce costs, and set your team up for long-term success.",
+    "softwareTitle": "Custom Software Development",
+    "softwareDesc": "Build modern, cloud-native applications tailored to your business. From microservices to full-stack products, we write clean code that ships.",
+    "consultingTitle": "IT Consulting & Strategy",
+    "consultingDesc": "Honest, practical advice on your technology roadmap. We help you make smart decisions about architecture, tooling, and team structure.",
+    "devopsTitle": "DevOps & CI/CD",
+    "devopsDesc": "Automate your build, test, and deployment pipelines. We implement GitOps workflows and infrastructure-as-code so your team can move faster.",
+    "k8sTitle": "Kubernetes & Containers",
+    "k8sDesc": "From containerizing your apps to running production-grade Kubernetes clusters, we help you embrace cloud-native infrastructure the right way.",
+    "securityTitle": "Security & Compliance",
+    "securityDesc": "Bake security into your infrastructure from day one. We help you build secure systems that meet industry standards without slowing you down."
+  },
+  "Approach": {
+    "label": "How We Work",
+    "title": "Simple, Transparent, Effective",
+    "subtitle": "No bloated proposals. No lock-in contracts. Just good engineering, clear communication, and real results.",
+    "step1Title": "Understand",
+    "step1Desc": "We start by listening. We map your current systems, pain points, and goals before writing a single line of code or making any recommendations.",
+    "step2Title": "Plan & Build",
+    "step2Desc": "We design a clear roadmap and work in short cycles. You see progress every week, not after months. We ship incrementally and adapt as we learn.",
+    "step3Title": "Deliver & Support",
+    "step3Desc": "We hand off clean, documented systems your team can actually maintain. We stick around to make sure everything runs smoothly in production."
+  },
+  "About": {
+    "label": "About Us",
+    "missionTitle": "We build technology\nthat actually works.",
+    "missionSub": "No fluff. No buzzwords. Just solid engineering.",
+    "title": "A Small Team That Thinks Big",
+    "p1": "We're a newly founded IT consulting and cloud-native solutions company. We started TODEA because we believe businesses deserve technology partners who are transparent, skilled, and genuinely invested in their success.",
+    "p2": "Our team brings hands-on experience with cloud infrastructure, modern software development, and enterprise architecture. We're small by choice — it means every client gets our full attention, and every project gets senior-level expertise.",
+    "p3": "We're not trying to be the biggest. We're trying to be the team you actually trust with your infrastructure."
+  },
+  "TechStack": {
+    "label": "Tech Stack",
+    "title": "Technologies We Work With",
+    "subtitle": "We're opinionated about using the right tool for the job, and we stay current with what actually works in production."
+  },
+  "Industries": {
+    "label": "Industries",
+    "title": "Built for Regulated, High-Stakes Environments",
+    "subtitle": "Every industry has its own compliance requirements, uptime expectations, and security standards. We've worked across sectors where getting it wrong isn't an option.",
+    "bankingTitle": "Banking & Finance",
+    "bankingDesc": "Build zero-downtime platforms with FIPS 140-2 validated cryptography, real-time fraud detection pipelines, and audit-ready infrastructure that regulators trust.",
+    "techTitle": "Technology & SaaS",
+    "techDesc": "Ship faster with cloud-native CI/CD, auto-scaling Kubernetes clusters, and fully observable microservices. We handle the infra so you can focus on your product.",
+    "autoTitle": "Automotive",
+    "autoDesc": "Power connected vehicle platforms, OTA update pipelines, and edge computing workloads with secure, low-latency infrastructure built for automotive reliability.",
+    "energyTitle": "Energy & Utilities",
+    "energyDesc": "Modernize SCADA systems, deploy FIPS-compliant monitoring across remote sites, and build data platforms that turn raw sensor data into operational intelligence.",
+    "healthTitle": "Healthcare",
+    "healthDesc": "Run HIPAA-ready workloads on FIPS-validated infrastructure. From medical imaging pipelines to patient data platforms, we build systems that protect what matters.",
+    "travelTitle": "Travel & Hospitality",
+    "travelDesc": "Handle unpredictable traffic spikes with auto-scaling architecture, real-time inventory systems, and globally distributed services that keep booking flows fast."
+  },
+  "CtaBanner": {
+    "title": "Have a Project in Mind?",
+    "description": "Whether it's a cloud migration, a new product build, or just a conversation about your architecture — we'd love to hear from you. No sales pitch, just a real conversation.",
+    "cta": "Start a Conversation"
+  },
+  "Contact": {
+    "label": "Get in Touch",
+    "title": "Let's Talk About Your Project",
+    "subtitle": "Drop us a message and we'll get back to you within 24 hours. No commitment, no pressure.",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "company": "Company",
+    "companyPlaceholder": "Your company (optional)",
+    "email": "Email",
+    "emailPlaceholder": "you@company.com",
+    "lookingFor": "What are you looking for?",
+    "optCloud": "Cloud Migration & Architecture",
+    "optSoftware": "Custom Software Development",
+    "optConsulting": "IT Consulting",
+    "optDevops": "DevOps & CI/CD",
+    "optK8s": "Kubernetes & Containers",
+    "optSecurity": "Security & Compliance",
+    "optChat": "Just want to chat",
+    "tellMore": "Tell us more",
+    "tellMorePlaceholder": "What are you working on? What's the challenge?",
+    "send": "Send Message",
+    "bookCall": "Book a Call",
+    "thankYou": "Thanks! We'll get back to you within 24 hours.",
+    "directTitle": "Prefer a direct conversation?",
+    "directDesc": "We're a small team and we reply fast. Reach out however works best for you.",
+    "emailLabel": "Email",
+    "emailValue": "hello@todea.com",
+    "locationLabel": "Based in",
+    "locationValue": "Seoul, South Korea",
+    "responseLabel": "Response time",
+    "responseValue": "Within 24 hours"
+  },
+  "Footer": {
+    "description": "IT consulting and cloud-native solutions. Built in Seoul, serving businesses everywhere.",
+    "servicesTitle": "Services",
+    "companyTitle": "Company",
+    "cloudArch": "Cloud Architecture",
+    "softwareDev": "Software Development",
+    "itConsulting": "IT Consulting",
+    "devops": "DevOps",
+    "kubernetes": "Kubernetes",
+    "security": "Security",
+    "about": "About",
+    "howWeWork": "How We Work",
+    "techStack": "Tech Stack",
+    "contact": "Contact",
+    "copyright": "© 2026 TODEA. All rights reserved."
+  }
+}
