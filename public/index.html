@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      const supported = ['en', 'ko', 'ja', 'zh'];
+      const langs = navigator.languages || [navigator.language];
+      let match = 'en';
+      for (const lang of langs) {
+        const code = lang.split('-')[0].toLowerCase();
+        if (supported.includes(code)) {
+          match = code;
+          break;
+        }
+      }
+      window.location.replace('/' + match);
+    </script>
+    <meta http-equiv="refresh" content="0;url=/en" />
+  </head>
+</html>
