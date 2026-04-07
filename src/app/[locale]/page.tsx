@@ -20,7 +20,7 @@ export default async function HomePage({
     '@type': 'ProfessionalService',
     name: 'Todea',
     url: 'https://todea.co.kr',
-    description: 'Seoul-based cloud native infrastructure consultancy specializing in Kubernetes, service mesh, and platform engineering.',
+    description: 'Seoul-based cloud native infrastructure consultancy specializing in Kubernetes, observability, and platform engineering.',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Seoul',
@@ -29,14 +29,13 @@ export default async function HomePage({
     areaServed: ['Asia Pacific', 'EMEA'],
     serviceType: [
       'Platform Engineering',
-      'Service Mesh Consulting',
       'Kubernetes Consulting',
       'Cloud Migration',
       'Observability',
       'Security & Compliance',
     ],
     knowsAbout: [
-      'Kubernetes', 'Service Mesh', 'Linkerd', 'Terraform', 'ArgoCD',
+      'Kubernetes', 'Terraform', 'ArgoCD',
       'OpenTelemetry', 'Prometheus', 'Grafana', 'Docker', 'Helm',
       'GitOps', 'Zero Trust', 'mTLS', 'SPIFFE', 'Cloud Native',
     ],

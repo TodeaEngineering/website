@@ -18,8 +18,6 @@
     "desc": "We work alongside your engineering teams on the hardest infrastructure challenges — from architecture through production.",
     "s1_t": "Platform Engineering",
     "s1_d": "Internal developer platforms on Kubernetes — secure, observable, and built for speed.",
-    "s2_t": "Service Mesh",
-    "s2_d": "Strategy, deployment, and operations. mTLS, traffic management, multi-cluster connectivity.",
     "s3_t": "Observability",
     "s3_d": "Full-stack monitoring, distributed tracing, and alerting with OpenTelemetry and Prometheus.",
     "s4_t": "Cloud Migration",
@@ -54,7 +52,7 @@
   "Contact": {
     "label": "(4.0) Contact",
     "h2": "Let's talk.",
-    "desc": "Whether you're planning a migration, adopting a service mesh, or building a platform from scratch.",
+    "desc": "Whether you're planning a migration, improving observability, or building a platform from scratch.",
     "email_l": "Email",
     "loc_l": "Based in",
     "loc_v": "Seoul, South Korea",
@@ -70,12 +68,11 @@
     "f_sent": "Sent — thank you",
     "f_opts_0": "Select",
     "f_opts_1": "Platform Engineering",
-    "f_opts_2": "Service Mesh",
-    "f_opts_3": "Observability",
-    "f_opts_4": "Cloud Migration",
-    "f_opts_5": "Security & Compliance",
-    "f_opts_6": "Training",
-    "f_opts_7": "Other"
+    "f_opts_2": "Observability",
+    "f_opts_3": "Cloud Migration",
+    "f_opts_4": "Security & Compliance",
+    "f_opts_5": "Training",
+    "f_opts_6": "Other"
   },
   "Footer": {
     "company_info": "Todea · Seoul, South Korea · hello@todea.co.kr",

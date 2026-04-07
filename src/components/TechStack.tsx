@@ -12,7 +12,6 @@ const techs = [
   { name: 'Docker', img: '/icons/docker.svg' },
   { name: 'Helm', img: '/icons/helm.svg' },
   { name: 'KEDA', img: '/icons/keda.svg' },
-  { name: 'Linkerd', img: '/icons/linkerd.svg' },
   { name: 'Kyverno', img: '/icons/kyverno.svg' },
   { name: 'Cert-Manager', img: '/icons/cert-manager.svg' },
   { name: 'CoreDNS', img: '/icons/coredns.svg' },

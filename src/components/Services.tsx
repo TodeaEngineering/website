@@ -3,7 +3,6 @@ import FadeIn from './FadeIn';
 
 const services = [
   { key: 's1' },
-  { key: 's2' },
   { key: 's3' },
   { key: 's4' },
   { key: 's5' },
