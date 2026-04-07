@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
 import Services from '@/components/Services';
@@ -7,7 +8,13 @@ import CTA from '@/components/CTA';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
-export default function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService',
