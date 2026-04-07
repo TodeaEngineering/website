@@ -5,7 +5,6 @@ import Services from '@/components/Services';
 import Approach from '@/components/Approach';
 import TechStack from '@/components/TechStack';
 import CTA from '@/components/CTA';
-import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
 export default async function HomePage({
@@ -26,6 +25,15 @@ export default async function HomePage({
       addressLocality: 'Seoul',
       addressCountry: 'KR',
     },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'ivan@todea.co.kr',
+      contactType: 'sales',
+    },
+    sameAs: [
+      'https://www.linkedin.com/company/todea/',
+      'https://github.com/TodeaEngineering',
+    ],
     areaServed: ['Asia Pacific', 'EMEA'],
     serviceType: [
       'Platform Engineering',
@@ -48,12 +56,13 @@ export default async function HomePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
-      <Hero />
-      <Services />
-      <Approach />
-      <TechStack />
-      <CTA />
-      {/* <Contact /> */}
+      <main>
+        <Hero />
+        <Services />
+        <Approach />
+        <TechStack />
+        <CTA />
+      </main>
       <Footer />
     </>
   );
