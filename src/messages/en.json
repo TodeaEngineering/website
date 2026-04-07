@@ -1,0 +1,84 @@
+{
+  "Nav": {
+    "services": "Services",
+    "approach": "Approach",
+    "expertise": "Expertise",
+    "contact": "Get in touch"
+  },
+  "Hero": {
+    "tag": "Cloud native consulting · Seoul",
+    "h1": "Building better infrastructure.",
+    "sub": "We combine deep cloud native expertise with hands-on engineering to help enterprises build platforms that are secure, observable, and ready to scale.",
+    "cta1": "Start project",
+    "cta2": "Services overview"
+  },
+  "Services": {
+    "label": "(1.0) Services",
+    "h2": "What we do",
+    "desc": "We work alongside your engineering teams on the hardest infrastructure challenges — from architecture through production.",
+    "s1_t": "Platform Engineering",
+    "s1_d": "Internal developer platforms on Kubernetes — secure, observable, and built for speed.",
+    "s2_t": "Service Mesh",
+    "s2_d": "Strategy, deployment, and operations. mTLS, traffic management, multi-cluster connectivity.",
+    "s3_t": "Observability",
+    "s3_d": "Full-stack monitoring, distributed tracing, and alerting with OpenTelemetry and Prometheus.",
+    "s4_t": "Cloud Migration",
+    "s4_d": "From on-prem to cloud native. Every phase planned, executed, and validated — zero guesswork.",
+    "s5_t": "Security & Compliance",
+    "s5_d": "Workload identity, policy enforcement, and compliance frameworks baked into the platform.",
+    "s6_t": "Training",
+    "s6_d": "Hands-on workshops so your team owns the platform long-term. Knowledge transfer, not dependency."
+  },
+  "Approach": {
+    "label": "(2.0) Approach",
+    "h2": "Pragmatic engineering, not slide decks.",
+    "desc": "We embed with your team to understand your constraints, your stack, and your goals. Every engagement produces working infrastructure.",
+    "step1_t": "Assess",
+    "step1_d": "Deep-dive into your architecture, operational practices, and business requirements.",
+    "step2_t": "Architect",
+    "step2_d": "Design a target state that balances reliability, security, and operational simplicity.",
+    "step3_t": "Implement",
+    "step3_d": "Build alongside your engineers. IaC, GitOps pipelines, validated deployments — version-controlled.",
+    "step4_t": "Operate",
+    "step4_d": "Production readiness reviews, runbooks, and monitoring. We stay until your team is confident."
+  },
+  "TechStack": {
+    "label": "(3.0) Expertise",
+    "title": "Deep roots in the cloud native ecosystem.",
+    "subtitle": "Production experience across the CNCF landscape and major cloud platforms."
+  },
+  "CTA": {
+    "sub": "Need better infrastructure?",
+    "h2": "Let's build it"
+  },
+  "Contact": {
+    "label": "(4.0) Contact",
+    "h2": "Let's talk.",
+    "desc": "Whether you're planning a migration, adopting a service mesh, or building a platform from scratch.",
+    "email_l": "Email",
+    "loc_l": "Based in",
+    "loc_v": "Seoul, South Korea",
+    "tz_l": "Timezones",
+    "tz_v": "APAC & EMEA coverage",
+    "f_name": "Name",
+    "f_company": "Company",
+    "f_email": "Email",
+    "f_interest": "Interest",
+    "f_msg": "Message",
+    "f_msg_ph": "Tell us about your project",
+    "f_submit": "Send inquiry",
+    "f_sent": "Sent — thank you",
+    "f_opts_0": "Select",
+    "f_opts_1": "Platform Engineering",
+    "f_opts_2": "Service Mesh",
+    "f_opts_3": "Observability",
+    "f_opts_4": "Cloud Migration",
+    "f_opts_5": "Security & Compliance",
+    "f_opts_6": "Training",
+    "f_opts_7": "Other"
+  },
+  "Footer": {
+    "company_info": "Todea · Seoul, South Korea · hello@todea.co.kr",
+    "copyright": "COPYRIGHT 2025 TODEA. ALL RIGHTS RESERVED."
+  }
+}

@@ -1,33 +1,26 @@
 {
-  "name": "website",
+  "name": "todea-website",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TodeaEngineering/website.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/TodeaEngineering/website/issues"
-  },
-  "homepage": "https://github.com/TodeaEngineering/website#readme",
   "dependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
-    "next": "^16.2.2",
-    "next-intl": "^4.9.0",
-    "postcss": "^8.5.8",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-google-recaptcha-v3": "^1.11.0",
-    "tailwindcss": "^4.2.2"
+    "next": "^14.2.0",
+    "next-intl": "^3.20.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.40",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.0"
   }
 }
