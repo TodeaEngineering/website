@@ -47,7 +47,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!routing.locales.includes(locale as any)) {
+  if (!(routing.locales as readonly string[]).includes(locale)) {
     notFound();
   }
 
@@ -57,6 +57,14 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${sora.variable} ${notoKR.variable} ${notoJP.variable} ${notoSC.variable}`}>
+      <head>
+        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        />
+      </head>
       <body className="bg-white text-black font-sora antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}

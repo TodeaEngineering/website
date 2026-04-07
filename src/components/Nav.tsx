@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 
 const langs = [
   { code: 'en', label: 'English', short: 'EN' },
@@ -21,9 +21,7 @@ export default function Nav() {
   const currentLang = langs.find((l) => l.code === locale) || langs[0];
 
   function switchLocale(code: string) {
-    const segments = pathname.split('/');
-    segments[1] = code;
-    router.push(segments.join('/'));
+    router.replace(pathname, { locale: code });
   }
 
   return (
