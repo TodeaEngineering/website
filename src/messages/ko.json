@@ -77,5 +77,10 @@
   "Footer": {
     "company_info": "Todea · 대한민국 서울",
     "copyright": "COPYRIGHT 2025 TODEA. ALL RIGHTS RESERVED."
+  },
+  "CookieConsent": {
+    "message": "이 사이트는 분석을 위해 쿠키를 사용합니다.",
+    "accept": "동의",
+    "decline": "거부"
   }
 }

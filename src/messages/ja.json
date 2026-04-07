@@ -77,5 +77,10 @@
   "Footer": {
     "company_info": "Todea · 韓国ソウル",
     "copyright": "COPYRIGHT 2025 TODEA. ALL RIGHTS RESERVED."
+  },
+  "CookieConsent": {
+    "message": "このサイトは分析のためにCookieを使用しています。",
+    "accept": "同意",
+    "decline": "拒否"
   }
 }

@@ -37,7 +37,7 @@ export default function Footer() {
                 {t('company_info')}
               </p>
               <p className="text-[12px] text-neutral-600">
-                {t('copyright')}
+                &copy; {new Date().getFullYear()} Todea. All rights reserved.
               </p>
             </div>
 

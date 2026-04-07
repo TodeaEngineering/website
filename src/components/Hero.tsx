@@ -29,7 +29,7 @@ export default function Hero() {
           style={{ animationDelay: '0.46s' }}
         >
           <a
-            href="#contact"
+            href="mailto:ivan@todea.co.kr"
             className="bg-brand text-white text-[13px] font-semibold px-6 py-3 rounded-full hover:opacity-80 transition-opacity"
           >
             {t('cta1')}

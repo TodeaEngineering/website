@@ -56,7 +56,7 @@ export default async function HomePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
-      <main>
+      <main id="main">
         <Hero />
         <Services />
         <Approach />

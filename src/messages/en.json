@@ -77,5 +77,10 @@
   "Footer": {
     "company_info": "Todea · Seoul, South Korea",
     "copyright": "COPYRIGHT 2025 TODEA. ALL RIGHTS RESERVED."
+  },
+  "CookieConsent": {
+    "message": "This site uses cookies for analytics.",
+    "accept": "Accept",
+    "decline": "Decline"
   }
 }

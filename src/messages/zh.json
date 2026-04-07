@@ -77,5 +77,10 @@
   "Footer": {
     "company_info": "Todea · 韩国首尔",
     "copyright": "COPYRIGHT 2025 TODEA. ALL RIGHTS RESERVED."
+  },
+  "CookieConsent": {
+    "message": "本网站使用Cookie进行分析。",
+    "accept": "同意",
+    "decline": "拒绝"
   }
 }
