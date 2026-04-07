@@ -14,7 +14,7 @@ export default function CTA() {
             {t('h2')}
           </h2>
           <a
-            href="#contact"
+            href="mailto:ivan@todea.co.kr"
             className="inline-block bg-brand text-white text-[13px] font-semibold px-7 py-3.5 rounded-full hover:opacity-80 transition-opacity"
           >
             {nav('contact')}

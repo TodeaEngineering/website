@@ -53,7 +53,7 @@ export default async function HomePage({
       <Approach />
       <TechStack />
       <CTA />
-      <Contact />
+      {/* <Contact /> */}
       <Footer />
     </>
   );

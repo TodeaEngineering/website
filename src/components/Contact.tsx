@@ -23,8 +23,8 @@ export default function Contact() {
                   <p className="text-[11px] font-semibold tracking-[.15em] text-neutral-400 uppercase mb-1">
                     {t('email_l')}
                   </p>
-                  <a href="mailto:hello@todea.co.kr" className="text-[15px] font-medium uline pb-0.5">
-                    hello@todea.co.kr
+                  <a href="mailto:ivan@todea.co.kr" className="text-[15px] font-medium uline pb-0.5">
+                    ivan@todea.co.kr
                   </a>
                 </div>
                 <div>
@@ -46,7 +46,7 @@ export default function Contact() {
           <FadeIn delay={0.16}>
             <div className="flex items-center justify-center">
               <a
-                href="mailto:hello@todea.co.kr"
+                href="mailto:ivan@todea.co.kr"
                 className="bg-brand text-white text-[13px] font-semibold px-7 py-3 rounded-full hover:opacity-80 transition-opacity inline-block"
               >
                 {t('f_submit')}

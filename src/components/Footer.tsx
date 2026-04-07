@@ -27,7 +27,7 @@ export default function Footer() {
                   {nav('expertise')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="#contact" className="text-[13px] text-neutral-300 hover:text-white transition-colors">
+                <a href="mailto:ivan@todea.co.kr" className="text-[13px] text-neutral-300 hover:text-white transition-colors">
                   {nav('contact')}
                 </a>
               </div>
@@ -47,7 +47,7 @@ export default function Footer() {
               <img src="/Logo.svg" alt="Todea" className="h-8 invert" />
               <div className="flex items-center gap-4">
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/company/todea/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-neutral-500 hover:text-white transition-colors"
@@ -58,7 +58,7 @@ export default function Footer() {
                   </svg>
                 </a>
                 <a
-                  href="https://github.com"
+                  href="https://github.com/TodeaEngineering"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-neutral-500 hover:text-white transition-colors"
