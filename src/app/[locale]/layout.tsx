@@ -105,12 +105,6 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${sora.variable} ${notoKR.variable} ${notoJP.variable} ${notoSC.variable}`}>
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});var c=localStorage.getItem('cookie-consent');if(c==='granted'){gtag('consent','update',{analytics_storage:'granted'});}gtag('js',new Date());gtag('config','G-G8K3GV4DB2');`,
-          }}
-        />
         <meta name="naver-site-verification" content="d62232868655b0d90718afa157ba294ee71dd601" />
         <meta name="theme-color" content="#000000" />
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
@@ -131,6 +125,12 @@ export default async function LocaleLayout({
           {children}
           <CookieConsent />
         </NextIntlClientProvider>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});var c=localStorage.getItem('cookie-consent');if(c==='granted'){gtag('consent','update',{analytics_storage:'granted'});}gtag('js',new Date());gtag('config','G-G8K3GV4DB2');`,
+          }}
+        />
       </body>
     </html>
   );

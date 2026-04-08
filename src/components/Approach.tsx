@@ -11,13 +11,13 @@ export default function Approach() {
       <div className="max-w-[1200px] mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
           <FadeIn>
-            <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase mb-3">
+            <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
               {t('label')}
             </p>
             <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight mb-6">
               {t('h2')}
             </h2>
-            <p className="text-[15px] text-neutral-500 font-light leading-relaxed">{t('desc')}</p>
+            <p className="text-[15px] text-neutral-600 font-light leading-relaxed">{t('desc')}</p>
           </FadeIn>
 
           <FadeIn delay={0.16}>
@@ -35,7 +35,7 @@ export default function Approach() {
                       <h3 className="text-[15px] font-bold mb-1 group-hover:translate-x-0.5 transition-transform duration-300">
                         {t(`${step}_t`)}
                       </h3>
-                      <p className="text-[14px] text-neutral-500 font-light leading-relaxed">
+                      <p className="text-[14px] text-neutral-600 font-light leading-relaxed">
                         {t(`${step}_d`)}
                       </p>
                     </div>

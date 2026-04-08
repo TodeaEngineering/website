@@ -54,6 +54,8 @@ function CarouselRow({ items, reverse }: { items: typeof techs; reverse?: boolea
             <img
               src={tech.img}
               alt={tech.name}
+              width="40"
+              height="40"
               className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
               loading="lazy"
             />
@@ -75,13 +77,13 @@ export default function TechStack() {
       <div className="max-w-[1200px] mx-auto px-6">
         <FadeIn>
           <div className="max-w-xl mb-12 mx-auto text-center">
-            <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase mb-3">
+            <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
               {t('label')}
             </p>
             <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight mb-5">
               {t('title')}
             </h2>
-            <p className="text-[15px] text-neutral-500 font-light leading-relaxed">{t('subtitle')}</p>
+            <p className="text-[15px] text-neutral-600 font-light leading-relaxed">{t('subtitle')}</p>
           </div>
         </FadeIn>
       </div>

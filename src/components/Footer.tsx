@@ -15,28 +15,28 @@ export default function Footer() {
             <div>
               {/* Nav links */}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
-                <a href="#services" className="text-[13px] text-neutral-300 hover:text-white transition-colors">
+                <a href="#services" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('services')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="#approach" className="text-[13px] text-neutral-300 hover:text-white transition-colors">
+                <a href="#approach" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('approach')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="#expertise" className="text-[13px] text-neutral-300 hover:text-white transition-colors">
+                <a href="#expertise" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('expertise')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="mailto:ivan@todea.co.kr" className="text-[13px] text-neutral-300 hover:text-white transition-colors">
+                <a href="mailto:ivan@todea.co.kr" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('contact')}
                 </a>
               </div>
 
               {/* Company details */}
-              <p className="text-[12px] text-neutral-500 leading-relaxed mb-1">
+              <p className="text-[12px] text-neutral-400 leading-relaxed mb-1">
                 {t('company_info')}
               </p>
-              <p className="text-[12px] text-neutral-600">
+              <p className="text-[12px] text-neutral-500">
                 &copy; {new Date().getFullYear()} Todea. All rights reserved.
               </p>
             </div>
@@ -44,13 +44,13 @@ export default function Footer() {
             {/* Right: logo + social */}
             <div className="flex flex-col items-start lg:items-end gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Logo.svg" alt="Todea" className="h-8 invert" />
+              <img src="/Logo.svg" alt="Todea" width="120" height="32" className="h-8 invert" />
               <div className="flex items-center gap-4">
                 <a
                   href="https://www.linkedin.com/company/todea/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-500 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-white transition-colors"
                   aria-label="LinkedIn"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -61,7 +61,7 @@ export default function Footer() {
                   href="https://github.com/TodeaEngineering"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-500 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-white transition-colors"
                   aria-label="GitHub"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

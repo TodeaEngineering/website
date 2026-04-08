@@ -7,7 +7,7 @@ export default function Hero() {
     <section className="min-h-screen flex items-center pt-[60px] px-6 bg-gradient-to-br from-neutral-200 via-neutral-50 to-neutral-200">
       <div className="max-w-[1200px] mx-auto w-full py-20 sm:py-28">
         <p
-          className="opacity-0 animate-rise text-[13px] text-neutral-400 tracking-wide mb-8"
+          className="opacity-0 animate-rise text-[13px] text-neutral-600 tracking-wide mb-8"
           style={{ animationDelay: '0.1s' }}
         >
           {t('tag')}
@@ -19,7 +19,7 @@ export default function Hero() {
           {t('h1')}
         </h1>
         <p
-          className="opacity-0 animate-rise text-[17px] sm:text-lg text-neutral-500 font-light leading-relaxed max-w-[520px] mt-8"
+          className="opacity-0 animate-rise text-[17px] sm:text-lg text-neutral-600 font-light leading-relaxed max-w-[520px] mt-8"
           style={{ animationDelay: '0.34s' }}
         >
           {t('sub')}

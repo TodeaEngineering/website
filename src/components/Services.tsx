@@ -18,7 +18,7 @@ export default function Services() {
         <FadeIn>
           <div className="grid md:grid-cols-12 gap-6 mb-20">
             <div className="md:col-span-5">
-              <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase mb-3">
+              <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
                 {t('label')}
               </p>
               <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight">
@@ -26,7 +26,7 @@ export default function Services() {
               </h2>
             </div>
             <div className="md:col-span-5 md:col-start-8 flex items-end">
-              <p className="text-[15px] text-neutral-500 font-light leading-relaxed">{t('desc')}</p>
+              <p className="text-[15px] text-neutral-600 font-light leading-relaxed">{t('desc')}</p>
             </div>
           </div>
         </FadeIn>
@@ -44,7 +44,7 @@ export default function Services() {
                 <span className="sm:col-span-4 text-xl sm:text-2xl font-bold tracking-tight group-hover:translate-x-1 transition-transform duration-500">
                   {t(`${svc.key}_t`)}
                 </span>
-                <span className="sm:col-span-5 sm:col-start-7 text-[14px] text-neutral-500 font-light leading-relaxed">
+                <span className="sm:col-span-5 sm:col-start-7 text-[14px] text-neutral-600 font-light leading-relaxed">
                   {t(`${svc.key}_d`)}
                 </span>
                 <span className="sm:col-span-1 hidden sm:flex justify-end text-neutral-300 group-hover:text-brand group-hover:translate-x-0.5 transition-all duration-500">

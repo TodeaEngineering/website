@@ -30,24 +30,24 @@ export default function Nav() {
         <div className="flex items-center justify-between h-[60px]">
           <a href={`/${locale}`} className="flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/Logo.svg" alt="Todea" className="w-40 sm:w-48" />
+            <img src="/Logo.svg" alt="Todea" className="w-40 sm:w-48" width="192" height="40" />
           </a>
 
           {/* Desktop */}
           <div className="hidden md:flex items-center gap-7">
-            <a href="#services" className="text-[13px] text-neutral-500 hover:text-black transition-colors">
+            <a href="#services" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('services')}
             </a>
-            <a href="#approach" className="text-[13px] text-neutral-500 hover:text-black transition-colors">
+            <a href="#approach" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('approach')}
             </a>
-            <a href="#expertise" className="text-[13px] text-neutral-500 hover:text-black transition-colors">
+            <a href="#expertise" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('expertise')}
             </a>
 
             {/* Lang switcher */}
             <div className="relative group">
-              <button className="text-[13px] text-neutral-500 hover:text-black transition-colors flex items-center gap-1">
+              <button className="text-[13px] text-neutral-600 hover:text-black transition-colors flex items-center gap-1">
                 {currentLang.short}
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.3" />
@@ -91,9 +91,9 @@ export default function Nav() {
           style={{ maxHeight: mobileOpen ? '350px' : '0' }}
         >
           <div className="pb-5 flex flex-col gap-3">
-            <a href="#services" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500">{t('services')}</a>
-            <a href="#approach" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500">{t('approach')}</a>
-            <a href="#expertise" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500">{t('expertise')}</a>
+            <a href="#services" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('services')}</a>
+            <a href="#approach" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('approach')}</a>
+            <a href="#expertise" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('expertise')}</a>
             <div className="flex gap-2 mt-1">
               {langs.map((l) => (
                 <button key={l.code} onClick={() => switchLocale(l.code)} className="text-xs border border-neutral-200 px-2.5 py-1 rounded-full">
