@@ -55,7 +55,7 @@
     "desc": "마이그레이션 계획, 옵저버빌리티 개선, 플랫폼 구축 등 무엇이든 상담해 주세요.",
     "email_l": "이메일",
     "loc_l": "위치",
-    "loc_v": "대한민국 서울",
+    "loc_v": "서울특별시 서초구 서초대로 396, 16층",
     "tz_l": "시간대",
     "tz_v": "APAC 및 EMEA 지원",
     "f_name": "이름",
@@ -75,7 +75,7 @@
     "f_opts_6": "기타"
   },
   "Footer": {
-    "company_info": "Todea · 대한민국 서울",
+    "company_info": "Todea · 서울특별시 서초구 서초대로 396, 16층 06619",
     "copyright": "COPYRIGHT 2025 TODEA. ALL RIGHTS RESERVED."
   },
   "CookieConsent": {

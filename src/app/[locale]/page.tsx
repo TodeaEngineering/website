@@ -22,7 +22,9 @@ export default async function HomePage({
     description: 'Seoul-based cloud native infrastructure consultancy specializing in Kubernetes, observability, and platform engineering.',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Seoul',
+      streetAddress: '396 Seocho-daero, 16th Floor',
+      addressLocality: 'Seocho-gu, Seoul',
+      postalCode: '06619',
       addressCountry: 'KR',
     },
     contactPoint: {
