@@ -111,6 +111,7 @@ export default async function LocaleLayout({
             __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});var c=localStorage.getItem('cookie-consent');if(c==='granted'){gtag('consent','update',{analytics_storage:'granted'});}gtag('js',new Date());gtag('config','G-G8K3GV4DB2');`,
           }}
         />
+        <meta name="naver-site-verification" content="d62232868655b0d90718afa157ba294ee71dd601" />
         <meta name="theme-color" content="#000000" />
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
