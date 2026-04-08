@@ -3,6 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://todea.co.kr/en</loc>
+    <lastmod>2026-04-08</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja"/>
@@ -12,6 +13,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ko</loc>
+    <lastmod>2026-04-08</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja"/>
@@ -21,6 +23,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ja</loc>
+    <lastmod>2026-04-08</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja"/>
@@ -30,6 +33,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/zh</loc>
+    <lastmod>2026-04-08</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja"/>
