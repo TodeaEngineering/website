@@ -30,7 +30,7 @@ export default function Nav() {
         <div className="flex items-center justify-between h-[60px]">
           <a href={`/${locale}`} className="flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/Logo.svg" alt="Todea" className="w-40 sm:w-48" width="192" height="40" />
+            <img src="/Logo.svg" alt="Todea" className="w-40 sm:w-48" width="192" height="40" fetchPriority="high" />
           </a>
 
           {/* Desktop */}

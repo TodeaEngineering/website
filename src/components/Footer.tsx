@@ -36,7 +36,7 @@ export default function Footer() {
               <p className="text-[12px] text-neutral-400 leading-relaxed mb-1">
                 {t('company_info')}
               </p>
-              <p className="text-[12px] text-neutral-500">
+              <p className="text-[12px] text-neutral-400">
                 &copy; {new Date().getFullYear()} Todea. All rights reserved.
               </p>
             </div>
