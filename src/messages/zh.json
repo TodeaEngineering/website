@@ -3,6 +3,7 @@
     "services": "服务",
     "approach": "方法",
     "expertise": "专业技术",
+    "about": "关于",
     "contact": "联系我们"
   },
   "Hero": {
@@ -82,5 +83,27 @@
     "message": "本网站使用Cookie进行分析。",
     "accept": "同意",
     "decline": "拒绝"
+  },
+  "About": {
+    "label": "云原生咨询 · 首尔",
+    "h1": "我们是Todea。",
+    "sub": "企业应当拥有值得信赖的基础设施——安全、可观测、经久耐用。Todea成立于首尔，致力于为亚太地区带来深入的云原生工程能力。",
+    "stat1_value": "15+",
+    "stat1_label": "云原生工程经验年数",
+    "stat2_value": "5",
+    "stat2_label": "横跨3大洲的国家",
+    "stat3_value": "6+",
+    "stat3_label": "CNCF会议与主题演讲",
+    "story_label": "我们的故事",
+    "story_h2": "由实践者创建，而非顾问。",
+    "story_p1": "Todea始于一个简单的观察：太多的云原生转型由从未运维过生产Kubernetes的人主导。我们采取了不同的方式——构建以实践工程为基础的咨询，而非幻灯片。",
+    "story_p2": "我们的团队在金融服务、咨询和云原生转型等企业级规模的平台交付方面拥有丰富经验。无论是两周评估还是完整平台构建，我们对每个项目都保持同样的严谨。",
+    "byline_name": "Ivan Porta",
+    "byline_role": "创始人兼首席工程师"
+  },
+  "AboutCredentials": {
+    "label": "(2.0) 演讲",
+    "h2": "活跃于亚太舞台。",
+    "desc": "我们分享所学。从KubeCon到各地区Kubernetes Community Days，我们将工程经验带给云原生社区。"
   }
 }

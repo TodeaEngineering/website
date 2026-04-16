@@ -3,6 +3,7 @@
     "services": "Services",
     "approach": "Approach",
     "expertise": "Expertise",
+    "about": "About",
     "contact": "Get in touch"
   },
   "Hero": {
@@ -82,5 +83,27 @@
     "message": "This site uses cookies for analytics.",
     "accept": "Accept",
     "decline": "Decline"
+  },
+  "About": {
+    "label": "Cloud native consulting · Seoul",
+    "h1": "We are Todea.",
+    "sub": "We believe enterprises deserve infrastructure they can trust — secure, observable, and built to last. Todea was founded in Seoul to bring deep cloud-native engineering to the Asia-Pacific region.",
+    "stat1_value": "15+",
+    "stat1_label": "Years in cloud-native engineering",
+    "stat2_value": "5",
+    "stat2_label": "Countries across 3 continents",
+    "stat3_value": "6+",
+    "stat3_label": "CNCF conferences & keynotes",
+    "story_label": "Our story",
+    "story_h2": "Built by practitioners, not consultants.",
+    "story_p1": "Todea started with a simple observation: too many cloud-native transformations are led by people who have never operated production Kubernetes. We took a different approach — building a consultancy grounded in hands-on engineering, not slide decks.",
+    "story_p2": "Our team brings experience delivering enterprise platforms at scale — across financial services, consulting, and cloud-native transformations. We bring that same rigor to every engagement, whether it is a two-week assessment or a full platform build.",
+    "byline_name": "Ivan Porta",
+    "byline_role": "Founder & Principal Engineer"
+  },
+  "AboutCredentials": {
+    "label": "(2.0) Speaking",
+    "h2": "On stage across APAC.",
+    "desc": "We share what we learn. From KubeCon to regional Kubernetes Community Days, we bring engineering experience to the cloud native community."
   }
 }

@@ -41,8 +41,8 @@ const localeMetadata: Record<string, { title: string; description: string; ogDes
   },
 };
 
-export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
-  const locale = params.locale;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const meta = localeMetadata[locale] || localeMetadata.en;
   const alternateLanguages: Record<string, string> = {};
   for (const loc of routing.locales) {
@@ -90,7 +90,7 @@ export default async function LocaleLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
 
