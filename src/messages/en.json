@@ -6,48 +6,48 @@
     "contact": "Get in touch"
   },
   "Hero": {
-    "tag": "Cloud native consulting · Seoul",
-    "h1": "Building better infrastructure.",
-    "sub": "We combine deep cloud native expertise with hands-on engineering to help enterprises build platforms that are secure, observable, and ready to scale.",
-    "cta1": "Start project",
-    "cta2": "Services overview"
+    "tag": "Cloud native engineering · Seoul",
+    "h1": "We build cloud-native platforms. And we run them.",
+    "sub": "Todea is a Seoul-based engineering team helping enterprises across the Americas, Europe, and Asia-Pacific design, build, and operate production-grade cloud-native infrastructure.",
+    "cta1": "Book a discovery call",
+    "cta2": "See our services"
   },
   "Services": {
     "label": "(1.0) Services",
-    "h2": "What we do",
-    "desc": "We work alongside your engineering teams on the hardest infrastructure challenges — from architecture through production.",
+    "h2": "How we help.",
+    "desc": "Five ways we help engineering teams ship production-grade infrastructure, from architecture through day-two operations.",
     "s1_t": "Platform Engineering",
-    "s1_d": "Internal developer platforms on Kubernetes — secure, observable, and built for speed.",
+    "s1_d": "Internal developer platforms your engineers actually want to use. Secure, observable, production-ready.",
     "s3_t": "Observability",
-    "s3_d": "Full-stack monitoring, distributed tracing, and alerting with OpenTelemetry and Prometheus.",
+    "s3_d": "Full-stack visibility into production. Know what's happening before your users do.",
     "s4_t": "Cloud Migration",
-    "s4_d": "From on-prem to cloud native. Every phase planned, executed, and validated — zero guesswork.",
+    "s4_d": "From on-prem to cloud native. Every workload migrated, validated, and ready to scale.",
     "s5_t": "Security & Compliance",
-    "s5_d": "Workload identity, policy enforcement, and compliance frameworks baked into the platform.",
-    "s6_t": "Training",
-    "s6_d": "Hands-on workshops so your team owns the platform long-term. Knowledge transfer, not dependency."
+    "s5_d": "Zero-trust, workload identity, and compliance baked into the platform, not bolted on.",
+    "s6_t": "Managed Operations",
+    "s6_d": "We don't just build. We operate. 24/7 platform management, on-call coverage, and continuous improvement, so your team can focus on your product."
   },
   "Approach": {
     "label": "(2.0) Approach",
     "h2": "Pragmatic engineering, not slide decks.",
-    "desc": "We embed with your team to understand your constraints, your stack, and your goals. Every engagement produces working infrastructure.",
+    "desc": "We work alongside your engineers to understand your constraints, your stack, and your goals. Every engagement produces working infrastructure.",
     "step1_t": "Assess",
     "step1_d": "Deep-dive into your architecture, operational practices, and business requirements.",
     "step2_t": "Architect",
     "step2_d": "Design a target state that balances reliability, security, and operational simplicity.",
     "step3_t": "Implement",
-    "step3_d": "Build alongside your engineers. IaC, GitOps pipelines, validated deployments — version-controlled.",
+    "step3_d": "Build alongside your engineers with IaC, GitOps pipelines, and version-controlled deployments.",
     "step4_t": "Operate",
-    "step4_d": "Production readiness reviews, runbooks, and monitoring. We stay until your team is confident."
+    "step4_d": "Production readiness reviews, runbooks, and monitoring. We stay on as your operations team, or hand off cleanly when you're ready."
   },
   "TechStack": {
     "label": "(3.0) Expertise",
-    "title": "Deep roots in the cloud native ecosystem.",
-    "subtitle": "Production experience across the CNCF landscape and major cloud platforms."
+    "title": "Battle-tested across the cloud-native stack.",
+    "subtitle": "Every tool shown here, we've shipped to production. From Kubernetes orchestration to zero-trust service mesh."
   },
   "CTA": {
-    "sub": "Need better infrastructure?",
-    "h2": "Let's build it"
+    "sub": "Planning a platform transformation?",
+    "h2": "Let's build it."
   },
   "Contact": {
     "label": "(4.0) Contact",
@@ -57,7 +57,7 @@
     "loc_l": "Based in",
     "loc_v": "396 Seocho-daero, 16F, Seocho-gu, Seoul",
     "tz_l": "Timezones",
-    "tz_v": "APAC & EMEA coverage",
+    "tz_v": "Americas, EMEA & APAC coverage",
     "f_name": "Name",
     "f_company": "Company",
     "f_email": "Email",
@@ -65,7 +65,7 @@
     "f_msg": "Message",
     "f_msg_ph": "Tell us about your project",
     "f_submit": "Send inquiry",
-    "f_sent": "Sent — thank you",
+    "f_sent": "Sent. Thank you.",
     "f_opts_0": "Select",
     "f_opts_1": "Platform Engineering",
     "f_opts_2": "Observability",
