@@ -44,6 +44,9 @@ export default function Nav() {
             <a href="#expertise" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('expertise')}
             </a>
+            <a href={`/${locale}/blog`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
+              {t('blog')}
+            </a>
 
             {/* Lang switcher */}
             <div className="relative group">
@@ -94,6 +97,7 @@ export default function Nav() {
             <a href="#services" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('services')}</a>
             <a href="#approach" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('approach')}</a>
             <a href="#expertise" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('expertise')}</a>
+            <a href={`/${locale}/blog`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('blog')}</a>
             <div className="flex gap-2 mt-1">
               {langs.map((l) => (
                 <button key={l.code} onClick={() => switchLocale(l.code)} className="text-xs border border-neutral-200 px-2.5 py-1 rounded-full">
