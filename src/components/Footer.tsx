@@ -1,8 +1,9 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Footer() {
   const t = useTranslations('Footer');
   const nav = useTranslations('Nav');
+  const locale = useLocale();
 
   return (
     <footer className="bg-[#0a0f10] text-white">
@@ -25,6 +26,10 @@ export default function Footer() {
                 <span className="text-neutral-600">|</span>
                 <a href="#expertise" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('expertise')}
+                </a>
+                <span className="text-neutral-600">|</span>
+                <a href={`/${locale}/blog`} className="text-[13px] text-neutral-400 hover:text-white transition-colors">
+                  {nav('blog')}
                 </a>
                 <span className="text-neutral-600">|</span>
                 <a href="mailto:ivan@todea.co.kr" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
