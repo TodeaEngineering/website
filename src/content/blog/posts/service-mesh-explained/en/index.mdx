@@ -9,13 +9,13 @@ image: "/blog/service-mesh-explained/en-cover.svg"
 tags: ["service-mesh", "kubernetes", "zero-trust", "platform-engineering"]
 ---
 
-If you run more than a handful of microservices on Kubernetes, your developers have probably already built parts of a service mesh by accident. Retry logic in HTTP clients. TLS certificates rotated by a script. A custom Prometheus exporter that traces calls between services. A YAML file somewhere defining timeouts.
+If you run more than a handful of microservices on Kubernetes, your developers have probably already reinvented half of a service mesh. Retry and timeout logic wired into every HTTP client. Certificate rotation held together by a CronJob and a script. Service-to-service auth improvised with bearer tokens. A mix of library versions, language idioms, and "we'll fix it later" config spread across every repo.
 
-Every service team ends up reimplementing the same patterns in slightly different ways. A service mesh moves all of that out of application code and into infrastructure your platform team owns.
+Every team solves the same problems slightly differently. A service mesh moves those concerns out of application code and into infrastructure your platform team owns.
 
 ## The duties developers shouldn't own
 
-When you distribute a monolith into microservices, you also distribute everything that used to be in-process: error handling, retries, timeouts, authentication, observability. Without a mesh, every team rebuilds the same patterns:
+When you split a monolith into microservices, you also split everything that used to happen in-process: error handling, retries, timeouts, auth, metrics. Without a mesh, every team rebuilds the same patterns, usually in their own language's idiom, often misconfigured, rarely consistent:
 
 - **Retry and timeout logic** in every HTTP client, often misconfigured
 - **TLS certificate management** with shared secrets passed around in headers
@@ -25,80 +25,61 @@ When you distribute a monolith into microservices, you also distribute everythin
 - **Load balancing and retry budgets** scattered across application code
 - **Network policies** expressed as IP allowlists nobody dares to change
 
-Multiply this by every service in your platform, every language you ship in, and every team who has to maintain it. The cost is enormous, the consistency is poor, and the reliability suffers.
+Multiply that by every service, every language you ship in, and every team maintaining it. The cost is enormous, the consistency is poor, and the reliability suffers.
 
-A service mesh removes these concerns from your developers entirely:
+A service mesh takes these concerns off your developers:
 
 ![What a service mesh takes off your developers' plate](/blog/service-mesh-explained/en-duties.svg)
 
-The developer writes business logic. The mesh handles everything that used to be cross-cutting plumbing.
+The developer writes business logic. The mesh handles the cross-cutting plumbing. 
 
 ## How it works: the proxy architecture
 
-A service mesh delivers this through a deceptively simple pattern. Two components:
+Every service mesh is built on the same two components:
 
-1. A **data plane** — a lightweight network proxy that runs alongside every service instance (the **sidecar pattern**), intercepting every byte of incoming and outgoing traffic.
-2. A **control plane** — a centralized component that configures the proxies and aggregates their telemetry.
+1. A **data plane**: Network proxies that intercept every byte of service-to-service traffic, handle mTLS, and enforce policy.
+2. A **control plane**: Controllers that configure those proxies, issue workload identities, and aggregate their telemetry.
 
-When service A wants to call service B, it does not call B directly. It calls its local proxy. The proxy handles mTLS, retries, timeouts, tracing, and routing, then forwards the request to B's proxy. B's proxy enforces policies and forwards to B.
+What differs between meshes is *where the proxy runs*. There are two dominant models.
 
-From the application's perspective, nothing has changed — it still makes a normal HTTP call to `localhost`. From the operator's perspective, every byte of traffic is now observable, securable, and controllable, without changing a single line of application code.
+### Sidecar proxies
+
+In the sidecar model, the proxy runs as an extra container inside every application pod. Linkerd works this way by default; so does classic Istio. At pod startup, iptables rules (installed either by an init container or by a CNI plugin) transparently redirect the pod's inbound and outbound TCP traffic through the sidecar.
+
+When service A calls `b.default.svc.cluster.local`, A's application container makes a normal HTTP call to a Kubernetes Service. The iptables redirect funnels it through A's sidecar, which handles mTLS, retries, timeouts, and routing, then forwards the request to B's sidecar. B's sidecar enforces authorization policy, records metrics, and forwards to B on loopback.
 
 ![Service mesh proxy architecture](/blog/service-mesh-explained/en-service-mesh.svg)
 
-This is the entire foundation: move shared infrastructure concerns out of application code and into a per-service proxy owned by the platform team.
+### Sidecarless architectures
+
+The major players are:
+
+- **Istio ambient mode** runs an L4 tunnel (`ztunnel`) as a DaemonSet, one per node, handling mTLS for all local pods. L7 features (HTTP routing, authorization on paths, etc.) are layered on by deploying optional per-namespace **waypoint proxies**. You pay for L7 only where you need it.
+
+- **Cilium Service Mesh** pushes L4 mTLS and policy into **eBPF** in the Linux kernel, and runs Envoy **per node** for L7 concerns. 
+
+The trade-offs invert: no per-pod overhead, faster pod startup, and fewer moving parts per workload — but a shared proxy means tenancy concerns bleed between workloads on the same node, and debugging a single service's traffic now means reasoning about a node-scoped component.
+
+![Sidecarless service mesh proxy architecture](/blog/service-mesh-explained/en-istio-ambient.svg)
+
+From the application's perspective, both models look identical: it makes a normal HTTP call to a Kubernetes Service. From the operator's perspective, every byte of that traffic is now authenticated, encrypted, observable, and governable by policy, without a single line of application code changing.
 
 ## What you get at the platform level
 
 A properly deployed service mesh gives you, without application changes:
 
-- **Mutual TLS between every service.** The mesh handles certificate issuance, rotation, and revocation. No PKI code in app teams' repos.
-- **Workload identity** based on cryptographic certificates, not IP addresses or shared secrets. The foundation of zero-trust networking.
-- **Traffic management** — retries, timeouts, circuit breaking, canary releases — declared in configuration.
-- **Distributed tracing** for free. Every request gets a trace ID propagated automatically.
-- **Consistent metrics** — request rate, error rate, p50/p95/p99 latency — for every service, with no instrumentation work.
-- **Multi-cluster service discovery**, where a service in cluster A can call a service in cluster B as if they were neighbors.
-
-## When you actually need one
-
-Not every Kubernetes platform needs a service mesh. The signals that you do:
-
-- You have **more than ~10 services** that talk to each other
-- You need to enforce **zero-trust networking** for compliance (financial services, government, healthcare)
-- You operate across **multiple clusters or regions** and need cross-cluster service discovery
-- You are tired of **debugging without distributed tracing**
-- You have **inconsistent retry and timeout behavior** across services causing outages
-
-If you have three services in one cluster, you probably do not need a mesh yet. Solve the problems you have, not the ones you might have.
+- **Mutual TLS between every service**: The mesh handles certificate issuance, rotation, and revocation. No PKI code in app teams' repos.
+- **Workload identity**: Based on cryptographic certificates, not IP addresses or shared secrets. The foundation of zero-trust networking.
+- **Traffic management**: Retries, timeouts, circuit breaking, canary releases — declared in configuration.
+- **Distributed tracing**: Every request gets a trace ID propagated automatically.
+- **Consistent metrics**:  Request rate, error rate, p50/p95/p99 latency — for every service, with no instrumentation work.
+- **Multi-cluster service discovery**: Service in cluster A can call a service in cluster B as if they were neighbors.
 
 ## Common pitfalls
 
 Service mesh adoption fails in predictable ways:
 
-1. **Treating it as a switch.** Installing a mesh is the easy part. Operating it — managing certificate authorities, debugging proxy issues, handling upgrades — is the hard part. Plan for the operational investment.
-2. **Choosing for features instead of fit.** The mesh ecosystem (Istio, Linkerd, Consul, Cilium service mesh) has very different operational profiles. A mesh that works for Google's scale is overkill for most enterprises.
-3. **Forgetting the latency cost.** Every request now goes through two extra proxies. Modern meshes add 1-3ms p50, but it adds up across long call chains.
-4. **Skipping observability work.** A service mesh produces enormous telemetry. Without dashboards and SLOs, the data is useless.
+1. **Treating it as a switch.** Treating install as the finish line. Getting the mesh running is the easy part. Operating it, rotating the trust anchor, debugging proxy issues in the request path, staying current with upgrades, tuning resource limits as the cluster grows, is where the real investment lives. Budget for it up front, or the mesh becomes shelfware.
+2. **Choosing for features instead of fit.** Istio, Linkerd, Consul, and Cilium Service Mesh have very different operational profiles. The mesh with the longest feature list is not the one you want if your team is three people — pick the one whose operational surface you can actually own.
+3. **Skipping observability work.** A service mesh produces enormous telemetry. Without dashboards and SLOs, the data is useless.
 
-## The road ahead
-
-Service mesh is moving toward simpler, more focused tooling. The trend over the past three years:
-
-- **Per-node proxies** instead of per-pod sidecars (Istio Ambient, Cilium) — lower memory cost, but different security trade-offs
-- **eBPF-based meshing** for L4 traffic, bypassing user-space proxies entirely
-- **Tighter integration with platform engineering** — Backstage plugins, IDP exposures, GitOps-native configuration
-- **Zero-trust as a first-class outcome**, not a feature among many
-
-The technology is settling into something stable. The pattern — moving cross-cutting concerns out of application code — is here to stay.
-
-## A practical recommendation
-
-If you are running production Kubernetes at scale and do not yet have a service mesh, start with a 2-week assessment:
-
-1. Map your service-to-service traffic and identify the highest-value problems (security? observability? traffic management?)
-2. Pilot one mesh in a non-production cluster for 4 weeks
-3. Make the operational decision based on that experience, not on benchmarks
-
-Service mesh is one of the highest-leverage platform investments a cloud-native team can make — and one of the most painful when adopted reflexively. The deciding factor is operational maturity, not feature checklists.
-
-If you would like to talk through your specific situation, [get in touch](mailto:ivan@todea.co.kr). We have done this work for enterprises across financial services, fintech, and platform teams scaling from dozens to thousands of services.

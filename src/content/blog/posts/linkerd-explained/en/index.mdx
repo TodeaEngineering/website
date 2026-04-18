@@ -1,0 +1,67 @@
+---
+title: "Linkerd Explained: The Service Mesh That Stays Out of Your Way"
+description: "A practitioner's guide to Linkerd — what makes its Rust-based micro-proxy different, when it outperforms Istio, and how to run it in production."
+date: "2026-04-17"
+author: "Ivan Porta"
+authorRole: "Founder & Principal Engineer, Todea"
+category: "Cloud Native"
+image: "/blog/linkerd-explained/en-cover.svg"
+tags: ["linkerd", "service-mesh", "kubernetes", "rust", "platform-engineering"]
+---
+
+Most teams pick a service mesh the same way they pick a Kubernetes distribution: whichever one came up first in the RFP. That is how Istio ends up deployed for three services, and why Linkerd ends up overlooked for problems it would have solved in an afternoon.
+
+Linkerd is the only CNCF graduated service mesh that is not built on Envoy. Everything about its design follows from that one decision.
+
+## What Linkerd actually is
+
+Linkerd is a service mesh for Kubernetes built around a purpose-built, Rust-based micro-proxy called **linkerd2-proxy**. Unlike Envoy, a general-purpose L7 proxy that can do almost anything, linkerd2-proxy implements only what a sidecar actually needs. The maintainers have held that line deliberately, prioritizing a smaller, more predictable proxy over feature breadth.
+
+That narrow scope is the product. The proxy has a small memory footprint, predictable tail latency, and a configuration surface small enough to keep in your head.
+
+For most teams, that is the right trade. For teams running WASM filters, multi-protocol gateways, or workloads that depend on Istio-specific extensions, it isn't.
+
+## How it works
+
+Linkerd follows the same two-plane architecture as every other mesh:
+
+1. A **data plane** — `linkerd2-proxy` injected as a sidecar into every meshed pod, transparently intercepting all TCP traffic via an init container that rewrites iptables rules.
+2. A **control plane** — a small set of controllers (destination, identity, proxy-injector) that stream service discovery and policy to the proxies, issue short-lived workload certificates for mTLS, and mutate pod specs at admission time to inject the sidecar.
+
+When service A calls service B:
+
+1. A's request to `b.default.svc.cluster.local` is redirected into A's sidecar by iptables rules installed either by a `linkerd-init` init container or, in CNI-mode installs, by the `linkerd-cni` DaemonSet.
+2. A's sidecar resolves B against endpoints it is already streaming from the `destination` controller, then opens an mTLS connection to one of B's pods using its workload certificate. That certificate is issued by identity at proxy startup and renewed against identity every 24 hours.
+3. B's sidecar terminates mTLS, checks the client's workload identity against the inbound policy it is streaming from the policy controller, and, if allowed, forwards the request to B over loopback.
+
+The application code is unchanged. Every byte between services is authenticated, encrypted, and observable.
+
+![Linkerd control plane architecture](/blog/linkerd-explained/en-linkerd-dp.svg)
+
+## The control plane
+
+![Linkerd control plane architecture](/blog/linkerd-explained/en-linkerd-cp.svg)
+
+The control plane is composed of three Deployments, each covering a different aspect of the mesh. Each runs behind its own linkerd-proxy sidecar for mTLS, the control plane is meshed the same way as your workloads.
+
+- **`identity`**: When a meshed pod starts, its proxy submits a Certificate Signing Request signed with the pod's Kubernetes ServiceAccount token. identity validates the token via a `TokenReview` call to the API server (using the `identity.l5d.io` audience), then issues a short-lived (24-hour) workload certificate. 
+
+- **`destination`**: It answers "which endpoints back this service, and what do I need to know about them?" The first time a proxy needs to resolve an authority like `b.default.svc.cluster.local:80`, it opens a long-lived gRPC `Get` stream to destination and receives pushed updates: the ready endpoint addresses, each annotated with its TLS identity, protocol hints (HTTP/2 upgrade, opaque ports, opaque-transport inbound port), metric labels, and weights. A parallel `GetProfile` stream returns per-service routing configuration from ServiceProfile. 
+
+- **`policy`**: It serves two gRPC APIs to proxies: an `InboundPolicies` API that each sidecar watches (once per listening port) to learn which client identities are allowed on which routes, and an `OutboundPolicies` API that each sidecar watches (once per authority it's calling) to get routing rules, retries, timeouts, circuit breakers, and rate limits. Authorization decisions are then made locally by the proxy against its cached policy.
+
+- **`sp-validator`**: It is the validating admission webhook for the `ServiceProfile` CRD.
+
+- **`proxy-injector`**: It is a mutating admission webhook. Its `MutatingWebhookConfiguration` subscribes to every `CREATE` of pods and services in namespaces matching the configured namespaceSelector. When the API server calls the webhook, the handler inspects the object for `linkerd.io/inject: enabled` (on the pod or its namespace); if present, it patches the pod spec to add the linkerd-proxy container.
+
+## Operational reality
+
+- **Trust anchor rotation.** he root CA's expiry is whatever you set when you generated it, whether that's Step, AWS Private CA, or cert-manager issuing from an upstream. Linkerd will happily issue workload certs right up until the anchor expires, then everything stops. Record the expiry date, set a reminder, and practice the rotation flow before you need it in an incident.
+
+- **Multi-cluster.** The `linkerd-multicluster` extension is solid, but it supports several topologies — gateway-based linking, flat pod networks, and federated services — each with its own trade-offs. Gateway-based works across any network boundary (separate VPCs, same CIDRs) at the cost of an extra hop and a gateway pod to operate; flat and federated skip the gateway for lower latency, but both require pod-level connectivity between clusters, which isn't free to set up. It's worth understanding which model fits your environment before a production topology depends on it.
+
+- **Proxy resource limits.** There is no universal sizing recipe. A meshed ingress controller terminating thousands of connections per second will burn far more proxy memory than an upstream service handling a trickle of internal traffic; a `destination` controller watching a 50-service cluster has nothing in common with one watching 5,000 endpoints. Before setting any limits, observe: run without them, let production traffic shape the workload, and watch real CPU and memory consumption per sidecar and per control-plane component. Once you have a week of data that covers your peaks, set limits with headroom above the observed maximum.
+
+## A practical recommendation
+
+If you are evaluating a service mesh for a Kubernetes platform and you do not already have a strong reason to pick Istio, pilot Linkerd first. The install fits in an afternoon. If it does what you need, you just saved a quarter of operational work. If it doesn't, you have a clear, documented reason to go somewhere else.

@@ -1,0 +1,67 @@
+---
+title: "Linkerd 详解：不打扰你的服务网格"
+description: "Linkerd 实践者指南 — 基于 Rust 的微代理与 Istio 有何不同、在哪些场景下更出色，以及如何在生产环境中运行它。"
+date: "2026-04-17"
+author: "Ivan Porta"
+authorRole: "创始人兼首席工程师，Todea"
+category: "云原生"
+image: "/blog/linkerd-explained/zh-cover.svg"
+tags: ["linkerd", "service-mesh", "kubernetes", "rust", "platform-engineering"]
+---
+
+大多数团队选择服务网格的方式,和选择 Kubernetes 发行版的方式一样:选那个在 RFP 里最先出现的。于是 Istio 被部署起来只为了三个服务,而 Linkerd 本来可以用一个下午解决的问题却被忽视掉。
+
+Linkerd 是唯一一个不基于 Envoy 构建的 CNCF 毕业服务网格。它所有的设计都源自这一个决定。
+
+## Linkerd 究竟是什么
+
+Linkerd 是一个面向 Kubernetes 的服务网格,围绕一个专门设计、基于 Rust 的微代理 **linkerd2-proxy** 构建。与 Envoy(一个几乎无所不能的通用 L7 代理)不同,linkerd2-proxy 只实现边车真正需要的功能。维护者们有意识地守住这条边界,宁愿要一个更小、更可预测的代理,也不追求功能的广度。
+
+这种狭窄的范围本身就是产品。代理的内存占用很小,尾部延迟可预测,配置面小到你可以记在脑子里。
+
+对大多数团队来说,这是正确的取舍。对于跑 WASM 过滤器、多协议网关、或者依赖 Istio 专有扩展的工作负载的团队来说,则不是。
+
+## 工作原理
+
+Linkerd 遵循和其他所有网格相同的双平面架构:
+
+1. **数据平面** — 以边车的形式注入到每个网格化 Pod 中的 `linkerd2-proxy`。通过一个重写 iptables 规则的 init 容器,透明地拦截所有 TCP 流量。
+2. **控制平面** — 一组小规模的控制器(destination、identity、proxy-injector),它们向代理流式推送服务发现和策略、签发 mTLS 用的短期工作负载证书,并在准入时修改 Pod 规格以注入边车。
+
+当服务 A 调用服务 B 时:
+
+1. A 对 `b.default.svc.cluster.local` 的请求,被 `linkerd-init` init 容器(或在 CNI 模式安装下由 `linkerd-cni` DaemonSet)安装的 iptables 规则重定向到 A 的边车中。
+2. A 的边车根据它已经从 `destination` 控制器持续接收的端点信息解析 B,然后使用自己的工作负载证书对 B 的某一个 Pod 发起 mTLS 连接。该证书由 identity 在代理启动时签发,并每 24 小时向 identity 续签一次。
+3. B 的边车终止 mTLS,根据它正在从 policy 控制器持续接收的入站策略检查客户端的工作负载身份,若允许,则通过环回将请求转发到 B。
+
+应用程序代码保持不变。服务之间的每一个字节都被认证、加密,并且可观测。
+
+![Linkerd 数据平面架构](/blog/linkerd-explained/ch-linkerd-dp.svg)
+
+## 控制平面
+
+![Linkerd 控制平面架构](/blog/linkerd-explained/ch-linkerd-cp.svg)
+
+控制平面由三个 Deployment 组成,分别负责网格的不同方面。每个 Deployment 都运行在自己的 linkerd-proxy 边车之后以提供 mTLS — 控制平面本身,是和你的工作负载一样被网格化的。
+
+- **`identity`**:当一个网格化的 Pod 启动时,它的代理会提交一份由该 Pod 的 Kubernetes ServiceAccount 令牌签名的证书签名请求(CSR)。identity 通过向 API Server 发起 `TokenReview` 调用(使用 `identity.l5d.io` audience)来验证该令牌,然后签发一个短期(24 小时)的工作负载证书。
+
+- **`destination`**:它回答"哪些端点承载了这个服务,我需要了解它们的什么?"。当代理第一次需要解析一个像 `b.default.svc.cluster.local:80` 这样的 authority 时,它会打开一条通往 destination 的长连接 gRPC `Get` 流,并持续接收推送更新:就绪的端点地址,每一个都附带 TLS 身份、协议提示(HTTP/2 升级、不透明端口、不透明传输入站端口)、指标标签和权重。并行的 `GetProfile` 流则从 ServiceProfile 返回每个服务的路由配置。
+
+- **`policy`**:向代理提供两个 gRPC API:每个边车会按监听端口各 watch 一次的 `InboundPolicies` API,用来了解哪些客户端身份在哪些路由上是被允许的;以及每个边车会按它调用的每一个 authority 各 watch 一次的 `OutboundPolicies` API,用来获取路由规则、重试、超时、熔断器和速率限制。随后的授权判定,由代理在本地针对其缓存的策略做出。
+
+- **`sp-validator`**:是 `ServiceProfile` CRD 的 validating admission webhook。
+
+- **`proxy-injector`**:是一个 mutating admission webhook。它的 `MutatingWebhookConfiguration` 订阅所有匹配所配置 `namespaceSelector` 的命名空间中 Pod 与 Service 的每一次 `CREATE`。当 API Server 调用 webhook 时,处理器会在对象(Pod 或其所在命名空间)上检查 `linkerd.io/inject: enabled`;如果存在,它会给 Pod 规格打补丁,添加 linkerd-proxy 容器。
+
+## 运维现实
+
+- **信任锚轮换。** 根 CA 的过期时间就是你生成它时设置的那个,不管你用的是 Step、AWS Private CA,还是 cert-manager 从上游签发。Linkerd 会很愉快地签发工作负载证书,一直签到锚过期为止,然后一切停摆。把过期日期记下来,设好提醒,并且在真正出事之前就把轮换流程演练一遍。
+
+- **多集群。** `linkerd-multicluster` 扩展做得很扎实,但它支持多种拓扑 — 基于网关的链接、扁平 Pod 网络和联合服务 — 每一种都有各自的权衡。基于网关的方式可以跨任何网络边界(独立的 VPC、相同的 CIDR)工作,代价是多一跳和一个需要运维的网关 Pod;扁平和联合跳过网关以获得更低延迟,但都要求集群之间具备 Pod 级别的连通性,而这不是免费得来的。在让生产拓扑依赖它之前,值得先理解哪种模型最适合你的环境。
+
+- **代理资源限制。** 没有放之四海而皆准的容量配方。一个每秒终止数千连接的网格化 ingress 控制器,消耗的代理内存要远多于一个只处理少量内部流量的上游服务;一个 watch 50 个服务的集群的 `destination` 控制器,和一个 watch 5,000 个端点的完全不是同一件事。在设置任何限制之前,先观察:不设限制地跑起来,让生产流量塑造工作负载,观察每个边车和每个控制平面组件真实的 CPU 与内存消耗。一旦你拿到了一周、覆盖了峰值的数据,再在观测到的最大值之上留出富余,去设置限制。
+
+## 实用建议
+
+如果你正在为某个 Kubernetes 平台评估服务网格,并且还没有非用 Istio 不可的强理由,就先拿 Linkerd 做个试点。安装工作一个下午就能搞定。如果它满足你的需求,你就省下了一个季度的运维工作;如果不满足,你也得到了一个清晰、有据可查的理由去选择别的方案。
