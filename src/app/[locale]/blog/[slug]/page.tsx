@@ -32,12 +32,19 @@ export async function generateMetadata({
     return { title: 'Post not found' };
   }
 
+  const languages: Record<string, string> = {};
+  for (const loc of routing.locales) {
+    languages[loc] = `${BASE_URL}/${loc}/blog/${post.slug}`;
+  }
+  languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/blog/${post.slug}`;
+
   return {
     title: `${post.title} · Todea`,
     description: post.description,
     authors: [{ name: post.author }],
     alternates: {
       canonical: `${BASE_URL}/${locale}/blog/${post.slug}`,
+      languages,
     },
     openGraph: {
       title: post.title,

@@ -21,11 +21,18 @@ export async function generateMetadata({
   const { locale } = await params;
   const meta = getPageMeta('blog/page', locale);
 
+  const languages: Record<string, string> = {};
+  for (const loc of routing.locales) {
+    languages[loc] = `${BASE_URL}/${loc}/blog`;
+  }
+  languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/blog`;
+
   return {
     title: meta.title,
     description: meta.description,
     alternates: {
       canonical: `${BASE_URL}/${locale}/blog`,
+      languages,
     },
     openGraph: {
       title: meta.title,
