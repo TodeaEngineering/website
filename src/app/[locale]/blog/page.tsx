@@ -81,11 +81,13 @@ export default async function BlogIndexPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Nav />
-      <main id="main">
-        <BlogList posts={posts} />
-      </main>
-      <Footer />
+      <div className="flex flex-col min-h-screen">
+        <Nav />
+        <main id="main" className="flex-1 bg-neutral-50">
+          <BlogList posts={posts} />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }
