@@ -16,25 +16,25 @@ const BASE_URL = 'https://todea.co.kr';
 
 const localeMetadata: Record<string, { title: string; description: string; ogDescription: string; ogLocale: string }> = {
   en: {
-    title: 'Todea — Cloud Native Infrastructure Consulting',
+    title: 'Todea · Cloud Native Infrastructure Consulting',
     description: 'Todea is a Seoul-based cloud native infrastructure consultancy helping enterprises build resilient platforms on Kubernetes.',
     ogDescription: 'We help enterprises design, build, and operate resilient cloud native platforms.',
     ogLocale: 'en_US',
   },
   ko: {
-    title: 'Todea — 클라우드 네이티브 인프라 컨설팅',
+    title: 'Todea · 클라우드 네이티브 인프라 컨설팅',
     description: 'Todea는 서울 기반 클라우드 네이티브 인프라 컨설팅 기업으로, Kubernetes 기반의 안정적인 플랫폼 구축을 지원합니다.',
     ogDescription: '기업이 안정적인 클라우드 네이티브 플랫폼을 설계, 구축, 운영할 수 있도록 지원합니다.',
     ogLocale: 'ko_KR',
   },
   ja: {
-    title: 'Todea — クラウドネイティブインフラコンサルティング',
+    title: 'Todea · クラウドネイティブインフラコンサルティング',
     description: 'Todeaはソウル拠点のクラウドネイティブインフラコンサルティング企業です。Kubernetes上の堅牢なプラットフォーム構築を支援します。',
     ogDescription: '企業が堅牢なクラウドネイティブプラットフォームを設計・構築・運用できるよう支援します。',
     ogLocale: 'ja_JP',
   },
   zh: {
-    title: 'Todea — 云原生基础设施咨询',
+    title: 'Todea · 云原生基础设施咨询',
     description: 'Todea是一家位于首尔的云原生基础设施咨询公司，帮助企业在Kubernetes上构建可靠的平台。',
     ogDescription: '我们帮助企业设计、构建和运营可靠的云原生平台。',
     ogLocale: 'zh_CN',
@@ -112,7 +112,7 @@ export default async function LocaleLayout({
         <meta name="referrer" content="strict-origin-when-cross-origin" />
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; base-uri 'self'; form-action 'self'"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; base-uri 'self'; form-action 'self'"
         />
       </head>
       <body className="bg-white text-black font-sora antialiased">
