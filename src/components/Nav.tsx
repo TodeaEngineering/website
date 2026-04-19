@@ -46,6 +46,7 @@ export default function Nav() {
             </a>
             <a href={`/${locale}/about`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('about')}
+            </a>
             <a href={`/${locale}/blog`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('blog')}
             </a>

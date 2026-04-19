@@ -27,11 +27,15 @@ export default getRequestConfig(async ({ requestLocale }: GetRequestConfigParams
   // Homepage content (Hero, Services, Approach, TechStack, CTA, Contact)
   const homepageContent = loadFrontmatter(`homepage/${locale}/index.mdx`);
 
+  // About page content (About, AboutCredentials)
+  const aboutContent = loadFrontmatter(`about/${locale}/index.mdx`);
+
   return {
     locale,
     messages: {
       ...sharedContent,
       ...homepageContent,
+      ...aboutContent,
     },
   };
 });

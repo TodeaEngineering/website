@@ -28,13 +28,11 @@ export default function Footer() {
                   {nav('expertise')}
                 </a>
                 <span className="text-neutral-600">|</span>
-<<<<<<< HEAD
                 <a href={`/${locale}/about`} className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('about')}
-=======
+                </a>
                 <a href={`/${locale}/blog`} className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('blog')}
->>>>>>> main
                 </a>
                 <span className="text-neutral-600">|</span>
                 <a href="mailto:ivan@todea.co.kr" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
