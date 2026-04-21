@@ -1,6 +1,6 @@
 ---
 title: "Running Linkerd on OpenShift: SCCs, CNI, and the Edges That Bite"
-description: "A practitioner's guide to installing Linkerd on OpenShift — why the default install fails, how Security Context Constraints change the picture, and which of the two fixes is actually worth operating."
+description: "A practitioner's guide to installing Linkerd on OpenShift: why the default install fails, how Security Context Constraints change the picture, and which of the two fixes is actually worth operating."
 date: "2026-04-19"
 author: "Todea Engineering"
 authorRole: "Cloud Native Practice"
@@ -68,7 +68,7 @@ As its name suggests, `restricted-v2` is strict:
 
 The Linkerd pods violate this in two ways. The first hits every container in the install; the second only applies to `linkerd-init`:
 
-- **The UIDs don't fit the project range.** `restricted-v2` requires every UID to fall inside the project's assigned range — `[1000750000, 1000759999]` in this example, a different window in every project. `linkerd-init` runs as `65534` (`nobody`), and the control-plane containers and proxy sidecar default to `2102` and `2103`. None of those are in range, and chasing them through Helm isn't a fix: ranges are reassigned whenever a namespace is recreated, and meshed application pods live in *other* projects with ranges of their own. No single UID works everywhere.
+- **The UIDs don't fit the project range.** `restricted-v2` requires every UID to fall inside the project's assigned range: `[1000750000, 1000759999]` in this example, a different window in every project. `linkerd-init` runs as `65534` (`nobody`), and the control-plane containers and proxy sidecar default to `2102` and `2103`. None of those are in range, and chasing them through Helm isn't a fix: ranges are reassigned whenever a namespace is recreated, and meshed application pods live in *other* projects with ranges of their own. No single UID works everywhere.
 - **`linkerd-init` needs capabilities `restricted-v2` won't grant.** Its whole job is rewriting iptables so the pod's traffic is redirected through the sidecar, which takes `NET_ADMIN` and `NET_RAW`. Neither is on the allow-list.
 
 ## Two ways out
@@ -77,7 +77,7 @@ There are two supported paths. They solve the same problem from opposite ends, a
 
 ### Path 1: Linkerd CNI (recommended)
 
-The Linkerd CNI plugin moves the iptables setup **out of the pod** and into a node-level CNI chain. The `linkerd-cni` DaemonSet drops a binary and a config into the node's CNI directory, and Multus chains it into every pod's CNI setup — the plugin is a no-op for pods that aren't meshed. The pod itself no longer needs `NET_ADMIN` or `NET_RAW`.
+The Linkerd CNI plugin moves the iptables setup **out of the pod** and into a node-level CNI chain. The `linkerd-cni` DaemonSet drops a binary and a config into the node's CNI directory, and Multus chains it into every pod's CNI setup. The plugin is a no-op for pods that aren't meshed. The pod itself no longer needs `NET_ADMIN` or `NET_RAW`.
 
 The CNI DaemonSet still does privileged work on the node, so its ServiceAccount needs a SCC that allows it:
 
@@ -271,4 +271,4 @@ The **CNI path** concentrates the privilege in one place: a single DaemonSet in 
 
 The **proxy-init path** spreads the privilege out: every meshed application namespace needs its ServiceAccounts bound to an SCC that grants `NET_ADMIN` and `NET_RAW`. You are operating that grant forever, for every new app team that onboards.
 
-Pick CNI unless your cluster administrators forbid DaemonSets that write to host CNI paths. In that case, proxy-init with a custom SCC is the honest fallback — just build the per-namespace SCC grant into your namespace-provisioning automation from day one, or it will bite you six months in.
+Pick CNI unless your cluster administrators forbid DaemonSets that write to host CNI paths. In that case, proxy-init with a custom SCC is the honest fallback. Just build the per-namespace SCC grant into your namespace-provisioning automation from day one, or it will bite you six months in.

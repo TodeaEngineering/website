@@ -23,7 +23,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. The site redirects to the default locale (`/en`).
 
-Hot reload is enabled — edits to components, styles, and translations reflect immediately.
+Hot reload is enabled. Edits to components, styles, and translations reflect immediately.
 
 ## Build & Preview
 

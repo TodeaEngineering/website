@@ -1,6 +1,6 @@
 ---
 title: "OpenShift에서 Linkerd 운영하기: SCC, CNI, 그리고 발목을 잡는 것들"
-description: "OpenShift에 Linkerd를 설치하기 위한 실무자 가이드 — 왜 기본 설치가 실패하는지, Security Context Constraints가 어떻게 그림을 바꾸는지, 그리고 두 가지 해결책 중 어느 쪽이 실제로 운영할 가치가 있는지."
+description: "OpenShift에 Linkerd를 설치하기 위한 실무자 가이드: 왜 기본 설치가 실패하는지, Security Context Constraints가 어떻게 그림을 바꾸는지, 그리고 두 가지 해결책 중 어느 쪽이 실제로 운영할 가치가 있는지."
 date: "2026-04-19"
 author: "Todea Engineering"
 authorRole: "클라우드 네이티브 실무"
@@ -77,7 +77,7 @@ Linkerd 파드는 두 가지 방식으로 이를 위반합니다. 첫 번째는 
 
 ### 경로 1: Linkerd CNI (권장)
 
-Linkerd CNI 플러그인은 iptables 설정을 **파드 밖으로** 옮겨 노드 레벨의 CNI 체인 안으로 넣습니다. `linkerd-cni` DaemonSet은 노드의 CNI 디렉터리에 바이너리와 설정을 떨어뜨리고, Multus는 그것을 모든 파드의 CNI 설정에 체인으로 연결합니다 — 메시화되지 않은 파드에 대해 이 플러그인은 아무 일도 하지 않습니다. 파드 자체는 더 이상 `NET_ADMIN`이나 `NET_RAW`가 필요하지 않습니다.
+Linkerd CNI 플러그인은 iptables 설정을 **파드 밖으로** 옮겨 노드 레벨의 CNI 체인 안으로 넣습니다. `linkerd-cni` DaemonSet은 노드의 CNI 디렉터리에 바이너리와 설정을 떨어뜨리고, Multus는 그것을 모든 파드의 CNI 설정에 체인으로 연결합니다. 메시화되지 않은 파드에 대해 이 플러그인은 아무 일도 하지 않습니다. 파드 자체는 더 이상 `NET_ADMIN`이나 `NET_RAW`가 필요하지 않습니다.
 
 CNI DaemonSet은 여전히 노드 위에서 권한이 필요한 작업을 수행하므로, 그 ServiceAccount는 이를 허용하는 SCC가 필요합니다:
 
@@ -271,4 +271,4 @@ spec:
 
 **proxy-init 경로**는 권한을 흩뿌립니다. 메시화된 모든 애플리케이션 네임스페이스가 그 ServiceAccount들을 `NET_ADMIN`과 `NET_RAW`를 부여하는 SCC에 바인딩해야 합니다. 새로운 앱 팀이 온보딩할 때마다 그 부여를 영원히 운영하게 됩니다.
 
-클러스터 관리자가 호스트 CNI 경로에 쓰는 DaemonSet을 금지하는 경우가 아니라면 CNI를 선택하세요. 그런 경우라면 커스텀 SCC를 사용한 proxy-init가 정직한 대안입니다 — 단, 첫날부터 네임스페이스 프로비저닝 자동화에 네임스페이스별 SCC 부여를 포함시키세요. 그렇지 않으면 6개월 후에 발목을 잡힐 것입니다.
+클러스터 관리자가 호스트 CNI 경로에 쓰는 DaemonSet을 금지하는 경우가 아니라면 CNI를 선택하세요. 그런 경우라면 커스텀 SCC를 사용한 proxy-init가 정직한 대안입니다. 단, 첫날부터 네임스페이스 프로비저닝 자동화에 네임스페이스별 SCC 부여를 포함시키세요. 그렇지 않으면 6개월 후에 발목을 잡힐 것입니다.

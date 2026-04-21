@@ -1,6 +1,6 @@
 # Todea Website
 
-Corporate website for [Todea](https://todea.co.kr) — a Seoul-based cloud native infrastructure consultancy.
+Corporate website for [Todea](https://todea.co.kr): a Seoul-based cloud native infrastructure consultancy.
 
 ## Tech Stack
 

@@ -1,6 +1,6 @@
 ---
 title: "Linkerd Explained: The Service Mesh That Stays Out of Your Way"
-description: "A practitioner's guide to Linkerd — what makes its Rust-based micro-proxy different, when it outperforms Istio, and how to run it in production."
+description: "A practitioner's guide to Linkerd: what makes its Rust-based micro-proxy different, when it outperforms Istio, and how to run it in production."
 date: "2026-04-17"
 author: "Todea Engineering"
 authorRole: "Cloud Native Practice"
@@ -25,8 +25,8 @@ For most teams, that is the right trade. For teams running WASM filters, multi-p
 
 Linkerd follows the same two-plane architecture as every other mesh:
 
-1. A **data plane** — `linkerd2-proxy` injected as a sidecar into every meshed pod, transparently intercepting all TCP traffic via an init container that rewrites iptables rules.
-2. A **control plane** — a small set of controllers (destination, identity, proxy-injector) that stream service discovery and policy to the proxies, issue short-lived workload certificates for mTLS, and mutate pod specs at admission time to inject the sidecar.
+1. A **data plane**: `linkerd2-proxy` injected as a sidecar into every meshed pod, transparently intercepting all TCP traffic via an init container that rewrites iptables rules.
+2. A **control plane**: a small set of controllers (destination, identity, proxy-injector) that stream service discovery and policy to the proxies, issue short-lived workload certificates for mTLS, and mutate pod specs at admission time to inject the sidecar.
 
 When service A calls service B:
 
@@ -58,7 +58,7 @@ The control plane is composed of three Deployments, each covering a different as
 
 - **Trust anchor rotation.** he root CA's expiry is whatever you set when you generated it, whether that's Step, AWS Private CA, or cert-manager issuing from an upstream. Linkerd will happily issue workload certs right up until the anchor expires, then everything stops. Record the expiry date, set a reminder, and practice the rotation flow before you need it in an incident.
 
-- **Multi-cluster.** The `linkerd-multicluster` extension is solid, but it supports several topologies — gateway-based linking, flat pod networks, and federated services — each with its own trade-offs. Gateway-based works across any network boundary (separate VPCs, same CIDRs) at the cost of an extra hop and a gateway pod to operate; flat and federated skip the gateway for lower latency, but both require pod-level connectivity between clusters, which isn't free to set up. It's worth understanding which model fits your environment before a production topology depends on it.
+- **Multi-cluster.** The `linkerd-multicluster` extension is solid, but it supports several topologies (gateway-based linking, flat pod networks, and federated services), each with its own trade-offs. Gateway-based works across any network boundary (separate VPCs, same CIDRs) at the cost of an extra hop and a gateway pod to operate; flat and federated skip the gateway for lower latency, but both require pod-level connectivity between clusters, which isn't free to set up. It's worth understanding which model fits your environment before a production topology depends on it.
 
 - **Proxy resource limits.** There is no universal sizing recipe. A meshed ingress controller terminating thousands of connections per second will burn far more proxy memory than an upstream service handling a trickle of internal traffic; a `destination` controller watching a 50-service cluster has nothing in common with one watching 5,000 endpoints. Before setting any limits, observe: run without them, let production traffic shape the workload, and watch real CPU and memory consumption per sidecar and per control-plane component. Once you have a week of data that covers your peaks, set limits with headroom above the observed maximum.
 
