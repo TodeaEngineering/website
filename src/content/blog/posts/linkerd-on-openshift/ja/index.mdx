@@ -1,0 +1,274 @@
+---
+title: "OpenShift上でLinkerdを動かす：SCC、CNI、そして足を引っ張るもの"
+description: "OpenShiftにLinkerdをインストールするための実務者ガイド — なぜデフォルトのインストールが失敗するのか、Security Context Constraintsがどのように構図を変えるのか、そして二つの解決策のうちどちらが実際に運用する価値があるのか。"
+date: "2026-04-19"
+author: "Todea Engineering"
+authorRole: "クラウドネイティブ・プラクティス"
+category: "クラウドネイティブ"
+image: "/blog/linkerd-on-openshift/ja-cover.svg"
+tags: ["linkerd", "openshift", "service-mesh", "kubernetes", "platform-engineering"]
+---
+
+素のKubernetesクラスターにLinkerdをインストールするのは10分の作業です。OpenShiftにインストールするのはそうではありません。Helmチャートも同じ、コントロールプレーンも同じ、プロキシも同じですが、OpenShiftに対して最初の`helm install`を実行すると、`linkerd`ネームスペースには0から決してスケールしないデプロイメントだけが残ります：
+
+```bash
+oc get deployment -n linkerd
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+linkerd-destination      0/1     0            0           2m40s
+linkerd-identity         0/1     0            0           2m40s
+linkerd-proxy-injector   0/1     0            0           2m40s
+```
+
+これはバグではありません。OpenShiftのセキュリティモデルが設計通りに正確に動作しているだけです。コツは、Linkerdのどの部分がそれと衝突するのか、そして利用可能な解決策のうちどれを実際に抱えて生きていきたいかを知ることです。
+
+## なぜ素のインストールは失敗するのか
+
+OpenShiftはすべてのポッドをSecurity Context Constraints (SCC) を通じて管理します。SCCはクラスタースコープのポリシーで、ポッドがどの`securityContext`設定を使用できるかを決定します。どのUIDで実行できるか、どのLinuxケーパビリティを要求できるか、どのボリュームタイプをマウントできるか、ホストネットワークにアクセスできるかなどです。
+
+```bash
+oc get scc
+NAME                              PRIV    CAPS                   SELINUX     RUNASUSER          FSGROUP     SUPGROUP    PRIORITY     READONLYROOTFS   VOLUMES
+anyuid                            false   <no value>             MustRunAs   RunAsAny           RunAsAny    RunAsAny    10           false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+hostaccess                        false   <no value>             MustRunAs   MustRunAsRange     MustRunAs   RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","hostPath","persistentVolumeClaim","projected","secret"]
+hostmount-anyuid                  false   <no value>             MustRunAs   RunAsAny           RunAsAny    RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","hostPath","nfs","persistentVolumeClaim","projected","secret"]
+hostmount-anyuid-v2               false   <no value>             RunAsAny    RunAsAny           RunAsAny    RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","hostPath","nfs","persistentVolumeClaim","projected","secret"]
+hostnetwork                       false   <no value>             MustRunAs   MustRunAsRange     MustRunAs   MustRunAs   <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+hostnetwork-v2                    false   ["NET_BIND_SERVICE"]   MustRunAs   MustRunAsRange     MustRunAs   MustRunAs   <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+insights-runtime-extractor-scc    true    ["CAP_SYS_ADMIN"]      RunAsAny    RunAsAny           RunAsAny    RunAsAny    <no value>   false            ["*"]
+machine-api-termination-handler   false   <no value>             MustRunAs   RunAsAny           MustRunAs   MustRunAs   <no value>   false            ["downwardAPI","hostPath"]
+node-exporter                     true    <no value>             RunAsAny    RunAsAny           RunAsAny    RunAsAny    <no value>   false            ["*"]
+nonroot                           false   <no value>             MustRunAs   MustRunAsNonRoot   RunAsAny    RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+nonroot-v2                        false   ["NET_BIND_SERVICE"]   MustRunAs   MustRunAsNonRoot   RunAsAny    RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+privileged                        true    ["*"]                  RunAsAny    RunAsAny           RunAsAny    RunAsAny    <no value>   false            ["*"]
+privileged-genevalogging          true    ["*"]                  RunAsAny    RunAsAny           RunAsAny    RunAsAny    <no value>   false            ["*"]
+restricted                        false   <no value>             MustRunAs   MustRunAsRange     MustRunAs   RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+restricted-v2                     false   ["NET_BIND_SERVICE"]   MustRunAs   MustRunAsRange     MustRunAs   RunAsAny    <no value>   false            ["configMap","csi","downwardAPI","emptyDir","ephemeral","persistentVolumeClaim","projected","secret"]
+```
+
+アドミッション時、プラグインはクラスター上のすべてのSCCを列挙し、優先度順にソートして、それぞれについて二つのことをチェックします。ポッドのServiceAccountにそのSCCへのRBACアクセスがあるか、そしてポッドのスペックがそのルールに対してバリデーションを通るかです。両方をパスする最初のSCCに対してポッドが受け入れられます。どれも通らなければポッドは拒否され、イベントログにはプラグインが試したすべてのSCCと、それぞれが拒否した理由が並びます。
+
+ポッドが拒否されると、イベントログはプラグインが試したことを正確に書き出します。SCCごとに1行、`Forbidden: not usable by user or serviceaccount`(RBACチェック失敗)または`Invalid value: …`の詳細(RBACは通ったがバリデーションに失敗)です。そのリストを読むことがデバッグの出発点です。
+
+```bash
+oc get events -n linkerd
+LAST SEEN   TYPE      REASON         OBJECT                                         MESSAGE
+7m47s       Warning   FailedCreate   replicaset/linkerd-destination-5fd5f7b7f7      Error creating: pods "linkerd-destination-5fd5f7b7f7-" is forbidden: unable to validate against any security context constraint: [provider "anyuid": Forbidden: not usable by user or serviceaccount, provider restricted-v2: .initContainers[0].runAsUser: Invalid value: 65534: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .initContainers[0].capabilities.add: Invalid value: "NET_ADMIN": capability may not be added, provider restricted-v2: .initContainers[0].capabilities.add: Invalid value: "NET_RAW": capability may not be added, provider restricted-v2: .containers[0].runAsUser: Invalid value: 2102: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .containers[1].runAsUser: Invalid value: 2103: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .containers[2].runAsUser: Invalid value: 2103: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .containers[3].runAsUser: Invalid value: 2103: must be in the ranges: [1000750000, 1000759999], provider "restricted": Forbidden: not usable by user or serviceaccount, provider "nonroot-v2": Forbidden: not usable by user or serviceaccount, provider "nonroot": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid-v2": Forbidden: not usable by user or serviceaccount, provider "machine-api-termination-handler": Forbidden: not usable by user or serviceaccount, provider "hostnetwork-v2": Forbidden: not usable by user or serviceaccount, provider "hostnetwork": Forbidden: not usable by user or serviceaccount, provider "hostaccess": Forbidden: not usable by user or serviceaccount, provider "insights-runtime-extractor-scc": Forbidden: not usable by user or serviceaccount, provider "node-exporter": Forbidden: not usable by user or serviceaccount, provider "privileged": Forbidden: not usable by user or serviceaccount, provider "privileged-genevalogging": Forbidden: not usable by user or serviceaccount]
+106s        Warning   FailedCreate   job/linkerd-heartbeat-29446087                 Error creating: pods "linkerd-heartbeat-29446087-" is forbidden: unable to validate against any security context constraint: [provider "anyuid": Forbidden: not usable by user or serviceaccount, provider restricted-v2: .containers[0].runAsUser: Invalid value: 2103: must be in the ranges: [1000750000, 1000759999], provider "restricted": Forbidden: not usable by user or serviceaccount, provider "nonroot-v2": Forbidden: not usable by user or serviceaccount, provider "nonroot": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid-v2": Forbidden: not usable by user or serviceaccount, provider "machine-api-termination-handler": Forbidden: not usable by user or serviceaccount, provider "hostnetwork-v2": Forbidden: not usable by user or serviceaccount, provider "hostnetwork": Forbidden: not usable by user or serviceaccount, provider "hostaccess": Forbidden: not usable by user or serviceaccount, provider "insights-runtime-extractor-scc": Forbidden: not usable by user or serviceaccount, provider "node-exporter": Forbidden: not usable by user or serviceaccount, provider "privileged": Forbidden: not usable by user or serviceaccount, provider "privileged-genevalogging": Forbidden: not usable by user or serviceaccount]
+7m47s       Warning   FailedCreate   replicaset/linkerd-identity-688fff88b4         Error creating: pods "linkerd-identity-688fff88b4-" is forbidden: unable to validate against any security context constraint: [provider "anyuid": Forbidden: not usable by user or serviceaccount, provider restricted-v2: .initContainers[0].runAsUser: Invalid value: 65534: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .initContainers[0].capabilities.add: Invalid value: "NET_ADMIN": capability may not be added, provider restricted-v2: .initContainers[0].capabilities.add: Invalid value: "NET_RAW": capability may not be added, provider restricted-v2: .containers[0].runAsUser: Invalid value: 2103: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .containers[1].runAsUser: Invalid value: 2102: must be in the ranges: [1000750000, 1000759999], provider "restricted": Forbidden: not usable by user or serviceaccount, provider "nonroot-v2": Forbidden: not usable by user or serviceaccount, provider "nonroot": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid-v2": Forbidden: not usable by user or serviceaccount, provider "machine-api-termination-handler": Forbidden: not usable by user or serviceaccount, provider "hostnetwork-v2": Forbidden: not usable by user or serviceaccount, provider "hostnetwork": Forbidden: not usable by user or serviceaccount, provider "hostaccess": Forbidden: not usable by user or serviceaccount, provider "insights-runtime-extractor-scc": Forbidden: not usable by user or serviceaccount, provider "node-exporter": Forbidden: not usable by user or serviceaccount, provider "privileged": Forbidden: not usable by user or serviceaccount, provider "privileged-genevalogging": Forbidden: not usable by user or serviceaccount]
+7m47s       Warning   FailedCreate   replicaset/linkerd-proxy-injector-5f654db4db   Error creating: pods "linkerd-proxy-injector-5f654db4db-" is forbidden: unable to validate against any security context constraint: [provider "anyuid": Forbidden: not usable by user or serviceaccount, provider restricted-v2: .initContainers[0].runAsUser: Invalid value: 65534: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .initContainers[0].capabilities.add: Invalid value: "NET_ADMIN": capability may not be added, provider restricted-v2: .initContainers[0].capabilities.add: Invalid value: "NET_RAW": capability may not be added, provider restricted-v2: .containers[0].runAsUser: Invalid value: 2102: must be in the ranges: [1000750000, 1000759999], provider restricted-v2: .containers[1].runAsUser: Invalid value: 2103: must be in the ranges: [1000750000, 1000759999], provider "restricted": Forbidden: not usable by user or serviceaccount, provider "nonroot-v2": Forbidden: not usable by user or serviceaccount, provider "nonroot": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid": Forbidden: not usable by user or serviceaccount, provider "hostmount-anyuid-v2": Forbidden: not usable by user or serviceaccount, provider "machine-api-termination-handler": Forbidden: not usable by user or serviceaccount, provider "hostnetwork-v2": Forbidden: not usable by user or serviceaccount, provider "hostnetwork": Forbidden: not usable by user or serviceaccount, provider "hostaccess": Forbidden: not usable by user or serviceaccount, provider "insights-runtime-extractor-scc": Forbidden: not usable by user or serviceaccount, provider "node-exporter": Forbidden: not usable by user or serviceaccount, provider "privileged": Forbidden: not usable by user or serviceaccount, provider "privileged-genevalogging": Forbidden: not usable by user or serviceaccount]
+```
+
+Linkerdはカスタムなしで何のSCCバインディングもなくインストールされるので、そのServiceAccountはOpenShift 4.11+ですべての認証済みSAが受け取るクラスター全体のRBAC付与だけを継承します。つまり`restricted-v2`へのアクセスのみで、それ以外は何もありません。イベントログがこれを裏付けます。他のすべてのプロバイダーは`Forbidden: not usable by user or serviceaccount`を返します。Linkerdのポッドは`restricted-v2`単独に対してバリデーションされ、そして失敗します。
+
+その名が示すように、`restricted-v2`は厳しいです：
+
+- 追加されたLinuxケーパビリティはなし。
+- ポッドは*プロジェクトに割り当てられたUID範囲内の*非ルートUIDで実行されなければなりません。各OpenShiftプロジェクトは`openshift.io/sa.scc.uid-range`ネームスペース注釈を介して独自の範囲を取得し、ポッドはその中に収まらなければなりません。
+- ホストパスなし、ホストネットワークなし、特権昇格なし。
+
+Linkerdのポッドはこれを二つの方法で違反します。一つ目はインストールのすべてのコンテナに当てはまり、二つ目は`linkerd-init`のみに当てはまります：
+
+- **UIDがプロジェクト範囲に収まらない。** `restricted-v2`はすべてのUIDがプロジェクトの割り当てられた範囲内に収まることを要求します。この例では`[1000750000, 1000759999]`で、プロジェクトごとに異なるウィンドウです。`linkerd-init`は`65534`(`nobody`)で実行され、コントロールプレーンコンテナとプロキシサイドカーはデフォルトで`2102`と`2103`になります。どれも範囲内に入らず、Helmを通じてそれらを追跡するのは解決策ではありません。範囲はネームスペースが再作成されるたびに再割り当てされ、メッシュ化されたアプリケーションポッドは*別の*プロジェクトに住み、それぞれ独自の範囲を持ちます。どこでも動く単一のUIDは存在しません。
+- **`linkerd-init`は`restricted-v2`が付与しないケーパビリティを必要とする。** その仕事は、ポッドのトラフィックがサイドカーを通じてリダイレクトされるようiptablesを書き換えることであり、これには`NET_ADMIN`と`NET_RAW`が必要です。どちらも許可リストにありません。
+
+## 二つの出口
+
+サポートされている経路は二つあります。それらは同じ問題を正反対の側から解き、その選択は実際の運用上の結果をもたらします。
+
+### 経路1：Linkerd CNI(推奨)
+
+Linkerd CNIプラグインはiptablesのセットアップを**ポッドの外**へ、ノードレベルのCNIチェーンへと移します。`linkerd-cni` DaemonSetはノードのCNIディレクトリにバイナリと設定を配置し、MultusはそれをすべてのポッドのCNIセットアップにチェーンします — メッシュ化されていないポッドに対して、このプラグインは何もしません。ポッド自体はもはや`NET_ADMIN`も`NET_RAW`も必要としません。
+
+CNI DaemonSetは依然としてノード上で特権作業を行うので、そのServiceAccountにはそれを許可するSCCが必要です：
+
+```yaml
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: linkerd-cni-scc
+allowPrivilegedContainer: true
+allowPrivilegeEscalation: true
+defaultAllowPrivilegeEscalation: true
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+allowHostDirVolumePlugin: true
+volumes:
+  - hostPath
+  - configMap
+  - projected
+  - downwardAPI
+  - emptyDir
+seccompProfiles:
+  - '*'
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+  - system:serviceaccount:linkerd-cni:linkerd-cni
+```
+
+OpenShift特有のもう一つのディテールがあります。CNIパスはアップストリームKubernetesのデフォルトとは異なります。OpenShiftはCNIバイナリを`/var/lib/cni/bin`の下に、設定を`/etc/kubernetes/cni/net.d`の下に置きます。Linkerd CNIは正しい場所にファイルを配置しなければならず、そうでなければMultusは決してそれを認識しません。インストール時にHelmの値をそれに合わせて設定してください：
+
+```bash
+helm install linkerd2-cni linkerd2-edge/linkerd2-cni \
+  --namespace linkerd-cni \
+  --set destCNIBinDir=/var/lib/cni/bin \
+  --set destCNINetDir=/etc/kubernetes/cni/net.d \
+  --set privileged=true
+```
+
+DaemonSetが正常な状態になったら、`--set cniEnabled=true`を付けてコントロールプレーンをインストールします。すると`linkerd-init`コンテナはすべてのメッシュ化ポッドから省かれ、プロキシサイドカーは特権昇格なしで実行されます。
+
+CNIは特権作業をポッドからノードへ移しますが、コントロールプレーン自体のUID問題は解決しません。Linkerdコントロールプレーンの各ServiceAccountを最小権限の非特権SCCにバインドしてください：
+
+```yaml
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: linkerd-scc
+allowPrivilegedContainer: false
+allowPrivilegeEscalation: false
+defaultAllowPrivilegeEscalation: false
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+allowHostDirVolumePlugin: false
+volumes:
+  - configMap
+  - projected
+  - downwardAPI
+  - emptyDir
+  - secret
+seccompProfiles:
+  - '*'
+runAsUser:
+  type: MustRunAsNonRoot
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+  - system:serviceaccount:linkerd:linkerd-destination
+  - system:serviceaccount:linkerd:linkerd-identity
+  - system:serviceaccount:linkerd:linkerd-proxy-injector
+  - system:serviceaccount:linkerd:linkerd-heartbeat
+```
+
+メッシュ化されたアプリケーションワークロードもUID 2102で実行される`linkerd-proxy`サイドカーを抱えるので、それらのServiceAccountにも同じ付与が必要です。各々を`users:`リストに追加するか、`oc adm policy add-scc-to-user linkerd-scc -z <sa> -n <namespace>`を実行してください。
+
+### 経路2：proxy-init用のカスタムSCC
+
+`linkerd-init`を保ちたいなら、以下のカスタムSCCをデプロイしてください：
+
+```yaml
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: linkerd-scc
+allowPrivilegedContainer: false
+allowPrivilegeEscalation: false
+defaultAllowPrivilegeEscalation: false
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+allowHostDirVolumePlugin: false
+requiredDropCapabilities:
+  - ALL
+allowedCapabilities:
+  - NET_ADMIN
+  - NET_RAW
+volumes:
+  - configMap
+  - projected
+  - downwardAPI
+  - emptyDir
+  - secret
+seccompProfiles:
+  - '*'
+runAsUser:
+  type: MustRunAsNonRoot
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+  - system:serviceaccount:linkerd:linkerd-destination
+  - system:serviceaccount:linkerd:linkerd-identity
+  - system:serviceaccount:linkerd:linkerd-proxy-injector
+  - system:serviceaccount:linkerd:linkerd-heartbeat
+```
+
+前の経路との違いは、このSCCがコントロールプレーンの各ServiceAccountに`NET_ADMIN`と`NET_RAW`を付与する点です。その付与はSCCにリストされたユーザーのみに適用されるので、新しいアプリケーションのServiceAccountをオンボードするたびに追加する必要があります。
+
+これは限定的に見えますが、その爆発半径は見かけよりも大きいです。`linkerd-init`はコントロールプレーンのものだけでなく、すべてのメッシュ化ポッドの中で実行されるので、メッシュ化されたすべてのネームスペースがそのServiceAccountにそれらのケーパビリティを利用可能にしておく必要があります。実際には、このSCC(あるいはその兄弟)をオンボードするすべてのアプリケーションネームスペースの`system:serviceaccounts:<app-namespace>`にバインドすることになります。その運用上の税金は決して消えません。
+
+## もう一つの罠：ポリシーコントローラーのリース
+
+どちらの経路を選んでも、人々を引っかけるOpenShift特有のディテールがもう一つあります。OpenShiftはデフォルトで`OwnerReferencesPermissionEnforcement`アドミッションプラグインを有効化していますが、これは素のKubernetesクラスターでは有効ではありません。そのプラグインは、オブジェクトに`ownerReference`を設定する者がそのオブジェクトに対する`delete`権限も持つことを要求します。後でガベージコレクションがそれを除去できるようにするためです。ポリシーコントローラーが`leases.coordination.k8s.io`の`policy-controller-write`リースを取得し、ownerRefを付けようとするとき、その呼び出しは失敗します。デフォルトの`linkerd-policy` ClusterRoleはリースに対して`update`も`delete`も付与していないからです。欠けている動詞をパッチで追加してください：
+
+```bash
+oc get clusterrole linkerd-policy -o json \
+  | jq '(.rules[] | select(.apiGroups==["coordination.k8s.io"] and .resources==["leases"]) | .verbs) |= (. + ["update","delete"] | unique)' \
+  | oc apply -f -
+```
+
+## xtablesモジュールが利用できないとき
+
+一部のOpenShiftクラスターでは、RHCOSカーネルが`linkerd-init`の依存するすべてのxtables互換モジュールを自動ロードしません。そうなると`linkerd-init`はiptablesルールの挿入に失敗し、コントロールプレーンのコンポーネントは結局`Init:CrashLoopBackOff`に陥ります。
+
+```bash
+oc logs -n linkerd deploy/linkerd-destination -c linkerd-init --previous
+time="2025-12-27T04:59:58Z" level=info msg="/usr/sbin/iptables-nft-save -t nat"
+time="2025-12-27T04:59:58Z" level=info msg="# Generated by iptables-nft-save v1.8.11 (nf_tables) on Sat Dec 27 04:59:58 2025\n*nat\n:PREROUTING ACCEPT [0:0]\n:INPUT ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\n:POSTROUTING ACCEPT [0:0]\n:PROXY_INIT_REDIRECT - [0:0]\nCOMMIT\n# Completed on Sat Dec 27 04:59:58 2025\n"
+time="2025-12-27T04:59:58Z" level=info msg="/usr/sbin/iptables-nft -t nat -F PROXY_INIT_REDIRECT"
+time="2025-12-27T04:59:58Z" level=info msg="/usr/sbin/iptables-nft -t nat -A PROXY_INIT_REDIRECT -p tcp --match multiport --dports 4190,4191,4567,4568 -j RETURN -m comment --comment proxy-init/ignore-port-4190,4191,4567,4568"
+time="2025-12-27T04:59:58Z" level=info msg="Warning: Extension multiport revision 0 not supported, missing kernel module?\niptables v1.8.11 (nf_tables):  RULE_APPEND failed (No such file or directory): rule in chain PROXY_INIT_REDIRECT\n"
+Error: exit status 4
+```
+
+`iptables-nft`は純粋なnftablesトランスレーターではありません。`-m multiport`、`-m owner`、`-m comment`のようなマッチャー、そして`REDIRECT`ターゲットは`nft_compat`を経由し、これにはレガシーな`xt_*`モジュールがロード可能であることが必要です。それらのモジュールのいずれかが利用できなければ、ルールの挿入は失敗します。それらが起動時にロードされることを保証するため、以下のMachineConfigを使ってください：
+
+```yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: load-linkerd-xt-modules
+  labels:
+    machineconfiguration.openshift.io/role: worker
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+      - path: /etc/modules-load.d/linkerd-xt.conf
+        mode: 0644
+        overwrite: true
+        contents:
+          source: data:,xt_multiport%0Axt_comment%0Axt_REDIRECT%0Axt_owner
+```
+
+`data:,` URLは四つのモジュール名をURLエンコードされた改行で区切ったもので、`systemd-modules-load`が期待する形式です。これを適用すると、worker MachineConfigPool内のすべてのノードがドレインされ再起動されます。
+
+## どちらを選ぶか
+
+本当の選択は、特権がどこに存在するか、そしていくつのSCCを保守する必要があるか、についてです。
+
+**CNI経路**は特権を一箇所に集中させます。専用の`linkerd-cni`プロジェクト内の単一DaemonSet、単一ServiceAccountにバインドされた単一の`linkerd-cni-scc`によって管理されます。コントロールプレーンは最小権限の非特権`linkerd-scc`を取得します。アプリケーションワークロードは自身のプロキシサイドカーのために同じ最小SCCを取得しますが、クラスター内の何かがアプリケーションポッド内で`NET_ADMIN`や`NET_RAW`を必要とすることは決してありません。
+
+**proxy-init経路**は特権を分散させます。メッシュ化されたすべてのアプリケーションネームスペースが、そのServiceAccountを`NET_ADMIN`と`NET_RAW`を付与するSCCにバインドする必要があります。新しいアプリチームがオンボードするたびに、その付与を永遠に運用することになります。
+
+クラスター管理者がホストCNIパスに書き込むDaemonSetを禁止するのでない限り、CNIを選んでください。そうした場合は、カスタムSCCを伴うproxy-initが正直な代替案です — ただし、初日からネームスペースプロビジョニングの自動化にネームスペースごとのSCC付与を組み込んでください。さもないと半年後に足を引っ張られます。
