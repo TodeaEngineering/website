@@ -2,185 +2,252 @@ import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 import FadeIn from '../FadeIn';
 
-type Mark = 'online' | 'onsite' | 'dash';
+type Mark = 'included' | 'preferential' | 'dash';
 
 type Row = {
   key: string;
   marks: [Mark, Mark, Mark];
+  credits: 'standard' | 'quote';
 };
 
 type Category = {
   key: string;
   rows: Row[];
-  onDemand?: boolean;
 };
 
-// Order: Installation → Technical support → Proactive (included in packages)
-//        then Training & Professional services (on-demand, not in packages)
+// Installation → Technical support → Proactive → Enablement → Scoped per engagement
 const categories: Category[] = [
   {
     key: 'c1',
     rows: [
-      { key: 'r1', marks: ['online', 'onsite', 'onsite'] },
-      { key: 'r2', marks: ['online', 'onsite', 'onsite'] },
+      { key: 'r1', marks: ['included', 'included', 'included'], credits: 'standard' },
+      { key: 'r2', marks: ['included', 'included', 'included'], credits: 'standard' },
     ],
   },
   {
     key: 'c2',
     rows: [
-      { key: 'r1', marks: ['online', 'online', 'onsite'] },
-      { key: 'r2', marks: ['dash', 'onsite', 'onsite'] },
+      { key: 'r1', marks: ['included', 'included', 'included'], credits: 'standard' },
+      { key: 'r2', marks: ['dash', 'included', 'included'], credits: 'standard' },
     ],
   },
   {
     key: 'c4',
     rows: [
-      { key: 'r1', marks: ['dash', 'online', 'onsite'] },
-      { key: 'r2', marks: ['dash', 'dash', 'onsite'] },
+      { key: 'r1', marks: ['dash', 'included', 'included'], credits: 'standard' },
+      { key: 'r2', marks: ['dash', 'dash', 'included'], credits: 'standard' },
+    ],
+  },
+  {
+    key: 'c6',
+    rows: [
+      { key: 'r1', marks: ['included', 'included', 'included'], credits: 'standard' },
     ],
   },
   {
     key: 'c5',
     rows: [
-      { key: 'r2', marks: ['dash', 'dash', 'onsite'] },
-    ],
-  },
-  {
-    key: 'c3',
-    onDemand: true,
-    rows: [
-      { key: 'r1', marks: ['dash', 'dash', 'dash'] },
-      { key: 'r2', marks: ['dash', 'dash', 'dash'] },
+      { key: 'r1', marks: ['dash', 'preferential', 'included'], credits: 'quote' },
+      { key: 'r2', marks: ['dash', 'preferential', 'included'], credits: 'quote' },
+      { key: 'r3', marks: ['dash', 'preferential', 'included'], credits: 'quote' },
     ],
   },
 ];
 
+// Tier envelope rows
+const envelopeRows = [
+  'term',
+  'products',
+  'addproduct',
+  'credits',
+  'coverage',
+  'severity',
+];
+
+// Category-grouped zebra banding
+const categoryBg = ['bg-white', 'bg-neutral-50/60'];
+
+// Shared tokens
+const CARD =
+  'bg-white rounded-3xl border border-neutral-200/70 overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.03),0_30px_60px_-25px_rgba(15,23,42,0.15)]';
+const HAIRLINE = 'border-neutral-200/50';
+
 function Glyph({ mark }: { mark: Mark }) {
-  if (mark === 'online') {
+  const wrap = 'inline-flex items-center justify-center w-7 h-7 align-middle';
+  if (mark === 'included') {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-neutral-400 text-neutral-700 text-[13px]">
-        ○
+      <span className={wrap} role="img" aria-label="Included">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" fill="#111" />
+          <path
+            d="m8 12 3 3 5-6"
+            stroke="#fff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </span>
     );
   }
-  if (mark === 'onsite') {
+  if (mark === 'preferential') {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-black text-white text-[13px]">
-        ●
+      <span className={wrap} role="img" aria-label="Available at preferential rate">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#111"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="m8 12 3 3 5-6" />
+        </svg>
       </span>
     );
   }
-  return null;
+  return (
+    <span className={wrap} role="img" aria-label="Not available">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#d4d4d4"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        aria-hidden="true"
+      >
+        <path d="M6 12h12" />
+      </svg>
+    </span>
+  );
+}
+
+function TierLabel({ label }: { label: string }) {
+  return (
+    <span className="block text-[12px] font-bold tracking-[.22em] uppercase text-neutral-900 whitespace-nowrap">
+      {label}
+    </span>
+  );
 }
 
 export default function SupportTiers() {
   const t = useTranslations('SupportTiers');
   const tiers = [t('tier_1'), t('tier_2'), t('tier_3')];
+  const tierKeys = ['essential', 'professional', 'enterprise'] as const;
+  const creditLabels = {
+    standard: t('credits_standard'),
+    quote: t('credits_quote'),
+  };
 
   return (
-    <section className="py-20 sm:py-24 px-6 border-t border-neutral-100">
+    <section className="py-20 sm:py-28 px-6 border-t border-neutral-100">
       <div className="max-w-[1200px] mx-auto">
         <FadeIn>
-          <div className="text-center max-w-2xl mx-auto mb-14">
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
               {t('label')}
             </p>
             <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight mb-5">
               {t('h2')}
             </h2>
-            <p className="text-[15px] text-neutral-600 font-light leading-relaxed">{t('desc')}</p>
+            <p className="text-[15px] text-neutral-600 font-light leading-relaxed">
+              {t('desc')}
+            </p>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.1}>
-          <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.04)]">
+          <div className={CARD}>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[780px] text-left">
+              <table className="w-full min-w-[960px] text-left">
                 <thead>
-                  <tr className="bg-neutral-100/70 border-b border-neutral-200">
-                    <th className="px-5 py-4 text-[11px] font-semibold tracking-[.15em] text-neutral-500 uppercase w-[140px]">
+                  <tr className={`bg-white border-b ${HAIRLINE}`}>
+                    <th className="px-6 py-5 text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase align-bottom w-[160px]">
                       {t('col_category')}
                     </th>
-                    <th className="px-5 py-4 text-[11px] font-semibold tracking-[.15em] text-neutral-500 uppercase w-[200px]">
+                    <th className="px-6 py-5 text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase align-bottom w-[180px]">
                       {t('col_item')}
                     </th>
-                    <th className="px-5 py-4 text-[11px] font-semibold tracking-[.15em] text-neutral-500 uppercase">
+                    <th className="px-6 py-5 text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase align-bottom">
                       {t('col_detail')}
                     </th>
                     {tiers.map((tier) => (
-                      <th
-                        key={tier}
-                        className="px-3 py-4 text-center text-[11px] font-bold tracking-[.1em] text-black uppercase w-[110px]"
-                      >
-                        {tier}
+                      <th key={tier} className="px-3 py-5 text-center align-bottom w-[110px]">
+                        <TierLabel label={tier} />
                       </th>
                     ))}
+                    <th className={`px-5 py-5 text-center align-bottom w-[170px] border-l ${HAIRLINE}`}>
+                      <div className="text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase leading-tight">
+                        {t('col_credits_title')}
+                      </div>
+                      <div className="mt-1 text-[10px] font-normal tracking-wide text-neutral-400 normal-case">
+                        {t('col_credits_sub')}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((cat, ci) => {
-                    const firstOnDemandIdx = categories.findIndex((c) => c.onDemand);
-                    const isFirstOnDemand = cat.onDemand && ci === firstOnDemandIdx;
+                  {categories.map((cat, catIdx) => {
+                    const bg = categoryBg[catIdx % categoryBg.length];
                     return (
                       <Fragment key={cat.key}>
-                        {isFirstOnDemand && (
-                          <tr className="border-b border-neutral-200 bg-neutral-50/80">
-                            <td
-                              colSpan={6}
-                              className="px-5 py-3 text-[11px] font-semibold tracking-[.2em] text-neutral-500 uppercase"
-                            >
-                              {t('on_demand_heading')}
-                            </td>
-                          </tr>
-                        )}
-                        {cat.rows.map((row, ri) => (
-                          <tr
-                            key={`${cat.key}-${row.key}`}
-                            className={`border-b border-neutral-100 last:border-b-0 transition-colors ${
-                              cat.onDemand ? 'bg-neutral-50/40 hover:bg-neutral-50' : 'hover:bg-neutral-50/60'
-                            }`}
-                          >
-                            {ri === 0 ? (
-                              <td
-                                rowSpan={cat.rows.length}
-                                className="px-5 py-4 align-top text-[13px] font-bold text-black border-r border-neutral-100"
-                              >
-                                <div className="flex flex-col gap-1.5">
-                                  <span>{t(`${cat.key}_label`)}</span>
-                                </div>
+                        {cat.rows.map((row, ri) => {
+                          const isLastInCat = ri === cat.rows.length - 1;
+                          const innerDivider = !isLastInCat ? `border-b ${HAIRLINE}` : '';
+                          const catEndDivider = isLastInCat ? `border-b ${HAIRLINE}` : '';
+                          return (
+                            <tr key={`${cat.key}-${row.key}`} className={`${bg} transition-colors`}>
+                              {ri === 0 ? (
+                                <td
+                                  rowSpan={cat.rows.length}
+                                  className={`px-6 py-5 align-top ${catEndDivider}`}
+                                >
+                                  <span className="text-[13px] font-bold text-black tracking-tight">
+                                    {t(`${cat.key}_label`)}
+                                  </span>
+                                </td>
+                              ) : null}
+                              <td className={`px-6 py-5 text-[13.5px] font-semibold text-black ${innerDivider || catEndDivider}`}>
+                                {t(`${cat.key}_${row.key}_item`)}
                               </td>
-                            ) : null}
-                            <td className="px-5 py-4 text-[13px] font-semibold text-black">
-                              {t(`${cat.key}_${row.key}_item`)}
-                            </td>
-                            <td className="px-5 py-4 text-[13px] text-neutral-600 font-light leading-relaxed">
-                              {t(`${cat.key}_${row.key}_detail`)}
-                            </td>
-                            {cat.onDemand && ri === 0 ? (
-                              <td
-                                colSpan={3}
-                                rowSpan={cat.rows.length}
-                                className="px-3 py-4 text-center align-middle border-l border-neutral-100"
-                              >
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black text-white text-[10px] font-semibold tracking-[.15em] uppercase">
-                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                                    <path d="M12 5v14M5 12h14" />
-                                  </svg>
-                                  {t('on_demand_pill')}
-                                </span>
+                              <td className={`px-6 py-5 text-[13px] text-neutral-600 font-light leading-relaxed ${innerDivider || catEndDivider}`}>
+                                {t(`${cat.key}_${row.key}_detail`)}
                               </td>
-                            ) : cat.onDemand ? null : (
-                              row.marks.map((mark, mi) => (
-                                <td key={mi} className="px-3 py-4 text-center">
+                              {row.marks.map((mark, mi) => (
+                                <td key={mi} className={`px-3 py-5 text-center ${innerDivider || catEndDivider}`}>
                                   <Glyph mark={mark} />
                                 </td>
-                              ))
-                            )}
-                          </tr>
-                        ))}
+                              ))}
+                              <td className={`px-5 py-5 text-center whitespace-nowrap border-l ${HAIRLINE} ${innerDivider || catEndDivider}`}>
+                                {row.credits === 'standard' ? (
+                                  <span className="inline-block text-[14px] font-semibold text-black tabular-nums tracking-[.05em]">
+                                    {creditLabels.standard}
+                                  </span>
+                                ) : (
+                                  <span className="inline-block text-[11px] italic text-neutral-500 tracking-wide">
+                                    {creditLabels.quote}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </Fragment>
                     );
                   })}
+                  {/* remove trailing border on the very last row by overriding */}
                 </tbody>
               </table>
             </div>
@@ -188,17 +255,74 @@ export default function SupportTiers() {
         </FadeIn>
 
         <FadeIn delay={0.18}>
-          <p className="mt-6 text-[12px] text-neutral-500 font-light leading-relaxed">
+          <div className="mt-6 flex flex-wrap gap-x-7 gap-y-2 text-[12px] text-neutral-600">
+            <span className="inline-flex items-center gap-2">
+              <Glyph mark="included" />
+              <span>{t('legend_included')}</span>
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Glyph mark="preferential" />
+              <span>{t('legend_preferential')}</span>
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Glyph mark="dash" />
+              <span>{t('legend_dash')}</span>
+            </span>
+          </div>
+          <p className="mt-4 text-[12px] text-neutral-500 font-light leading-relaxed">
             {t('onsite_note')}
           </p>
-          <div className="mt-4 flex flex-col sm:flex-row gap-4 sm:gap-8 text-[12px] text-neutral-500">
-            <div className="flex items-center gap-2">
-              <Glyph mark="online" />
-              <span>{t('legend_online')}</span>
+        </FadeIn>
+
+        <FadeIn delay={0.22}>
+          <div className="mt-20">
+            <div className="max-w-2xl mx-auto text-center mb-12">
+              <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
+                {t('envelope_label')}
+              </p>
+              <h3 className="text-2xl sm:text-[2rem] font-[800] leading-[1.15] tracking-tight mb-4">
+                {t('envelope_h3')}
+              </h3>
+              <p className="text-[14px] text-neutral-600 font-light leading-relaxed">
+                {t('envelope_desc')}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Glyph mark="onsite" />
-              <span>{t('legend_onsite')}</span>
+            <div className={CARD}>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[780px] text-left">
+                  <thead>
+                    <tr className={`bg-white border-b ${HAIRLINE}`}>
+                      <th className="px-6 py-5 text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase align-bottom w-[220px]">
+                        {t('envelope_col_attribute')}
+                      </th>
+                      {tiers.map((tier) => (
+                        <th key={tier} className="px-5 py-5 text-center align-bottom">
+                          <TierLabel label={tier} />
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {envelopeRows.map((rowKey, rIdx) => {
+                      const bg = rIdx % 2 === 0 ? 'bg-white' : 'bg-neutral-50/60';
+                      const isLast = rIdx === envelopeRows.length - 1;
+                      const divider = !isLast ? `border-b ${HAIRLINE}` : '';
+                      return (
+                        <tr key={rowKey} className={`${bg} transition-colors`}>
+                          <td className={`px-6 py-5 align-top text-[13px] font-semibold text-black ${divider}`}>
+                            {t(`env_${rowKey}_label`)}
+                          </td>
+                          {tierKeys.map((tierKey) => (
+                            <td key={tierKey} className={`px-5 py-5 align-top text-[13px] text-neutral-700 font-light leading-relaxed text-center ${divider}`}>
+                              {t(`env_${rowKey}_${tierKey}`)}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </FadeIn>
