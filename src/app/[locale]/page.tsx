@@ -29,7 +29,7 @@ export default async function HomePage({
     },
     contactPoint: {
       '@type': 'ContactPoint',
-      email: 'ivan@todea.co.kr',
+      email: 'sales@todea.co.kr',
       contactType: 'sales',
     },
     sameAs: [

@@ -67,7 +67,7 @@ export default function Nav() {
               </div>
             </div>
 
-            <a href="mailto:ivan@todea.co.kr" className="text-[13px] font-semibold bg-brand text-white px-5 py-2 rounded-full hover:opacity-80 transition-opacity">
+            <a href="mailto:sales@todea.co.kr" className="text-[13px] font-semibold bg-brand text-white px-5 py-2 rounded-full hover:opacity-80 transition-opacity">
               {t('contact')}
             </a>
           </div>
@@ -97,7 +97,7 @@ export default function Nav() {
                 </button>
               ))}
             </div>
-            <a href="mailto:ivan@todea.co.kr" onClick={() => setMobileOpen(false)} className="text-sm font-semibold bg-brand text-white px-5 py-2 rounded-full text-center">
+            <a href="mailto:sales@todea.co.kr" onClick={() => setMobileOpen(false)} className="text-sm font-semibold bg-brand text-white px-5 py-2 rounded-full text-center">
               {t('contact')}
             </a>
           </div>

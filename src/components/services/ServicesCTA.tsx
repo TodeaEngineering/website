@@ -13,7 +13,7 @@ export default function ServicesCTA() {
             {t('h2')}
           </h2>
           <a
-            href="mailto:ivan@todea.co.kr"
+            href="mailto:sales@todea.co.kr"
             className="inline-block bg-brand text-white text-[13px] font-semibold px-7 py-3.5 rounded-full hover:opacity-80 transition-opacity"
           >
             {t('cta')}

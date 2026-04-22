@@ -32,7 +32,7 @@ export default function Footer() {
                   {nav('blog')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="mailto:ivan@todea.co.kr" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
+                <a href="mailto:sales@todea.co.kr" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('contact')}
                 </a>
               </div>
