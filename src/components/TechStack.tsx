@@ -9,6 +9,7 @@ const techs = [
   { name: 'Azure', img: '/icons/azure.svg' },
   { name: 'Naver Cloud', img: '/icons/naver.svg' },
   { name: 'Kubernetes', img: '/icons/kubernetes.svg' },
+  { name: 'OpenShift', img: '/icons/openshift.svg' },
   { name: 'Docker', img: '/icons/docker.svg' },
   { name: 'Helm', img: '/icons/helm.svg' },
   { name: 'KEDA', img: '/icons/keda.svg' },
@@ -16,22 +17,28 @@ const techs = [
   { name: 'Cert-Manager', img: '/icons/cert-manager.svg' },
   { name: 'CoreDNS', img: '/icons/coredns.svg' },
   { name: 'Vault', img: '/icons/vault.svg' },
+  { name: 'Istio', img: '/icons/istio.svg' },
+  { name: 'Consul', img: '/icons/consul.svg' },
   { name: 'ArgoCD', img: '/icons/argocd.svg' },
   { name: 'Flux', img: '/icons/flux.svg' },
   { name: 'GitHub Actions', img: '/icons/githubactions.svg' },
+  { name: 'Azure DevOps', img: '/icons/azure-devops.svg' },
+  { name: 'Harbor', img: '/icons/harbor.svg' },
   { name: 'Prometheus', img: '/icons/prometheus.svg' },
   { name: 'Grafana', img: '/icons/grafana.svg' },
   { name: 'OpenTelemetry', img: '/icons/opentelemetry.svg' },
   { name: 'Datadog', img: '/icons/datadog.svg' },
   { name: 'Fluentd', img: '/icons/fluentd.svg' },
+  { name: 'Elasticsearch', img: '/icons/elasticsearch.svg' },
+  { name: 'OpenSearch', img: '/icons/opensearch.svg' },
+  { name: 'Kubecost', img: '/icons/kubecost.svg' },
   { name: 'Terraform', img: '/icons/terraform.svg' },
   { name: 'Crossplane', img: '/icons/crossplane.svg' },
-  { name: 'OpenStack', img: '/icons/openstack.svg' },
-  { name: 'Linux', img: '/icons/linux.svg' },
+  { name: 'Ansible', img: '/icons/ansible.svg' },
 ];
 
-const row1 = techs.slice(0, 13);
-const row2 = techs.slice(13);
+const row1 = techs.slice(0, 15);
+const row2 = techs.slice(15);
 
 function CarouselRow({ items, reverse }: { items: typeof techs; reverse?: boolean }) {
   const doubled = [...items, ...items];

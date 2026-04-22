@@ -35,13 +35,13 @@ export default function Nav() {
 
           {/* Desktop */}
           <div className="hidden md:flex items-center gap-7">
-            <a href="#services" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
+            <a href={`/${locale}/services`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('services')}
             </a>
-            <a href="#approach" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
+            <a href={`/${locale}#approach`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('approach')}
             </a>
-            <a href="#expertise" className="text-[13px] text-neutral-600 hover:text-black transition-colors">
+            <a href={`/${locale}#expertise`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('expertise')}
             </a>
             <a href={`/${locale}/blog`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
@@ -94,9 +94,9 @@ export default function Nav() {
           style={{ maxHeight: mobileOpen ? '350px' : '0' }}
         >
           <div className="pb-5 flex flex-col gap-3">
-            <a href="#services" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('services')}</a>
-            <a href="#approach" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('approach')}</a>
-            <a href="#expertise" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('expertise')}</a>
+            <a href={`/${locale}/services`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('services')}</a>
+            <a href={`/${locale}#approach`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('approach')}</a>
+            <a href={`/${locale}#expertise`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('expertise')}</a>
             <a href={`/${locale}/blog`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('blog')}</a>
             <div className="flex gap-2 mt-1">
               {langs.map((l) => (

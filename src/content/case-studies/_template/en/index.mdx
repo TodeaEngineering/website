@@ -1,0 +1,190 @@
+---
+# ============================================================
+# CASE STUDY TEMPLATE
+# Duplicate this folder: src/content/case-studies/<slug>/{en,ko,ja,zh}/index.mdx
+# Replace all placeholder text. Delete any fields that don't apply.
+# Remove these comment blocks before publishing.
+# ============================================================
+
+# --- Routing & identity ---
+title: "[Client name or anonymized descriptor] — [one-line engagement summary]"
+slug: "client-slug-or-pattern-name"
+category: "Case Study"
+publishedDate: "YYYY-MM-DD"
+ogImage: "/case-studies/<slug>/en-cover.svg"
+description: "[One-sentence outcome-led summary for meta description, max 160 chars.]"
+
+# --- Anonymization flag ---
+# "named"      — client approved public naming
+# "anonymized" — we describe the engagement without identifying the client
+# "reference"  — brand-authored reference architecture; no real client
+disclosure: "named"
+
+# --- Client metadata (if named) ---
+Client:
+  name: "[Client name or e.g. 'Top-3 Korean commercial bank']"
+  logo: "/case-studies/<slug>/client-logo.svg"   # omit if anonymized
+  website: "https://example.com"                   # omit if anonymized
+  industry: "Financial services"                   # Financial services | Public sector | Telecommunications | Manufacturing | Technology | Defense-adjacent | Retail | Healthcare
+  region: "kr"                                     # kr | jp | sea | anz | tw | global
+  size: "Large enterprise"                         # Mid-market | Large enterprise | Public sector | Scale-up
+  contact:
+    name: "[Named contact, e.g. Head of Platform]"   # omit if anonymized
+    title: "[Role title]"
+
+# --- Engagement metadata ---
+Engagement:
+  duration: "12 weeks"                             # or "3 months + ongoing retainer"
+  kickoff: "2026-09-01"                            # optional
+  services:
+    - "platform-engineering"                         # keys from the homepage Services list
+    - "security-compliance"
+  stack:
+    - "Kubernetes"
+    - "Argo CD"
+    - "Linkerd"
+    - "OpenTelemetry"
+    - "Kyverno"
+
+# --- Hero block ---
+Hero:
+  eyebrow: "Case study · [Industry] · [Region]"
+  headline: "[Outcome headline. One line. Concrete.]"
+  sub: "[One-sentence engagement summary: who the client is (or what pattern they represent), what Todea delivered, over what timeframe.]"
+
+# --- Outcome stats (3–4 items) ---
+# Pick measurable, defensible numbers. Avoid vanity metrics.
+Stats:
+  - n: "12"
+    unit: "weeks"
+    label: "From kickoff to production"
+  - n: "0"
+    unit: ""
+    label: "P1 incidents in first 90 days"
+  - n: "40%"
+    unit: ""
+    label: "Reduction in mean deploy time"
+  - n: "4"
+    unit: "engineers"
+    label: "Platform team upskilled"
+
+# --- The Challenge ---
+# Two to four short paragraphs. Describe what the client faced, why existing tools/processes weren't working, what was at stake.
+# Avoid diagnostic prose that reads like a sales pitch for the answer. The reader should feel the problem.
+Challenge:
+  label: "(1.0) Challenge"
+  h2: "[Short framing headline]"
+  body: |
+    [Paragraph 1: the client's business context and the specific problem they needed solved. Be concrete. Name the cluster count, the service count, the team size, the compliance regime — whatever is true and non-confidential.]
+
+    [Paragraph 2: what had already been tried. What tools were in place, what hand-rolled approaches, what the failure modes looked like. This demonstrates due diligence and avoids the "they were lost, we saved them" trope.]
+
+    [Paragraph 3 (optional): the deadline, audit, regulatory event, or business milestone that made this urgent. Stakes matter.]
+
+# --- The Approach ---
+# Four blocks mirroring the homepage Approach: Assess → Architect → Implement → Operate.
+# Each block: what Todea did, key decisions made, key artifacts delivered.
+Approach:
+  label: "(2.0) Approach"
+  h2: "[Short framing headline, e.g. 'Upstream Kubernetes. Clean handover.']"
+  steps:
+    - t: "Assess"
+      duration: "Weeks 1–2"
+      d: "[What we inspected, who we interviewed, what we produced. Name the diagnostic artifact: 'platform gap map', 'security posture audit', 'observability coverage matrix'.]"
+    - t: "Architect"
+      duration: "Weeks 2–4"
+      d: "[Reference architecture decisions. Name the key tradeoffs: Argo CD vs Flux, Linkerd vs Istio, Crossplane vs Terraform for X. Why each call was made.]"
+    - t: "Implement"
+      duration: "Weeks 4–10"
+      d: "[What was built, paired with whom on the client team, how PR review ran, key milestones. The goal is to demonstrate 'built alongside your engineers, not instead of them'.]"
+    - t: "Operate"
+      duration: "Weeks 10–12 + ongoing"
+      d: "[Handover specifics: production readiness review, SLO definitions per service tier, runbooks, on-call rotation. If an ongoing retainer exists, describe the coverage.]"
+
+# --- Outcomes ---
+# Measurable results. Pull from the Stats block and expand.
+Outcomes:
+  label: "(3.0) Outcomes"
+  h2: "[Short framing headline]"
+  items:
+    - t: "[Outcome 1 — one-line headline]"
+      d: "[One or two sentences. Cite the metric. Attribute the change to the specific intervention where credible; avoid over-claiming.]"
+    - t: "[Outcome 2]"
+      d: "..."
+    - t: "[Outcome 3]"
+      d: "..."
+    - t: "[Outcome 4]"
+      d: "..."
+
+# --- Client quote (if named & approved) ---
+# Must be written or approved by a named contact at the client. Never paraphrase an unapproved quote.
+Quote:
+  body: "[Client quote, 1–3 sentences. Specific, not generic. Worst quote: 'Todea delivered great work and we're happy with the results.' Best quote: 'The golden-path template cut new-service onboarding from three weeks to one afternoon — my team is shipping product again instead of fighting YAML.']"
+  attribution: "[Name], [Role], [Client]"
+
+# --- Lessons / what would we change ---
+# Optional but recommended. Shows honest reflection. Omit if client discretion requires.
+Lessons:
+  label: "(4.0) What we'd do differently"
+  h2: "[Short framing headline]"
+  body: |
+    [One or two short paragraphs of honest reflection. What we'd sequence differently, what tool we'd pick differently next time, what we didn't anticipate. Demonstrates seniority and builds trust.]
+
+# --- Related case studies / service pages ---
+Related:
+  label: "Related work"
+  items:
+    - kind: "case-study"
+      slug: "other-case-study-slug"
+    - kind: "service"
+      slug: "platform-engineering"
+
+# --- CTA ---
+CTA:
+  eyebrow: "Similar challenge?"
+  h2: "Let's scope it in a call."
+  sub: "Twenty minutes. English, Korean, Japanese, or Chinese."
+  cta: "Book a discovery call"
+---
+
+{/*
+============================================================
+PRE-PUBLISH CHECKLIST
+============================================================
+
+Client approval
+  [ ] Final copy reviewed by client's named contact
+  [ ] Written approval on file (email is fine)
+  [ ] Logo usage rights confirmed (most enterprise logos require signed permission)
+  [ ] Quote approved by the attributed individual, in writing
+
+Anonymization (if "anonymized" disclosure)
+  [ ] No industry + region + size combination uniquely identifies the client
+  [ ] No metrics precise enough to identify the client (round deploy counts, team sizes)
+  [ ] No named stack components that are uniquely known to be used by one client
+  [ ] No project-code-names, internal tool names, or marketing campaign references
+  [ ] No direct quote from the client (paraphrase only, attributed to role not name)
+
+Content quality
+  [ ] Challenge reads as a real problem, not a pitch for the answer
+  [ ] Metrics are defensible — Todea would survive a skeptical client-reference call
+  [ ] Stack list matches the actual implementation
+  [ ] Timeline matches the invoice record
+  [ ] Lessons section shows real reflection, not humblebrag
+
+SEO & distribution
+  [ ] Meta description ≤160 chars, outcome-led
+  [ ] OG image rendered at /case-studies/<slug>/en-cover.svg
+  [ ] All four locales (en/ko/ja/zh) published
+  [ ] Sitemap regenerated, Google Search Console and Naver Search Advisor notified
+  [ ] LinkedIn company page post scheduled: summary + link, brand voice only
+  [ ] Cross-post to relevant Todea accounts: dev.to, Qiita/Zenn (if JP), Naver Blog (if KR), Medium
+
+Quiet-mode compliance (until Phase 2 activates)
+  [ ] Author byline is "Todea Engineering" — not Ivan
+  [ ] No "I" or "we the founders" voice
+  [ ] No link-backs from Ivan's personal channels
+  [ ] If the engagement touches Linkerd work, review wording to avoid implying Todea is a Linkerd reseller — Strategy doc keeps Todea vendor-neutral
+
+============================================================
+*/}

@@ -16,15 +16,15 @@ export default function Footer() {
             <div>
               {/* Nav links */}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
-                <a href="#services" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
+                <a href={`/${locale}/services`} className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('services')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="#approach" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
+                <a href={`/${locale}#approach`} className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('approach')}
                 </a>
                 <span className="text-neutral-600">|</span>
-                <a href="#expertise" className="text-[13px] text-neutral-400 hover:text-white transition-colors">
+                <a href={`/${locale}#expertise`} className="text-[13px] text-neutral-400 hover:text-white transition-colors">
                   {nav('expertise')}
                 </a>
                 <span className="text-neutral-600">|</span>
