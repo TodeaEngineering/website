@@ -188,7 +188,10 @@ export default function SupportTiers() {
         </FadeIn>
 
         <FadeIn delay={0.18}>
-          <div className="mt-6 flex flex-col sm:flex-row gap-4 sm:gap-8 text-[12px] text-neutral-500">
+          <p className="mt-6 text-[12px] text-neutral-500 font-light leading-relaxed">
+            {t('onsite_note')}
+          </p>
+          <div className="mt-4 flex flex-col sm:flex-row gap-4 sm:gap-8 text-[12px] text-neutral-500">
             <div className="flex items-center gap-2">
               <Glyph mark="online" />
               <span>{t('legend_online')}</span>
