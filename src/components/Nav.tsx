@@ -41,9 +41,6 @@ export default function Nav() {
             <a href={`/${locale}#approach`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('approach')}
             </a>
-            <a href={`/${locale}#expertise`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
-              {t('expertise')}
-            </a>
             <a href={`/${locale}/blog`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('blog')}
             </a>
@@ -96,7 +93,6 @@ export default function Nav() {
           <div className="pb-5 flex flex-col gap-3">
             <a href={`/${locale}/services`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('services')}</a>
             <a href={`/${locale}#approach`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('approach')}</a>
-            <a href={`/${locale}#expertise`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('expertise')}</a>
             <a href={`/${locale}/blog`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('blog')}</a>
             <div className="flex gap-2 mt-1">
               {langs.map((l) => (
