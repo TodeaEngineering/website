@@ -1,0 +1,78 @@
+---
+title: "Kubernetes v1.36『Haru』：这个版本里真正要紧的是什么"
+description: "Kubernetes v1.36 实践者导览：按负责各项变更的 SIG 分组：auth、node、scheduling、storage、DRA。"
+date: "2026-04-23"
+author: "Todea Engineering"
+authorRole: "云原生实践"
+category: "云原生"
+image: "/blog/kubernetes-1-36-release/zh-cover.svg"
+tags: ["kubernetes", "release", "platform-engineering", "security", "dra"]
+---
+ 
+Kubernetes [v1.36，代号 *Haru*](https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/)，共包含 70 项增强：Stable 18 项、Beta 25 项、Alpha 25 项。下面是以运维者视角按负责各项变更的 SIG 分组整理的内容。每一节先以可快速扫读的表格列出该领域的条目，然后用一段短注释说明本季度值得动手去做的那一两件事。
+ 
+## SIG Auth 与 API Machinery
+ 
+| 功能 | 阶段 | 作用 |
+|---|---|---|
+| 细粒度的 Kubelet API 授权 ([#2862](https://kep.k8s.io/2862)) | Stable | `KubeletFineGrainedAuthz` 功能门升级为 GA，允许对 kubelet 的 HTTPS API(例如 `nodes/healthz`、`nodes/metrics`)进行细粒度的访问控制，而无需授予过于宽泛的 `nodes/proxy` 权限。 |
+| Mutating Admission Policies ([#3962](https://kep.k8s.io/3962)) | Stable | 使用 Common Expression Language(CEL)在 YAML 中以声明式方式定义变更策略，作为 mutating webhook 的进程内替代方案。 |
+| 服务账户令牌的外部签名 ([#740](https://kep.k8s.io/740)) | Stable | API server 现在可以把服务账户令牌的签名委派给外部 KMS。 |
+| 节点日志查询 ([#2258](https://kep.k8s.io/2258)) | Stable | 无需 SSH 即可读取节点系统日志的 kubelet 原生 API，例如 `kubectl get --raw "/api/v1/nodes/node-1/logs?query=kubelet"`。 |
+| Constrained Impersonation ([#5284](https://kep.k8s.io/5284)) | Beta | `ConstrainedImpersonation` 功能门升级为 Beta。允许有边界的 impersonation 授予，这样用户就无法模拟一个权限比自己更高的主体，堵住了一条常见的权限升级路径。 |
+| 将 kubectl 用户偏好与集群配置分离 ([#3104](https://kep.k8s.io/3104)) | Beta | `.kuberc` 扩展支持为 credential exec 插件定义策略(allowlist 或 denylist)，以强制更安全的认证实践。 |
+| IP/CIDR 校验改进 ([#4858](https://kep.k8s.io/4858)) | Beta | `StrictIPCIDRValidation` 特性升级为 Beta。加强地址校验以捕捉格式不正确的地址和前缀，例如 `012.000.001.002` 这类带前导零的地址，以及 `::ffff:1.2.3.4` 这类 IPv4-mapped IPv6 地址。 |
+| Kubernetes 组件的 Flagz ([#4828](https://kep.k8s.io/4828)) | Beta | `ComponentFlagz` 特性升级为 Beta，标准化了 `/flagz` 端点以暴露各组件启动时的命令行参数，方便集群运维者排障。 |
+| 基于 manifest 的 admission 控制配置 ([#5793](https://kep.k8s.io/5793)) | Alpha | 把 admission 控制配置从存储在 etcd 的对象迁移到 kube-apiserver 的基于文件的 manifest。 |
+ 
+## SIG Node
+ 
+| 功能 | 阶段 | 作用 |
+|---|---|---|
+| Pod 中的 User Namespaces ([#127](https://kep.k8s.io/127)) | Stable | 升级为 Stable。将容器里的 root 用户映射为宿主机上的非特权用户，这样即使进程逃出容器，也不会在底层节点上拥有管理员权限。对于需要在容器内以 root 运行的工作负载特别有用。 |
+| ProcMount 选项 ([#4265](https://kep.k8s.io/4265)) | Stable | 升级为 Stable。在 `securityContext` 中新增 `ProcMountType` 字段，允许有选择地取消对 `/proc` 路径的屏蔽(`/proc` 的一部分默认被屏蔽以防止意外暴露宿主机信息)。 |
+| 基于 cgroupv2 的 PSI 支持 ([#4205](https://kep.k8s.io/4205)) | Stable | 升级为 Stable。kubelet 现在会报告 CPU、内存、I/O 的 Pressure Stall Information(任务等待资源的时间),相比传统的利用率指标,提供对资源争用的更细粒度视图。 |
+| Resource Health Status ([#4680](https://kep.k8s.io/4680)) | Beta | 升级为 Beta。统一的 `.status.allocatedResourcesStatus` 字段会报告所有专用硬件的设备健康状态,无论其是通过旧的 Device Plugin API 还是 DRA 分配的。 |
+| HostNetwork Pod 的 User Namespaces ([#5607](https://kep.k8s.io/5607)) | Alpha | 带有 `hostNetwork: true` 和 `hostUsers: false` 的 Pod 只会被调度到明确声明支持该特性的节点上。有了 user namespaces,逃出受损容器的攻击者在宿主机层面的权限会被削减。 |
+ 
+## SIG Scheduling 与 Dynamic Resource Allocation (DRA)
+ 
+如果你在运营加速器,这一块就是要紧的领域。DRA 是 Kubernetes 用于分配 GPU、FPGA 等专用硬件的灵活的、基于 claim 的 API,为工作负载提供了比旧的 Device Plugin API 更丰富的约束和共享策略。Core DRA 在 v1.34 升级为 GA;v1.36 延续了周边生态的成熟,关键的治理和选择类特性达到 Stable 和 Beta。
+ 
+| 功能 | 阶段 | 作用 |
+|---|---|---|
+| DRA: 为 ResourceClaims 添加 AdminAccess ([#5018](https://kep.k8s.io/5018)) | Stable | 升级为 Stable。通过在 `ResourceClaim` 和 `ResourceClaimTemplate` 上新增的 `adminAccess` 标志,支持对设备的特权访问(用于调试、检查或管理任务)。命名空间必须被显式标记为 `admin-access` 才能允许创建这类 claim。这完成了多租户 GPU 和 AI 平台治理基础中的一个关键部分。 |
+| DRA: 设备 taints 和 tolerations ([#5055](https://kep.k8s.io/5055)) | Beta | DRA 驱动现在可以把设备标记为已 taint,从而将其排除在新 Pod 的调度之外;已经在使用被 taint 设备的 Pod 可以被自动停止。管理员也可以通过 `DeviceTaintRule` 对匹配选择条件的设备施加 taint(例如某驱动下的所有设备)。 |
+| DRA: 可分区设备 ([#4815](https://kep.k8s.io/4815)) | Beta | 升级为 Beta。动态地把 GPU、TPU 这类硬件按需切分成更小的片段,而不要求提前固定分区,从而提升 NVIDIA MIG、多主机 TPU 切片等场景的利用率。 |
+| DRA: Resource Claim Status ([#4817](https://kep.k8s.io/4817)) | Beta | 在 `ResourceClaim.Status` 中新增 `devices` 字段,DRA 驱动可以在其中为每个分配的设备上报驱动自有的信息(conditions、任意数据,以及以标准化形式提供的网络相关信息,如接口名、MAC 地址、IP 地址)。提升了可观测性,并让第三方控制器(例如网络服务)可以直接从 claim 中消费设备信息。 |
+| Workload Aware Scheduling (多个 KEP) | Alpha | 让调度器把一组相关的 Pod 当作单个逻辑单元来处理,而不是各自独立。引入了修订过的 Workload API 和一个新的、解耦的 `PodGroup` API,以及一个以原子方式对整组进行评估的调度周期：要么所有 Pod 一起被绑定,要么都不绑定。可以防止 ML 训练作业等分布式工作负载出现碎片化调度和资源浪费。 |
+ 
+## SIG Storage
+ 
+| 功能 | 阶段 | 作用 |
+|---|---|---|
+| OCI VolumeSource ([#4639](https://kep.k8s.io/4639)) | Stable | 升级为 Stable。将 OCI artifact 和镜像直接作为只读卷挂载。 |
+| 跳过递归式的 SELinux relabel ([#1710](https://kep.k8s.io/1710)) | Stable | 升级为 Stable。在 SELinux 处于强制模式时加速 PersistentVolume 的挂载:通过传入 `context` 挂载选项,Kubernetes 把安全上下文应用于整个卷,而不是递归地给每个文件打标签。 |
+| CSI 驱动通过 secrets 获取 SA 令牌的 opt-in ([#5538](https://kep.k8s.io/5538)) | Stable | 升级为 Stable。引入新的 `secrets` 字段,用来安全地存放挂载云桶时使用的服务账户令牌等敏感数据。当 `serviceAccountTokenInSecrets` 为 true 时,CSI 驱动会从 `secrets` 字段读取令牌。 |
+ 
+## SIG Autoscaling
+ 
+| 功能 | 阶段 | 作用 |
+|---|---|---|
+| HPA 基于 object 和 external 指标的 scale to/from zero ([#2021](https://kep.k8s.io/2021)) | Alpha | 在 `HPAScaleToZero` 功能门后继续处于 Alpha。允许 HorizontalPodAutoscaler 在使用 Object 或 External 指标(例如队列长度)时把副本数缩到零,而不再要求至少有一个存活的 Pod 来采样 CPU 或内存。HPA 会在新的 `ScaledToZero` 状态字段中记录这一状态,因而不会复活被运维者固定为 `replicas: 0` 的 deployment,并在外部指标显示有新工作时立刻拉起第一个副本。对那些当前得为常开最小副本数付费的、突发性、队列驱动的工作负载很有用。 |
+ 
+## 废弃与移除
+ 
+| 条目 | 状态 | 操作 |
+|---|---|---|
+| `service.spec.externalIPs` ([#5707](https://kep.k8s.io/5707)) | Deprecated | `service.spec.externalIPs` 长期以来允许非特权用户在没有适当授权或校验的情况下声明任意地址。v1.36 将该字段废弃,并新增 `AllowServiceExternalIPs` 功能门以阻止 kube-proxy 为 externalIPs 编写规则。请迁移到 LoadBalancer 或 Gateway API。 |
+| `gitRepo` 卷插件 ([#5040](https://kep.k8s.io/5040)) | Removed | `gitRepo` 卷类型自 v1.11 起就被废弃。v1.36 将其永久禁用,无法再被开启。仍在依赖 `gitRepo` 的工作负载必须迁移到受支持的替代方案,例如 init 容器或外部的 git-sync 式工具。 |
+| `gogo/protobuf` 依赖 ([#5589](https://kep.k8s.io/5589)) | Removed | Kubernetes API 以前依赖 gogoprotobuf,该库在 2021 年被废弃。本次增强完成了它在 Kubernetes API 对象上的最后移除。对终端用户基本不可见,但与 API 客户端维护者有关。 |
+ 
+真正值得当作一次迁移项目来处理的废弃是 **`service.spec.externalIPs`**。多年来,这个字段在多租户集群中一直是中间人攻击和流量重定向的一条入口;废弃得都太晚了。如果你还在用它,请在字段被移除之前,而不是被移除之后,切换到 LoadBalancer 或 Gateway API 资源。从 v1.11 就一路走来的 `gitRepo` 移除终于落地了;如果你的 manifest 里还有,早就该换掉了。
+ 
+## 本周该做什么
+ 
+Kubernetes 1.36 主要是一次沿两条线推进的巩固型版本:作为加速器原生平台的 Kubernetes，日趋成熟的 DRA 治理、HPA scale-to-zero,以及更具工作负载感知的调度;以及作为最小权限平台的 Kubernetes，细粒度 kubelet 授权到达 GA、user namespaces 进入 Stable、externalIPs 走上废弃之路。
+
+所以行动清单其实相当直接。审计任何 `nodes/proxy` 权限,迁移到细粒度的 kubelet 子资源。在 manifest 中搜索现在已经被废弃的 `service.spec.externalIPs`,以及在 1.36 中被移除、会让仍依赖它的 Pod 直接挂掉的 `gitRepo`。如果你用加速器,在非生产集群上启用 DRA,把关于 AdminAccess 和设备 taints 的立场先摸清楚。其他大多数变更都可以作为常规升级流程的一部分来处理。
