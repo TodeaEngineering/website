@@ -29,8 +29,8 @@ export default async function HomePage({
     },
     contactPoint: {
       '@type': 'ContactPoint',
-      email: 'sales@todea.co.kr',
-      contactType: 'sales',
+      email: 'hello@todea.co.kr',
+      contactType: 'Hello',
     },
     sameAs: [
       'https://www.linkedin.com/company/todea/',
