@@ -175,6 +175,36 @@ export default function Contact() {
           </FadeIn>
 
           <FadeIn delay={0.16}>
+            {(status === 'success' || status === 'error') && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="mb-10 bg-black text-white p-8 rounded-2xl"
+              >
+                <div className="flex items-center gap-2 mb-4 text-neutral-400">
+                  <span aria-hidden="true">
+                    {status === 'success' ? (
+                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4">
+                        <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12.5l4.5 4.5L19 7.5" />
+                      </svg>
+                    ) : (
+                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4">
+                        <path strokeLinecap="square" strokeLinejoin="miter" d="M6 6l12 12M18 6L6 18" />
+                      </svg>
+                    )}
+                  </span>
+                  <p className="text-[11px] font-semibold tracking-[.2em] uppercase">
+                    {status === 'success' ? t('f_ok_l') : t('f_err_l')}
+                  </p>
+                </div>
+                <p className="text-2xl sm:text-3xl font-[800] tracking-tight leading-[1.1] mb-3">
+                  {status === 'success' ? t('f_ok_t') : t('f_err_t')}
+                </p>
+                <p className="text-[14px] text-neutral-400 font-light leading-relaxed">
+                  {status === 'success' ? t('f_ok_d') : t('f_err_d')}
+                </p>
+              </div>
+            )}
             <form ref={formRef} onSubmit={onSubmit} className="space-y-6" noValidate>
               <div className="grid sm:grid-cols-2 gap-6">
                 <div>
@@ -226,11 +256,8 @@ export default function Contact() {
                   disabled={status === 'sending'}
                   className="bg-brand text-white text-[13px] font-semibold px-7 py-3 rounded-full hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 >
-                  {status === 'sending' ? '…' : status === 'success' ? t('f_sent') : t('f_submit')}
+                  {status === 'sending' ? '…' : t('f_submit')}
                 </button>
-                {status === 'error' && (
-                  <span className="text-[13px] text-red-600">Please try again.</span>
-                )}
               </div>
             </form>
           </FadeIn>
