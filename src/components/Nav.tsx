@@ -73,33 +73,89 @@ export default function Nav() {
           </div>
 
           {/* Mobile toggle */}
-          <button className="md:hidden p-1" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
-            <svg width="18" height="12" fill="none">
-              <line y1=".75" x2="18" y2=".75" stroke="#000" strokeWidth="1.5" />
-              <line y1="5.75" x2="18" y2="5.75" stroke="#000" strokeWidth="1.5" />
-              <line y1="10.75" x2="18" y2="10.75" stroke="#000" strokeWidth="1.5" />
-            </svg>
+          <button
+            className="md:hidden p-2 -mr-2 flex items-center justify-center"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 4l12 12M16 4L4 16" stroke="#000" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="20" height="14" viewBox="0 0 20 14" fill="none" aria-hidden="true">
+                <line y1=".75" x2="20" y2=".75" stroke="#000" strokeWidth="1.5" />
+                <line y1="6.75" x2="20" y2="6.75" stroke="#000" strokeWidth="1.5" />
+                <line y1="12.75" x2="20" y2="12.75" stroke="#000" strokeWidth="1.5" />
+              </svg>
+            )}
           </button>
         </div>
 
         {/* Mobile menu */}
         <div
-          className="md:hidden overflow-hidden transition-all duration-400"
-          style={{ maxHeight: mobileOpen ? '350px' : '0' }}
+          className="md:hidden overflow-hidden transition-[max-height] duration-300 ease-out -mx-6"
+          style={{ maxHeight: mobileOpen ? '600px' : '0' }}
+          aria-hidden={!mobileOpen}
         >
-          <div className="pb-5 flex flex-col gap-3">
-            <a href={`/${locale}/services`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('services')}</a>
-            <a href={`/${locale}/blog`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600">{t('blog')}</a>
-            <div className="flex gap-2 mt-1">
-              {langs.map((l) => (
-                <button key={l.code} onClick={() => switchLocale(l.code)} className="text-xs border border-neutral-200 px-2.5 py-1 rounded-full">
-                  {l.short}
-                </button>
-              ))}
-            </div>
-            <a href="mailto:sales@todea.co.kr" onClick={() => setMobileOpen(false)} className="text-sm font-semibold bg-brand text-white px-5 py-2 rounded-full text-center">
-              {t('contact')}
+          <div className="border-t border-neutral-100 pb-5">
+            {/* Primary nav */}
+            <a
+              href={`/${locale}/services`}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between px-6 py-4 text-[15px] text-neutral-800 border-b border-neutral-100 active:bg-neutral-50"
+            >
+              <span>{t('services')}</span>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" aria-hidden="true" className="text-neutral-300">
+                <path d="M1.5 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
             </a>
+            <a
+              href={`/${locale}/blog`}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between px-6 py-4 text-[15px] text-neutral-800 border-b border-neutral-100 active:bg-neutral-50"
+            >
+              <span>{t('blog')}</span>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" aria-hidden="true" className="text-neutral-300">
+                <path d="M1.5 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </a>
+
+            {/* Language section */}
+            <p className="px-6 pt-6 pb-2 text-[10px] font-semibold tracking-[.22em] uppercase text-neutral-400">
+              {t('language')}
+            </p>
+            {langs.map((l) => {
+              const isActive = l.code === locale;
+              return (
+                <button
+                  key={l.code}
+                  onClick={() => switchLocale(l.code)}
+                  className={`flex w-full items-center justify-between px-6 py-3 text-[15px] text-left active:bg-neutral-50 ${
+                    isActive ? 'text-black font-medium' : 'text-neutral-500'
+                  }`}
+                >
+                  <span>{l.label}</span>
+                  {isActive && (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M2 7.5l3 3 7-8" stroke="#111" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+
+            {/* CTA */}
+            <div className="px-6 pt-6">
+              <a
+                href="mailto:sales@todea.co.kr"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center text-[15px] font-semibold bg-brand text-white px-5 py-3.5 rounded-full"
+              >
+                {t('contact')}
+              </a>
+            </div>
           </div>
         </div>
       </div>
