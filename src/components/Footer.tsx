@@ -92,9 +92,17 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-neutral-800 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <p className="text-[12px] text-neutral-500">
-            &copy; {new Date().getFullYear()} Todea. {t('rights_reserved')}
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5">
+            <p className="text-[12px] text-neutral-500">
+              &copy; {new Date().getFullYear()} Todea. {t('rights_reserved')}
+            </p>
+            <a
+              href={`/${locale}/privacy`}
+              className="text-[12px] text-neutral-500 hover:text-white transition-colors"
+            >
+              {t('privacy')}
+            </a>
+          </div>
           <p className="text-[11px] font-medium tracking-[.22em] uppercase text-neutral-600">
             {t('tagline')}
           </p>
