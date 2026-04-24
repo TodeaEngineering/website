@@ -11,6 +11,9 @@ declare global {
         el: HTMLElement,
         opts: {
           sitekey: string;
+          theme?: 'light' | 'dark' | 'auto';
+          size?: 'normal' | 'compact' | 'flexible' | 'invisible';
+          appearance?: 'always' | 'execute' | 'interaction-only';
           callback?: (token: string) => void;
           'error-callback'?: () => void;
           'expired-callback'?: () => void;
@@ -43,6 +46,8 @@ export default function Contact() {
       if (!widgetElRef.current || !window.turnstile || widgetIdRef.current) return;
       widgetIdRef.current = window.turnstile.render(widgetElRef.current, {
         sitekey: SITE_KEY,
+        theme: 'light',
+        size: 'flexible',
         callback: (t) => setToken(t),
         'error-callback': () => setToken(''),
         'expired-callback': () => setToken(''),
