@@ -8,6 +8,7 @@ export default function Footer() {
   const sitemapLinks = [
     { href: `/${locale}/services`, label: nav('services') },
     { href: `/${locale}/blog`, label: nav('blog') },
+    { href: `/${locale}/contact`, label: nav('contact') },
   ];
 
   return (

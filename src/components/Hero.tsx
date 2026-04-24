@@ -1,7 +1,8 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Hero() {
   const t = useTranslations('Hero');
+  const locale = useLocale();
 
   return (
     <section className="min-h-screen flex items-center pt-[60px] px-6 bg-gradient-to-br from-neutral-200 via-neutral-50 to-neutral-200">
@@ -29,7 +30,7 @@ export default function Hero() {
           style={{ animationDelay: '0.46s' }}
         >
           <a
-            href="mailto:hello@todea.co.kr"
+            href={`/${locale}/contact`}
             className="bg-brand text-white text-[13px] font-semibold px-6 py-3 rounded-full hover:opacity-80 transition-opacity"
           >
             {t('cta1')}
