@@ -170,7 +170,71 @@ export default function SupportTiers() {
 
         <FadeIn delay={0.1}>
           <div className={CARD}>
-            <div className="overflow-x-auto">
+            {/* Mobile stacked layout */}
+            <div className="lg:hidden">
+              {categories.map((cat, catIdx) => {
+                const bg = categoryBg[catIdx % categoryBg.length];
+                return (
+                  <div
+                    key={cat.key}
+                    className={`${bg} px-6 py-8 border-b ${HAIRLINE} last:border-b-0`}
+                  >
+                    <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-500 uppercase mb-5">
+                      {t(`${cat.key}_label`)}
+                    </p>
+                    {/* Shared tier header for the whole category */}
+                    <div className="grid grid-cols-3 gap-2 pb-3 mb-6 border-b border-neutral-200/50">
+                      {tiers.map((tier, i) => (
+                        <span
+                          key={i}
+                          className="text-[9px] font-bold tracking-[.18em] uppercase text-neutral-400 leading-none text-center"
+                        >
+                          {tier}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="space-y-6">
+                      {cat.rows.map((row, ri) => (
+                        <div
+                          key={row.key}
+                          className={ri > 0 ? 'pt-6 border-t border-neutral-200/40' : ''}
+                        >
+                          <p className="text-[14.5px] font-semibold text-black mb-1.5 leading-snug">
+                            {t(`${cat.key}_${row.key}_item`)}
+                          </p>
+                          <p className="text-[13px] text-neutral-600 font-light leading-relaxed mb-4">
+                            {t(`${cat.key}_${row.key}_detail`)}
+                          </p>
+                          <div className="grid grid-cols-3 gap-2 mb-3">
+                            {row.marks.map((mark, mi) => (
+                              <div key={mi} className="flex justify-center">
+                                <Glyph mark={mark} />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className="text-[10px] font-semibold tracking-[.2em] uppercase text-neutral-400">
+                              {t('col_credits_title')}
+                            </span>
+                            {row.credits === 'standard' ? (
+                              <span className="text-[13px] font-semibold text-black tabular-nums tracking-[.05em]">
+                                {creditLabels.standard}
+                              </span>
+                            ) : (
+                              <span className="text-[12px] italic text-neutral-500 tracking-wide">
+                                {creditLabels.quote}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Desktop table layout */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full min-w-[960px] text-left">
                 <thead>
                   <tr className={`bg-white border-b ${HAIRLINE}`}>
@@ -288,7 +352,33 @@ export default function SupportTiers() {
               </p>
             </div>
             <div className={CARD}>
-              <div className="overflow-x-auto">
+              {/* Mobile stacked layout */}
+              <div className="lg:hidden divide-y divide-neutral-200/50">
+                {envelopeRows.map((rowKey, rIdx) => {
+                  const bg = rIdx % 2 === 0 ? 'bg-white' : 'bg-neutral-50/60';
+                  return (
+                    <div key={rowKey} className={`${bg} px-6 py-6`}>
+                      <p className="text-[13.5px] font-semibold text-black mb-4 leading-snug">
+                        {t(`env_${rowKey}_label`)}
+                      </p>
+                      <div className="space-y-3">
+                        {tierKeys.map((tierKey, ti) => (
+                          <div key={tierKey} className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold tracking-[.18em] uppercase text-neutral-400 leading-none">
+                              {tiers[ti]}
+                            </span>
+                            <span className="text-[13px] text-neutral-700 font-light leading-relaxed">
+                              {t(`env_${rowKey}_${tierKey}`)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Desktop table layout */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full min-w-[780px] text-left">
                   <thead>
                     <tr className={`bg-white border-b ${HAIRLINE}`}>
