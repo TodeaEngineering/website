@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import FadeIn from './FadeIn';
 
 const services = [
@@ -11,6 +11,7 @@ const services = [
 
 export default function Services() {
   const t = useTranslations('Services');
+  const locale = useLocale();
 
   return (
     <section id="services" className="py-24 sm:py-32 px-6 border-t border-neutral-100">
@@ -35,7 +36,7 @@ export default function Services() {
           {services.map((svc, i) => (
             <FadeIn key={svc.key} delay={i * 0.08}>
               <a
-                href="#contact"
+                href={`/${locale}/contact`}
                 className="svc relative block border-b border-neutral-200 py-7 sm:py-9 grid sm:grid-cols-12 gap-3 sm:gap-6 items-baseline group"
               >
                 <span className="sm:col-span-1 text-[12px] text-brand/50 font-medium">

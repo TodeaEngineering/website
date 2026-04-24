@@ -14,11 +14,13 @@ declare global {
           theme?: 'light' | 'dark' | 'auto';
           size?: 'normal' | 'compact' | 'flexible' | 'invisible';
           appearance?: 'always' | 'execute' | 'interaction-only';
+          execution?: 'render' | 'execute';
           callback?: (token: string) => void;
           'error-callback'?: () => void;
           'expired-callback'?: () => void;
         },
       ) => string;
+      execute: (widgetId?: string) => void;
       reset: (widgetId?: string) => void;
       remove: (widgetId?: string) => void;
     };
@@ -36,21 +38,29 @@ export default function Contact() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const widgetElRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [token, setToken] = useState('');
+  const tokenResolversRef = useRef<Array<(token: string) => void>>([]);
   const [status, setStatus] = useState<Status>('idle');
 
   useEffect(() => {
     if (!SITE_KEY || typeof window === 'undefined') return;
+
+    const resolveToken = (t: string) => {
+      const resolvers = tokenResolversRef.current;
+      tokenResolversRef.current = [];
+      resolvers.forEach((r) => r(t));
+    };
 
     const render = () => {
       if (!widgetElRef.current || !window.turnstile || widgetIdRef.current) return;
       widgetIdRef.current = window.turnstile.render(widgetElRef.current, {
         sitekey: SITE_KEY,
         theme: 'light',
-        size: 'flexible',
-        callback: (t) => setToken(t),
-        'error-callback': () => setToken(''),
-        'expired-callback': () => setToken(''),
+        size: 'invisible',
+        appearance: 'interaction-only',
+        execution: 'execute',
+        callback: (t) => resolveToken(t),
+        'error-callback': () => resolveToken(''),
+        'expired-callback': () => resolveToken(''),
       });
     };
 
@@ -75,12 +85,28 @@ export default function Contact() {
     };
   }, []);
 
+  function requestToken(): Promise<string> {
+    if (!window.turnstile || !widgetIdRef.current) return Promise.resolve('');
+    return new Promise((resolve) => {
+      tokenResolversRef.current.push(resolve);
+      window.turnstile!.execute(widgetIdRef.current!);
+    });
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (status === 'sending' || !token) return;
+    if (status === 'sending') return;
 
     const form = e.currentTarget;
     const data = new FormData(form);
+
+    setStatus('sending');
+    const token = await requestToken();
+    if (!token) {
+      setStatus('error');
+      return;
+    }
+
     const body = {
       name: String(data.get('name') ?? ''),
       company: String(data.get('company') ?? ''),
@@ -90,7 +116,6 @@ export default function Contact() {
       token,
     };
 
-    setStatus('sending');
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -109,7 +134,6 @@ export default function Contact() {
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
       }
-      setToken('');
     }
   }
 
@@ -199,7 +223,7 @@ export default function Contact() {
               <div className="flex items-center gap-4 pt-2">
                 <button
                   type="submit"
-                  disabled={status === 'sending' || !token}
+                  disabled={status === 'sending'}
                   className="bg-brand text-white text-[13px] font-semibold px-7 py-3 rounded-full hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 >
                   {status === 'sending' ? '…' : status === 'success' ? t('f_sent') : t('f_submit')}
