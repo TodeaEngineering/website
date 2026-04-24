@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f10"/>
+      <stop offset="100%" stop-color="#1a1f20"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="800" cy="450" rx="800" ry="500" fill="url(#glow)"/>
+
+  <!-- Outer heptagon (7-sided, a nod to the Kubernetes helm) -->
+  <g stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.4" fill="none">
+    <polygon points="800,170 1052.59,232.88 1224.99,428.17 1191.02,682.45 969.81,814.45 630.19,814.45 408.98,682.45 375.01,428.17 547.41,232.88"/>
+  </g>
+
+  <!-- Inner heptagon -->
+  <g stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.2" fill="none">
+    <polygon points="800,290 969.06,332.04 1084.54,462.84 1061.78,633.11 913.63,721.51 686.37,721.51 538.22,633.11 515.46,462.84 630.94,332.04"/>
+  </g>
+
+  <!-- Spokes from center outward to heptagon vertices -->
+  <g stroke="#ffffff" stroke-opacity="0.18" stroke-width="1.2" fill="none">
+    <line x1="800" y1="450" x2="800" y2="170"/>
+    <line x1="800" y1="450" x2="1052.59" y2="232.88"/>
+    <line x1="800" y1="450" x2="1224.99" y2="428.17"/>
+    <line x1="800" y1="450" x2="1191.02" y2="682.45"/>
+    <line x1="800" y1="450" x2="969.81" y2="814.45"/>
+    <line x1="800" y1="450" x2="630.19" y2="814.45"/>
+    <line x1="800" y1="450" x2="408.98" y2="682.45"/>
+    <line x1="800" y1="450" x2="375.01" y2="428.17"/>
+    <line x1="800" y1="450" x2="547.41" y2="232.88"/>
+  </g>
+
+  <!-- Mesh lines connecting outer vertices (every other) -->
+  <g stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.2" fill="none">
+    <line x1="800" y1="170" x2="1224.99" y2="428.17"/>
+    <line x1="1224.99" y1="428.17" x2="969.81" y2="814.45"/>
+    <line x1="969.81" y1="814.45" x2="408.98" y2="682.45"/>
+    <line x1="408.98" y1="682.45" x2="547.41" y2="232.88"/>
+    <line x1="547.41" y1="232.88" x2="1052.59" y2="232.88"/>
+    <line x1="1052.59" y1="232.88" x2="1191.02" y2="682.45"/>
+    <line x1="1191.02" y1="682.45" x2="630.19" y2="814.45"/>
+    <line x1="630.19" y1="814.45" x2="375.01" y2="428.17"/>
+  </g>
+
+  <!-- Outer vertex rings -->
+  <g stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.2" fill="none">
+    <circle cx="800" cy="170" r="16"/>
+    <circle cx="1052.59" cy="232.88" r="16"/>
+    <circle cx="1224.99" cy="428.17" r="16"/>
+    <circle cx="1191.02" cy="682.45" r="16"/>
+    <circle cx="969.81" cy="814.45" r="16"/>
+    <circle cx="630.19" cy="814.45" r="16"/>
+    <circle cx="408.98" cy="682.45" r="16"/>
+    <circle cx="375.01" cy="428.17" r="16"/>
+    <circle cx="547.41" cy="232.88" r="16"/>
+  </g>
+
+  <!-- Outer vertex nodes -->
+  <g fill="#ffffff" fill-opacity="0.85">
+    <circle cx="800" cy="170" r="7"/>
+    <circle cx="1052.59" cy="232.88" r="7"/>
+    <circle cx="1224.99" cy="428.17" r="7"/>
+    <circle cx="1191.02" cy="682.45" r="7"/>
+    <circle cx="969.81" cy="814.45" r="7"/>
+    <circle cx="630.19" cy="814.45" r="7"/>
+    <circle cx="408.98" cy="682.45" r="7"/>
+    <circle cx="375.01" cy="428.17" r="7"/>
+    <circle cx="547.41" cy="232.88" r="7"/>
+  </g>
+
+  <!-- Central control plane -->
+  <circle cx="800" cy="450" r="28" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1.4" fill="none"/>
+  <circle cx="800" cy="450" r="14" fill="#ffffff" fill-opacity="0.9"/>
+
+  <text x="100" y="820" font-family="'Noto Sans SC', system-ui, -apple-system, sans-serif" font-weight="800" font-size="48" fill="#ffffff" letter-spacing="-1">Kubernetes 1.36</text>
+  <text x="100" y="865" font-family="'Noto Sans SC', system-ui, -apple-system, sans-serif" font-weight="400" font-size="20" fill="#a3a3a3" letter-spacing="2">TODEA · CLOUD NATIVE ENGINEERING</text>
+</svg>

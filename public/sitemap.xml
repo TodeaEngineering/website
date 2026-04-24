@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://todea.co.kr/en</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ko</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -25,7 +25,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ja</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -36,7 +36,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/zh</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -46,8 +46,52 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en"/>
   </url>
   <url>
+    <loc>https://todea.co.kr/en/services</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/services"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/services"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/services"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/services"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/services"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/ko/services</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/services"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/services"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/services"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/services"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/services"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/ja/services</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/services"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/services"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/services"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/services"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/services"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/zh/services</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/services"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/services"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/services"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/services"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/services"/>
+  </url>
+  <url>
     <loc>https://todea.co.kr/en/blog</loc>
-    <lastmod>2026-04-17</lastmod>
+    <lastmod>2026-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -58,7 +102,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ko/blog</loc>
-    <lastmod>2026-04-17</lastmod>
+    <lastmod>2026-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -69,7 +113,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ja/blog</loc>
-    <lastmod>2026-04-17</lastmod>
+    <lastmod>2026-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -80,7 +124,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/zh/blog</loc>
-    <lastmod>2026-04-17</lastmod>
+    <lastmod>2026-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -88,6 +132,17 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/en/blog/kubernetes-1-36-release</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/en/blog/linkerd-explained</loc>
@@ -101,6 +156,17 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
   </url>
   <url>
+    <loc>https://todea.co.kr/en/blog/linkerd-on-openshift</loc>
+    <lastmod>2026-04-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+  </url>
+  <url>
     <loc>https://todea.co.kr/en/blog/service-mesh-explained</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -110,6 +176,17 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/ko/blog/kubernetes-1-36-release</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/ko/blog/linkerd-explained</loc>
@@ -123,6 +200,17 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
   </url>
   <url>
+    <loc>https://todea.co.kr/ko/blog/linkerd-on-openshift</loc>
+    <lastmod>2026-04-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+  </url>
+  <url>
     <loc>https://todea.co.kr/ko/blog/service-mesh-explained</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -132,6 +220,17 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/ja/blog/kubernetes-1-36-release</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/ja/blog/linkerd-explained</loc>
@@ -145,6 +244,17 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
   </url>
   <url>
+    <loc>https://todea.co.kr/ja/blog/linkerd-on-openshift</loc>
+    <lastmod>2026-04-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+  </url>
+  <url>
     <loc>https://todea.co.kr/ja/blog/service-mesh-explained</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -154,6 +264,17 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/zh/blog/kubernetes-1-36-release</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/kubernetes-1-36-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/zh/blog/linkerd-explained</loc>
@@ -167,6 +288,17 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
   </url>
   <url>
+    <loc>https://todea.co.kr/zh/blog/linkerd-on-openshift</loc>
+    <lastmod>2026-04-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
+  </url>
+  <url>
     <loc>https://todea.co.kr/zh/blog/service-mesh-explained</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -176,5 +308,49 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/service-mesh-explained"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/en/privacy</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/privacy"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/privacy"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/ko/privacy</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/privacy"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/privacy"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/ja/privacy</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/privacy"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/privacy"/>
+  </url>
+  <url>
+    <loc>https://todea.co.kr/zh/privacy</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/privacy"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/privacy"/>
   </url>
 </urlset>

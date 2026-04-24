@@ -1,0 +1,78 @@
+---
+title: "Kubernetes v1.36 'Haru': 이번 릴리스에서 실제로 중요한 것"
+description: "Kubernetes v1.36의 실무자 가이드 워크스루: auth, node, scheduling, storage, DRA 등 각 변경 사항을 소유하는 SIG별로 그룹화."
+date: "2026-04-23"
+author: "Todea Engineering"
+authorRole: "클라우드 네이티브 실무"
+category: "클라우드 네이티브"
+image: "/blog/kubernetes-1-36-release/ko-cover.svg"
+tags: ["kubernetes", "release", "platform-engineering", "security", "dra"]
+---
+ 
+Kubernetes [v1.36, 코드네임 *Haru*](https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/)는 70개의 기능 개선을 포함합니다: Stable 18개, Beta 25개, Alpha 25개. 아래는 각 변경을 소유하는 SIG별로 그룹화한 운영자 관점의 뷰입니다. 각 섹션은 해당 영역의 항목들을 빠르게 훑어볼 수 있는 표로 제시하며, 그 뒤에 이번 분기에 실제로 조치할 가치가 있는 한두 항목에 대한 짧은 메모를 덧붙입니다.
+ 
+## SIG Auth 및 API Machinery
+ 
+| 기능 | 단계 | 설명 |
+|---|---|---|
+| 세분화된 Kubelet API 인가 ([#2862](https://kep.k8s.io/2862)) | Stable | `KubeletFineGrainedAuthz` 기능 게이트가 GA로 승격되어, 지나치게 광범위한 `nodes/proxy` 권한을 부여하지 않고도 kubelet의 HTTPS API(예: `nodes/healthz`, `nodes/metrics`)에 대한 세밀한 접근 제어가 가능해집니다. |
+| Mutating Admission Policies ([#3962](https://kep.k8s.io/3962)) | Stable | Common Expression Language(CEL)를 사용하여, mutating webhook의 인프로세스 대안으로 YAML에서 변형 정책을 선언적으로 정의합니다. |
+| 서비스 어카운트 토큰의 외부 서명 ([#740](https://kep.k8s.io/740)) | Stable | API 서버가 서비스 어카운트 토큰 서명을 외부 KMS에 위임할 수 있게 되었습니다. |
+| 노드 로그 쿼리 ([#2258](https://kep.k8s.io/2258)) | Stable | SSH 없이 노드 시스템 로그를 읽기 위한 kubelet 네이티브 API. 예: `kubectl get --raw "/api/v1/nodes/node-1/logs?query=kubelet"`. |
+| Constrained Impersonation ([#5284](https://kep.k8s.io/5284)) | Beta | `ConstrainedImpersonation` 기능 게이트가 Beta로 승격. 사용자가 impersonator보다 더 많은 권한을 가진 주체를 사칭할 수 없도록 경계를 둔 impersonation 부여를 허용하여, 흔한 권한 상승 경로를 차단합니다. |
+| kubectl 사용자 설정을 클러스터 설정에서 분리 ([#3104](https://kep.k8s.io/3104)) | Beta | `.kuberc`에 credential exec 플러그인에 대한 정책(허용목록 또는 차단목록)을 정의하는 기능이 확장되어, 더 안전한 인증 관행을 강제할 수 있습니다. |
+| IP/CIDR 검증 개선 ([#4858](https://kep.k8s.io/4858)) | Beta | `StrictIPCIDRValidation` 기능이 Beta로 승격. 잘못된 형식의 주소와 접두사를 잡아내도록 주소 검증을 강화합니다. 예: `012.000.001.002`처럼 앞에 0이 붙은 주소, `::ffff:1.2.3.4`처럼 IPv4-매핑 IPv6 주소. |
+| Kubernetes 컴포넌트용 Flagz ([#4828](https://kep.k8s.io/4828)) | Beta | `ComponentFlagz` 기능이 Beta로 승격. 각 컴포넌트가 시작될 때의 커맨드라인 인자를 노출하는 `/flagz` 엔드포인트를 표준화하여, 클러스터 운영자의 디버깅을 쉽게 만듭니다. |
+| 매니페스트 기반 admission 제어 설정 ([#5793](https://kep.k8s.io/5793)) | Alpha | admission 제어 설정을 etcd에 저장된 오브젝트에서 kube-apiserver의 파일 기반 매니페스트로 옮깁니다. |
+ 
+## SIG Node
+ 
+| 기능 | 단계 | 설명 |
+|---|---|---|
+| Pod의 User Namespaces ([#127](https://kep.k8s.io/127)) | Stable | Stable로 승격. 컨테이너의 root 사용자를 호스트의 비특권 사용자에 매핑하므로, 프로세스가 컨테이너를 탈출하더라도 기반 노드에 대한 관리 권한은 갖지 않습니다. 컨테이너 내부에서 root로 실행되어야 하는 워크로드에 특히 유용합니다. |
+| ProcMount 옵션 ([#4265](https://kep.k8s.io/4265)) | Stable | Stable로 승격. `securityContext`에 `ProcMountType` 필드를 추가하여, `/proc` 경로를 선택적으로 언마스크할 수 있게 합니다(`/proc`의 일부는 호스트 정보의 우연한 노출을 막기 위해 기본적으로 마스킹됩니다). |
+| cgroupv2 기반 PSI 지원 ([#4205](https://kep.k8s.io/4205)) | Stable | Stable로 승격. kubelet이 CPU, 메모리, I/O에 대한 Pressure Stall Information(태스크가 리소스를 기다리는 데 소비한 시간)을 보고하여, 전통적인 사용률 메트릭보다 리소스 경합에 대한 더 세밀한 뷰를 제공합니다. |
+| Resource Health Status ([#4680](https://kep.k8s.io/4680)) | Beta | Beta로 승격. 통합된 `.status.allocatedResourcesStatus` 필드가 레거시 Device Plugin API나 DRA로 할당되었든 관계없이 모든 특수 하드웨어의 디바이스 헬스를 보고합니다. |
+| HostNetwork Pod용 User Namespaces ([#5607](https://kep.k8s.io/5607)) | Alpha | `hostNetwork: true`이고 `hostUsers: false`인 Pod는 이 기능에 대한 지원을 명시적으로 선언한 노드에만 스케줄링됩니다. user namespaces를 사용하면, 침해된 컨테이너를 탈출한 공격자는 호스트 레벨에서 권한이 축소됩니다. |
+ 
+## SIG Scheduling 및 Dynamic Resource Allocation (DRA)
+ 
+가속기를 운영한다면, 이것이 중요한 영역입니다. DRA는 GPU와 FPGA 같은 특수 하드웨어를 할당하기 위한 Kubernetes의 유연하고 클레임 기반 API로, 레거시 Device Plugin API보다 더 풍부한 제약과 공유 정책을 워크로드에 제공합니다. Core DRA는 v1.34에서 GA로 승격되었고, v1.36은 주변 생태계의 성숙을 이어갑니다. 주요 거버넌스 및 선택 기능들이 Stable과 Beta에 도달합니다.
+ 
+| 기능 | 단계 | 설명 |
+|---|---|---|
+| DRA: ResourceClaims의 AdminAccess ([#5018](https://kep.k8s.io/5018)) | Stable | Stable로 승격. `ResourceClaim` 및 `ResourceClaimTemplate`의 새 `adminAccess` 플래그를 통해 디바이스에 대한 특권 접근(디버깅, 검사, 관리 작업용)을 활성화합니다. 그러한 클레임 생성을 허용하려면 네임스페이스를 명시적으로 `admin-access`로 표시해야 합니다. 멀티 테넌트 GPU 및 AI 플랫폼의 거버넌스 기반의 핵심 부분을 완성합니다. |
+| DRA: Device taints and tolerations ([#5055](https://kep.k8s.io/5055)) | Beta | DRA 드라이버가 디바이스를 taint로 표시하여 새 Pod의 스케줄링에서 제외할 수 있습니다. 이미 taint된 디바이스를 사용 중인 Pod는 자동으로 중지될 수 있습니다. 관리자는 `DeviceTaintRule`을 통해 선택 기준에 일치하는 디바이스에 taint를 적용할 수도 있습니다(예: 특정 드라이버의 모든 디바이스). |
+| DRA: Partitionable devices ([#4815](https://kep.k8s.io/4815)) | Beta | Beta로 승격. 고정된 사전 파티셔닝을 요구하는 대신 GPU나 TPU 같은 하드웨어를 온디맨드로 동적으로 작은 조각으로 분할하여 NVIDIA MIG, 멀티 호스트 TPU 슬라이스 등의 활용도를 개선합니다. |
+| DRA: Resource Claim Status ([#4817](https://kep.k8s.io/4817)) | Beta | `ResourceClaim.Status`에 새로운 `devices` 필드를 추가하여, DRA 드라이버가 할당된 각 디바이스에 대해 드라이버별 정보(조건, 임의 데이터, 그리고 표준화된 형태로, 인터페이스 이름, MAC 주소, IP 주소 같은 네트워크 상세 정보)를 보고할 수 있게 합니다. 관찰 가능성을 개선하고, 서드파티 컨트롤러(예: 네트워크 서비스)가 클레임에서 직접 디바이스 정보를 소비할 수 있게 합니다. |
+| Workload Aware Scheduling (여러 KEP) | Alpha | 스케줄러가 관련된 Pod들을 독립적인 것이 아니라 단일 논리 단위로 다루게 만듭니다. 개정된 Workload API와 새로운 분리된 `PodGroup` API를 도입하고, 전체 그룹을 원자적으로 평가하는 스케줄링 사이클을 포함합니다. 모든 Pod가 함께 바인딩되거나, 아무것도 바인딩되지 않습니다. ML 학습 작업 같은 분산 워크로드에서의 파편화된 스케줄링과 리소스 낭비를 방지합니다. |
+ 
+## SIG Storage
+ 
+| 기능 | 단계 | 설명 |
+|---|---|---|
+| OCI VolumeSource ([#4639](https://kep.k8s.io/4639)) | Stable | Stable로 승격. OCI 아티팩트와 이미지를 읽기 전용 볼륨으로 직접 마운트합니다. |
+| 재귀적 SELinux 재레이블 스킵 ([#1710](https://kep.k8s.io/1710)) | Stable | Stable로 승격. SELinux가 강제 모드일 때 PersistentVolume 마운트를 가속화합니다. `context` 마운트 옵션을 전달함으로써 Kubernetes는 모든 파일을 재귀적으로 재레이블하는 대신 전체 볼륨에 보안 컨텍스트를 적용합니다. |
+| CSI 드라이버의 시크릿 경유 SA 토큰 옵트인 ([#5538](https://kep.k8s.io/5538)) | Stable | Stable로 승격. 클라우드 버킷 마운트 시 사용되는 서비스 어카운트 토큰 같은 민감 데이터를 안전하게 담기 위한 새 `secrets` 필드를 도입합니다. `serviceAccountTokenInSecrets`가 true일 때 CSI 드라이버는 `secrets` 필드에서 토큰을 읽습니다. |
+ 
+## SIG Autoscaling
+ 
+| 기능 | 단계 | 설명 |
+|---|---|---|
+| 오브젝트 및 외부 메트릭을 위한 HPA의 0으로/0에서의 스케일 ([#2021](https://kep.k8s.io/2021)) | Alpha | `HPAScaleToZero` 기능 게이트 뒤에서 Alpha를 유지. Object 또는 External 메트릭(예: 큐 길이)을 사용할 때, CPU나 메모리를 샘플링하기 위해 최소 하나의 살아 있는 Pod가 필요하지 않고 HorizontalPodAutoscaler가 레플리카를 0으로 스케일할 수 있게 합니다. HPA는 새로운 `ScaledToZero` 상태 필드에 상태를 기록하여 운영자가 `replicas: 0`으로 고정한 디플로이먼트를 되살리지 않고, 외부 메트릭이 새 작업을 가리키는 즉시 첫 레플리카를 띄웁니다. 현재 항상 켜진 최소값에 대해 비용을 지불하고 있는 버스티한 큐 기반 워크로드를 유휴 상태로 두는 데 유용합니다. |
+ 
+## 폐기 예고 및 제거
+ 
+| 항목 | 상태 | 조치 |
+|---|---|---|
+| `service.spec.externalIPs` ([#5707](https://kep.k8s.io/5707)) | Deprecated | `service.spec.externalIPs`는 오랫동안 적절한 인가나 검증 없이 비특권 사용자가 임의의 주소를 청구하도록 허용해 왔습니다. v1.36은 이 필드를 폐기 예고하고, kube-proxy가 externalIPs에 대한 규칙을 프로그래밍하지 못하게 하는 `AllowServiceExternalIPs` 기능 게이트를 추가합니다. LoadBalancer나 Gateway API로 마이그레이션하세요. |
+| `gitRepo` 볼륨 플러그인 ([#5040](https://kep.k8s.io/5040)) | Removed | `gitRepo` 볼륨 유형은 v1.11 이후 폐기 예고 상태였습니다. v1.36에서 영구적으로 비활성화되어 되돌릴 수 없습니다. `gitRepo`에 의존하는 기존 워크로드는 init 컨테이너나 외부 git-sync 스타일 도구 같은 지원되는 대안으로 마이그레이션해야 합니다. |
+| `gogo/protobuf` 의존성 ([#5589](https://kep.k8s.io/5589)) | Removed | Kubernetes API는 이전에 2021년에 폐기 예고된 gogoprotobuf에 의존했습니다. 이 기능 개선은 Kubernetes API 오브젝트에서 이 의존성의 제거를 완료합니다. 최종 사용자에게는 대부분 보이지 않지만, API 클라이언트 메인테이너에게는 관련이 있습니다. |
+ 
+실제 마이그레이션 프로젝트로 다룰 가치가 있는 폐기 예고는 **`service.spec.externalIPs`**입니다. 이 필드는 수년간 멀티 테넌트 클러스터에서 MITM 및 트래픽 리다이렉션의 경로가 되어 왔습니다. 폐기 예고는 이미 한참 늦었습니다. 사용하고 있다면 필드가 제거된 때가 아니라 그 전에 LoadBalancer나 Gateway API 리소스로 전환하세요. v1.11 이후 진행 중이던 `gitRepo` 제거가 드디어 이루어집니다. 아직 매니페스트에 남아 있다면, 이미 대응했어야 할 때를 한참 지났습니다.
+ 
+## 이번 주에 할 일
+ 
+Kubernetes 1.36은 주로 두 갈래의 통합 릴리스입니다. 가속기 네이티브 플랫폼으로서의 Kubernetes(DRA 거버넌스의 성숙, HPA의 0 스케일, 더 많은 워크로드 인식 스케줄링), 그리고 최소 권한 플랫폼으로서의 Kubernetes(세분화된 kubelet 인가가 GA에 도달, user namespaces가 Stable이 됨, externalIPs가 폐기 예고 경로에 진입).
+
+그래서 액션 리스트는 상당히 단순합니다. `nodes/proxy` 권한을 감사하고 세분화된 kubelet 서브리소스로 마이그레이션하세요. 매니페스트에서 이제 폐기 예고된 `service.spec.externalIPs`와 1.36에서 제거되어 여전히 의존하는 Pod를 망가뜨릴 `gitRepo`를 검색하세요. 가속기를 사용한다면, DRA를 활성화한 비프로덕션 클러스터를 띄워 AdminAccess와 device taints에 대한 입장을 세우세요. 다른 대부분의 변경은 일반 업그레이드 과정의 일부로 처리할 수 있습니다.

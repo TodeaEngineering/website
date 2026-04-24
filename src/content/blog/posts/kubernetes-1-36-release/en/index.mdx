@@ -1,0 +1,78 @@
+---
+title: "Kubernetes v1.36 'Haru': What Actually Matters in This Release"
+description: "A practitioner's walkthrough of Kubernetes v1.36 grouped by the SIG that owns each change: auth, node, scheduling, storage, and DRA."
+date: "2026-04-23"
+author: "Todea Engineering"
+authorRole: "Cloud Native Practice"
+category: "Cloud Native"
+image: "/blog/kubernetes-1-36-release/en-cover.svg"
+tags: ["kubernetes", "release", "platform-engineering", "security", "dra"]
+---
+ 
+Kubernetes [v1.36, codenamed *Haru*](https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/), ships 70 enhancements: 18 to Stable, 25 to Beta, 25 to Alpha. Below is the operator's view, grouped by the SIG that owns each change. Each section is a quick-scan table of what's in the area, followed by a short note on the one or two items worth acting on this quarter.
+ 
+## SIG Auth and API Machinery
+ 
+| Feature | Stage | What it does |
+|---|---|---|
+| Fine-grained Kubelet API Authorization ([#2862](https://kep.k8s.io/2862)) | Stable | The `KubeletFineGrainedAuthz` feature gate graduates to GA, allowing granular access control over the kubelet's HTTPS API (e.g. `nodes/healthz`, `nodes/metrics`) without granting the overly broad `nodes/proxy` permission. |
+| Mutating Admission Policies ([#3962](https://kep.k8s.io/3962)) | Stable | Define mutation policies declaratively in YAML using Common Expression Language (CEL), as an in-process alternative to mutating webhooks. |
+| External Signing of Service Account Tokens ([#740](https://kep.k8s.io/740)) | Stable | The API server can now delegate Service Account token signing to an external KMS. |
+| Node log query ([#2258](https://kep.k8s.io/2258)) | Stable | A kubelet-native API for reading node system logs without SSH, e.g. `kubectl get --raw "/api/v1/nodes/node-1/logs?query=kubelet"`. |
+| Constrained Impersonation ([#5284](https://kep.k8s.io/5284)) | Beta | The `ConstrainedImpersonation` feature gate graduates to Beta. Allows impersonation grants that are bounded so a user cannot impersonate a subject with more permissions than the impersonator, closing a common privilege-escalation path. |
+| Separate kubectl user preferences from cluster configs ([#3104](https://kep.k8s.io/3104)) | Beta | `.kuberc` expands with the ability to define policies for credential exec plugins (allowlists or denylists), enforcing safer authentication practices. |
+| IP/CIDR validation improvements ([#4858](https://kep.k8s.io/4858)) | Beta | The `StrictIPCIDRValidation` feature graduates to Beta. Strengthens address validation to catch malformed addresses and prefixes, e.g. addresses with leading zeros like `012.000.001.002`, and IPv4-mapped IPv6 addresses like `::ffff:1.2.3.4`. |
+| Flagz for Kubernetes components ([#4828](https://kep.k8s.io/4828)) | Beta | The `ComponentFlagz` feature graduates to Beta, standardizing the `/flagz` endpoint that exposes the command-line arguments each component was started with, making it easier for cluster operators to debug. |
+| Manifest-based admission control config ([#5793](https://kep.k8s.io/5793)) | Alpha | Moves admission control configuration from etcd-stored objects to file-based manifests in the kube-apiserver. |
+ 
+## SIG Node
+ 
+| Feature | Stage | What it does |
+|---|---|---|
+| User Namespaces in Pods ([#127](https://kep.k8s.io/127)) | Stable | Graduates to Stable. Maps a container's root user to a non-privileged user on the host, so even if a process escapes the container it possesses no administrative power over the underlying node. Particularly useful for workloads that need to run as root inside the container. |
+| ProcMount option ([#4265](https://kep.k8s.io/4265)) | Stable | Graduates to Stable. Adds a `ProcMountType` field to `securityContext`, letting you selectively unmask `/proc` paths (some parts of `/proc` are masked by default to prevent accidental exposure of host information). |
+| Support PSI based on cgroupv2 ([#4205](https://kep.k8s.io/4205)) | Stable | Graduates to Stable. The kubelet now reports Pressure Stall Information (how much time tasks spend waiting for a resource) for CPU, memory, and I/O, offering a more granular view of resource contention than traditional utilization metrics. |
+| Resource Health Status ([#4680](https://kep.k8s.io/4680)) | Beta | Graduates to Beta. A unified `.status.allocatedResourcesStatus` field reports device health for all specialized hardware, whether allocated via the legacy Device Plugin API or DRA. |
+| User Namespaces for HostNetwork pods ([#5607](https://kep.k8s.io/5607)) | Alpha | Pods with `hostNetwork: true` and `hostUsers: false` will only be scheduled on nodes that explicitly declare support for this feature. With user namespaces, an attacker who escapes a compromised container has reduced permissions at the host level. |
+ 
+## SIG Scheduling and Dynamic Resource Allocation (DRA)
+ 
+If you operate accelerators, this is the area that matters. DRA is Kubernetes' flexible, claim-based API for allocating specialized hardware such as GPUs and FPGAs, giving workloads a richer set of constraints and sharing policies than the legacy Device Plugin API. Core DRA graduated to GA in v1.34; v1.36 continues the maturation of the surrounding ecosystem, with key governance and selection features reaching Stable and Beta.
+ 
+| Feature | Stage | What it does |
+|---|---|---|
+| DRA: AdminAccess for ResourceClaims ([#5018](https://kep.k8s.io/5018)) | Stable | Graduates to Stable. Enables privileged access to devices (for debugging, inspection, or administrative tasks) via a new `adminAccess` flag on `ResourceClaim` and `ResourceClaimTemplate`. Namespaces must be explicitly marked with `admin-access` to permit the creation of such claims. Completes a key piece of the governance foundation for multi-tenant GPU and AI platforms. |
+| DRA: Device taints and tolerations ([#5055](https://kep.k8s.io/5055)) | Beta | DRA drivers can now mark devices as tainted so they are excluded from scheduling new pods; pods already using a tainted device can be stopped automatically. Administrators can also apply taints to devices matching selection criteria via a `DeviceTaintRule` (e.g. all devices of a given driver). |
+| DRA: Partitionable devices ([#4815](https://kep.k8s.io/4815)) | Beta | Graduates to Beta. Dynamically split hardware like GPUs and TPUs into smaller, on-demand pieces instead of requiring fixed pre-partitioning, improving utilization for NVIDIA MIG, multi-host TPU slices, and similar. |
+| DRA: Resource Claim Status ([#4817](https://kep.k8s.io/4817)) | Beta | Adds a new `devices` field to `ResourceClaim.Status` so DRA drivers can report driver-specific info (conditions, arbitrary data, and, in a standardized form, network details like interface name, MAC address, and IP addresses) for each allocated device. Improves observability and lets third-party controllers (e.g. network services) consume device info directly from the claim. |
+| Workload Aware Scheduling (multiple KEPs) | Alpha | Makes the scheduler treat related pods as a single logical unit instead of independent ones. Introduces a revised Workload API and a new decoupled `PodGroup` API, along with a scheduling cycle that evaluates an entire group atomically: either all pods get bound together, or none do. Prevents fragmented scheduling and resource waste in distributed workloads like ML training jobs. |
+ 
+## SIG Storage
+ 
+| Feature | Stage | What it does |
+|---|---|---|
+| OCI VolumeSource ([#4639](https://kep.k8s.io/4639)) | Stable | Graduates to Stable. Mount OCI artifacts and images directly as read-only volumes. |
+| Recursive SELinux relabel skip ([#1710](https://kep.k8s.io/1710)) | Stable | Graduates to Stable. Speeds up PersistentVolume mounts when SELinux is enforcing: by passing the `context` mount option, Kubernetes applies the security context to the entire volume rather than recursively relabeling every file. |
+| CSI driver opt-in for SA tokens via secrets ([#5538](https://kep.k8s.io/5538)) | Stable | Graduates to Stable. Introduces a new `secrets` field to securely hold sensitive data such as service account tokens used when mounting cloud buckets. When `serviceAccountTokenInSecrets` is true, the CSI driver reads tokens from the `secrets` field. |
+ 
+## SIG Autoscaling
+ 
+| Feature | Stage | What it does |
+|---|---|---|
+| HPA scale to/from zero for object and external metrics ([#2021](https://kep.k8s.io/2021)) | Alpha | Continues in Alpha behind the `HPAScaleToZero` feature gate. Lets the HorizontalPodAutoscaler scale to zero replicas when using Object or External metrics (e.g. queue length), instead of requiring at least one live pod to sample CPU or memory. HPA records the state in a new `ScaledToZero` status field so it won't resurrect deployments an operator has pinned to `replicas: 0`, and spins up the first replica as soon as the external metric indicates new work. Useful for idling bursty, queue-driven workloads that currently pay for an always-on minimum. |
+ 
+## Deprecations and removals
+ 
+| Item | Status | Action |
+|---|---|---|
+| `service.spec.externalIPs` ([#5707](https://kep.k8s.io/5707)) | Deprecated | `service.spec.externalIPs` has long allowed non-privileged users to claim arbitrary addresses without proper authorization or validation. v1.36 deprecates the field and adds the `AllowServiceExternalIPs` feature gate to stop kube-proxy from programming rules for externalIPs. Migrate to LoadBalancer or Gateway API. |
+| `gitRepo` volume plugin ([#5040](https://kep.k8s.io/5040)) | Removed | The `gitRepo` volume type has been deprecated since v1.11. In v1.36 it is permanently disabled and cannot be turned back on. Existing workloads depending on `gitRepo` must migrate to supported alternatives such as init containers or external git-sync-style tools. |
+| `gogo/protobuf` dependency ([#5589](https://kep.k8s.io/5589)) | Removed | The Kubernetes API previously relied on gogoprotobuf, which was deprecated in 2021. This enhancement completes the removal of the dependency from Kubernetes API objects. Mostly invisible to end users, but relevant to maintainers of API clients. |
+ 
+The deprecation worth treating as a real migration project is **`service.spec.externalIPs`**. The field has been a route to MITM and traffic redirection in multi-tenant clusters for years; the deprecation is overdue. If you are using it, switch to a LoadBalancer or a Gateway API resource before the field is removed, not when. The `gitRepo` removal, on its way since v1.11, finally ships; if you still have one in your manifests, it is well past time.
+ 
+## What to do this week
+ 
+Kubernetes 1.36 is mainly a consolidation release across two tracks: Kubernetes as an accelerator-native platform, with maturing DRA governance, HPA scale-to-zero, and more workload-aware scheduling; and Kubernetes as a least-privilege platform, with fine-grained kubelet authorization reaching GA, user namespaces going Stable, and externalIPs now on the deprecation path.
+
+That makes the action list fairly straightforward. Audit any `nodes/proxy` permissions and migrate to fine-grained kubelet subresources. Search your manifests for `service.spec.externalIPs`, which is now deprecated, and `gitRepo`, which is removed in 1.36 and will break any pods that still depend on it. If you use accelerators, spin up a non-production cluster with DRA enabled and develop a position on AdminAccess and device taints. Most other changes can be handled as part of the normal upgrade process.

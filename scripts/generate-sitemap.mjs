@@ -12,6 +12,9 @@ const BASE_URL = 'https://todea.co.kr';
 const LOCALES = ['en', 'ko', 'ja', 'zh'];
 const DEFAULT_LOCALE = 'en';
 const BLOG_DIR = path.join(ROOT, 'src/content/blog/posts');
+const LEGAL_DOCS = [
+  { slug: 'privacy', dir: path.join(ROOT, 'src/content/privacy'), priority: '0.5' },
+];
 const OUTPUT = path.join(ROOT, 'public/sitemap.xml');
 
 function readDirSafe(dir) {
@@ -42,6 +45,16 @@ function getPosts() {
     }
   }
   return posts;
+}
+
+function getLegalDocDate(dir) {
+  for (const locale of LOCALES) {
+    const file = path.join(dir, locale, 'index.mdx');
+    if (!fs.existsSync(file)) continue;
+    const { data } = matter(fs.readFileSync(file, 'utf-8'));
+    if (data.effectiveDate) return data.effectiveDate;
+  }
+  return null;
 }
 
 function alternateLinks(pathSuffix) {
@@ -87,6 +100,16 @@ function build() {
 
   for (const locale of LOCALES) {
     entries.push({
+      loc: `${BASE_URL}/${locale}/services`,
+      lastmod: today,
+      changefreq: 'monthly',
+      priority: '0.9',
+      pathSuffix: '/services',
+    });
+  }
+
+  for (const locale of LOCALES) {
+    entries.push({
       loc: `${BASE_URL}/${locale}/blog`,
       lastmod: latestPostDate,
       changefreq: 'weekly',
@@ -103,6 +126,19 @@ function build() {
         changefreq: 'monthly',
         priority: '0.7',
         pathSuffix: `/blog/${post.slug}`,
+      });
+    }
+  }
+
+  for (const doc of LEGAL_DOCS) {
+    const docDate = getLegalDocDate(doc.dir) ?? today;
+    for (const locale of LOCALES) {
+      entries.push({
+        loc: `${BASE_URL}/${locale}/${doc.slug}`,
+        lastmod: isoDate(docDate),
+        changefreq: 'yearly',
+        priority: doc.priority,
+        pathSuffix: `/${doc.slug}`,
       });
     }
   }
