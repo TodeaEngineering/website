@@ -3,9 +3,9 @@ import { setRequestLocale } from 'next-intl/server';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import ServicesHero from '@/components/services/ServicesHero';
+import ServicesOverview from '@/components/services/ServicesOverview';
 import SupportedProducts from '@/components/services/SupportedProducts';
 import SupportTiers from '@/components/services/SupportTiers';
-import ManagedOps from '@/components/services/ManagedOps';
 import ServicesCTA from '@/components/services/ServicesCTA';
 import { getPageMeta } from '@/lib/page-meta';
 import { routing } from '@/i18n/routing';
@@ -95,11 +95,11 @@ export default async function ServicesPage({
       <Nav />
       <main id="main">
         <ServicesHero />
+        <ServicesOverview />
         <div id="tiers">
           <SupportTiers />
         </div>
         <SupportedProducts />
-        <ManagedOps />
         <ServicesCTA />
       </main>
       <Footer />
