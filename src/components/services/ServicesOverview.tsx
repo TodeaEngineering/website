@@ -9,7 +9,7 @@ const rows = [
   'onsite',
 ] as const;
 
-const cols = ['audit', 'project'] as const;
+const cols = ['managed', 'project', 'audit'] as const;
 
 const CARD =
   'bg-white rounded-3xl border border-neutral-200/70 overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.03),0_30px_60px_-25px_rgba(15,23,42,0.15)]';
@@ -52,7 +52,7 @@ export default function ServicesOverview() {
                 return (
                   <div key={col} className={`${bg} px-6 py-8`}>
                     <p className="text-[10px] font-bold tracking-[.22em] uppercase text-neutral-400 mb-3">
-                      {ci === 0 ? '01' : '02'}
+                      {String(ci + 1).padStart(2, '0')}
                     </p>
                     <h3 className="text-[18px] font-bold tracking-tight text-black mb-6">
                       {t(`col_${col}`)}
@@ -76,7 +76,7 @@ export default function ServicesOverview() {
 
             {/* Desktop table layout */}
             <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full min-w-[820px] text-left">
+              <table className="w-full min-w-[1080px] text-left table-fixed">
                 <thead>
                   <tr className={`bg-white border-b ${HAIRLINE}`}>
                     <th className="px-6 py-6 align-bottom w-[200px]" />

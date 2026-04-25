@@ -3,10 +3,9 @@ import FadeIn from '../FadeIn';
 
 const rows = [
   'bestfor',
+  'term',
   'coverage',
-  'products',
   'health',
-  'incident',
   'onsiteinc',
 ] as const;
 
@@ -81,11 +80,7 @@ export default function SupportTiers() {
               <table className="w-full min-w-[960px] text-left">
                 <thead>
                   <tr className={`bg-white border-b ${HAIRLINE}`}>
-                    <th className="px-6 py-6 align-bottom w-[220px]">
-                      <span className="text-[11px] font-semibold tracking-[.2em] text-neutral-400 uppercase">
-                        {t('col_attribute')}
-                      </span>
-                    </th>
+                    <th className="px-6 py-6 align-bottom w-[220px]" />
                     {tiers.map((tier) => (
                       <th key={tier} className="px-5 py-6 align-bottom">
                         <TierLabel label={tier} />
@@ -100,7 +95,7 @@ export default function SupportTiers() {
                     const divider = !isLast ? `border-b ${HAIRLINE}` : '';
                     return (
                       <tr key={row} className={`${bg} transition-colors`}>
-                        <td className={`px-6 py-5 align-top text-[13px] font-semibold text-black ${divider}`}>
+                        <td className={`px-6 py-5 align-top text-[12px] font-bold tracking-[.18em] uppercase text-neutral-500 ${divider}`}>
                           {t(`${row}_label`)}
                         </td>
                         {tierKeys.map((tierKey) => (
