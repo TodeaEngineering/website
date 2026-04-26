@@ -4,6 +4,7 @@ import FadeIn from '../FadeIn';
 const rows = [
   'bestfor',
   'term',
+  'response',
   'coverage',
   'health',
   'onsiteinc',
@@ -113,9 +114,10 @@ export default function SupportTiers() {
         </FadeIn>
 
         <FadeIn delay={0.18}>
-          <p className="mt-6 text-[12px] text-neutral-500 font-light leading-relaxed">
-            {t('term_note')}
-          </p>
+          <div className="mt-6 space-y-2 text-[12px] text-neutral-500 font-light leading-relaxed">
+            <p>{t('term_note')}</p>
+            <p>{t('severity_note')}</p>
+          </div>
         </FadeIn>
       </div>
     </section>
