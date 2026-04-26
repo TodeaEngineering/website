@@ -3,7 +3,6 @@ import FadeIn from './FadeIn';
 
 export default function CTA() {
   const t = useTranslations('CTA');
-  const nav = useTranslations('Nav');
   const locale = useLocale();
 
   return (
@@ -18,7 +17,7 @@ export default function CTA() {
             href={`/${locale}/contact`}
             className="inline-block bg-brand text-white text-[13px] font-semibold px-7 py-3.5 rounded-full hover:opacity-80 transition-opacity"
           >
-            {nav('contact')}
+            {t('cta')}
           </a>
         </div>
       </FadeIn>

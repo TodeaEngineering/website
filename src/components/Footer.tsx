@@ -59,10 +59,10 @@ export default function Footer() {
               {nav('contact')}
             </p>
             <a
-              href="mailto:hello@todea.co.kr"
-              className="text-[14px] text-neutral-300 hover:text-white transition-colors block mb-5 break-all"
+              href={`/${locale}/contact`}
+              className="text-[14px] text-neutral-300 hover:text-white transition-colors block mb-5"
             >
-              hello@todea.co.kr
+              {nav('contact')}
             </a>
             <div className="flex items-center gap-3">
               <a

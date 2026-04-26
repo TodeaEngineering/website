@@ -18,7 +18,6 @@ const techs = [
   { name: 'CoreDNS', img: '/icons/coredns.svg' },
   { name: 'Vault', img: '/icons/vault.svg' },
   { name: 'Istio', img: '/icons/istio.svg' },
-  { name: 'Consul', img: '/icons/consul.svg' },
   { name: 'ArgoCD', img: '/icons/argocd.svg' },
   { name: 'Flux', img: '/icons/flux.svg' },
   { name: 'GitHub Actions', img: '/icons/githubactions.svg' },
@@ -37,8 +36,8 @@ const techs = [
   { name: 'Ansible', img: '/icons/ansible.svg' },
 ];
 
-const row1 = techs.slice(0, 15);
-const row2 = techs.slice(15);
+const row1 = techs.slice(0, 16);
+const row2 = techs.slice(16);
 
 function CarouselRow({ items, reverse }: { items: typeof techs; reverse?: boolean }) {
   const doubled = [...items, ...items];

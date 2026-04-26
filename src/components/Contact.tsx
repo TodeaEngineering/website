@@ -230,8 +230,6 @@ export default function Contact() {
                   <option>{t('f_opts_2')}</option>
                   <option>{t('f_opts_3')}</option>
                   <option>{t('f_opts_4')}</option>
-                  <option>{t('f_opts_5')}</option>
-                  <option>{t('f_opts_6')}</option>
                 </select>
               </div>
 
