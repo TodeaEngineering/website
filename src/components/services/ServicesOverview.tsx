@@ -9,7 +9,7 @@ const rows = [
   'onsite',
 ] as const;
 
-const cols = ['managed', 'project', 'audit'] as const;
+const cols = ['audit', 'project', 'managed'] as const;
 
 const CARD =
   'bg-white rounded-3xl border border-neutral-200/70 overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.03),0_30px_60px_-25px_rgba(15,23,42,0.15)]';

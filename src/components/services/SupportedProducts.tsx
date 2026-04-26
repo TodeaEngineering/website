@@ -58,7 +58,6 @@ const groups: { key: string; products: Product[] }[] = [
     products: [
       { name: 'Istio', img: '/icons/istio.svg' },
       { name: 'Linkerd', img: '/icons/linkerd.svg' },
-      { name: 'Consul', img: '/icons/consul.svg' },
     ],
   },
   {
