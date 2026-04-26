@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import Nav from '@/components/Nav';
 import AboutHero from '@/components/about/AboutHero';
-import AboutCredentials from '@/components/about/AboutCredentials';
+import AboutBeliefs from '@/components/about/AboutBeliefs';
+import AboutCompany from '@/components/about/AboutCompany';
 import CTA from '@/components/CTA';
 import Footer from '@/components/Footer';
 
@@ -108,7 +109,8 @@ export default async function AboutPage({
       <Nav />
       <main id="main">
         <AboutHero />
-        <AboutCredentials />
+        <AboutBeliefs />
+        <AboutCompany />
         <CTA />
       </main>
       <Footer />

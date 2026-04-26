@@ -30,7 +30,7 @@ export default getRequestConfig(async ({ requestLocale }: GetRequestConfigParams
   // Services page content (ServicesHero, ServicesOverview, SupportTiers, SupportedProducts, ServicesCTA)
   const servicesContent = loadFrontmatter(`services/${locale}/index.mdx`);
 
-  // About page content (About, AboutCredentials)
+  // About page content (About, AboutBeliefs, AboutCompany)
   const aboutContent = loadFrontmatter(`about/${locale}/index.mdx`);
 
   return {

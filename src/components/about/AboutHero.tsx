@@ -51,84 +51,65 @@ export default function AboutHero() {
         </div>
       </section>
 
-      {/* Metrics */}
-      <section className="py-16 sm:py-20 px-6 bg-neutral-900 text-white">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8">
-            {(['stat1', 'stat2', 'stat3'] as const).map((stat, i) => (
-              <FadeIn key={stat} delay={i * 0.1}>
-                <div className="text-center sm:text-left">
-                  <p className="text-[clamp(2.5rem,5vw,3.5rem)] font-[800] tracking-tight leading-none mb-2">
-                    {t(`${stat}_value`)}
-                  </p>
-                  <p className="text-[13px] text-neutral-400 font-light">
-                    {t(`${stat}_label`)}
-                  </p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Story */}
       <section className="py-24 sm:py-32 px-6 bg-white border-t border-neutral-100">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
-            <FadeIn>
-              <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
-                {t('story_label')}
+        <div className="max-w-[760px] mx-auto">
+          <FadeIn>
+            <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
+              {t('story_label')}
+            </p>
+            <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight">
+              {t('story_h2')}
+            </h2>
+          </FadeIn>
+
+          <FadeIn delay={0.16}>
+            <div className="flex flex-col gap-6 mt-10">
+              <p className="text-[18px] sm:text-[20px] text-black font-medium italic leading-snug tracking-tight">
+                {t('story_lead')}
               </p>
-              <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight">
-                {t('story_h2')}
-              </h2>
-            </FadeIn>
+              <p className="text-[15px] text-neutral-600 font-light leading-relaxed">
+                {t('story_p1')}
+              </p>
+              <p className="text-[15px] text-neutral-600 font-light leading-relaxed">
+                {t('story_p2')}
+              </p>
 
-            <FadeIn delay={0.16}>
-              <div className="flex flex-col gap-5">
-                <p className="text-[15px] text-neutral-600 font-light leading-relaxed">
-                  {t('story_p1')}
-                </p>
-                <p className="text-[15px] text-neutral-600 font-light leading-relaxed">
-                  {t('story_p2')}
-                </p>
-
-                {/* Founder byline */}
-                <div className="flex items-center gap-4 mt-6 pt-8 border-t border-neutral-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/about/ivan-porta.jpg"
-                    alt="Ivan Porta"
-                    width={56}
-                    height={56}
-                    className="w-14 h-14 rounded-full object-cover shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-bold tracking-tight">
-                      {t('byline_name')}
-                    </p>
-                    <p className="text-[12px] text-neutral-500 font-light">
-                      {t('byline_role')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {socialLinks.map((link) => (
-                      <a
-                        key={link.label}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-neutral-400 hover:text-black transition-colors p-2 -m-2"
-                        aria-label={link.label}
-                      >
-                        {link.icon}
-                      </a>
-                    ))}
-                  </div>
+              {/* Founder byline */}
+              <div className="flex items-center gap-4 mt-4 pt-8 border-t border-neutral-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/about/ivan-porta.jpg"
+                  alt="Ivan Porta"
+                  width={56}
+                  height={56}
+                  className="w-14 h-14 rounded-full object-cover shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold tracking-tight">
+                    {t('byline_name')}
+                  </p>
+                  <p className="text-[12px] text-neutral-500 font-light">
+                    {t('byline_role')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {socialLinks.map((link) => (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-neutral-400 hover:text-black transition-colors p-2 -m-2"
+                      aria-label={link.label}
+                    >
+                      {link.icon}
+                    </a>
+                  ))}
                 </div>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
     </>
