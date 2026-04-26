@@ -119,6 +119,16 @@ function build() {
   }
 
   for (const locale of LOCALES) {
+    entries.push({
+      loc: `${BASE_URL}/${locale}/contact`,
+      lastmod: today,
+      changefreq: 'yearly',
+      priority: '0.7',
+      pathSuffix: '/contact',
+    });
+  }
+
+  for (const locale of LOCALES) {
     for (const post of posts) {
       entries.push({
         loc: `${BASE_URL}/${locale}/blog/${post.slug}`,

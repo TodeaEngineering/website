@@ -27,7 +27,7 @@ export default getRequestConfig(async ({ requestLocale }: GetRequestConfigParams
   // Homepage content (Hero, Services, Approach, TechStack, CTA, Contact)
   const homepageContent = loadFrontmatter(`homepage/${locale}/index.mdx`);
 
-  // Services page content (ServicesHero, Timeline, SupportedProducts, SupportTiers, ManagedOps, ServicesCTA)
+  // Services page content (ServicesHero, ServicesOverview, SupportTiers, SupportedProducts, ServicesCTA)
   const servicesContent = loadFrontmatter(`services/${locale}/index.mdx`);
 
   // About page content (About, AboutCredentials)

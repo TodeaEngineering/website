@@ -1,8 +1,9 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import FadeIn from '../FadeIn';
 
 export default function ServicesCTA() {
   const t = useTranslations('ServicesCTA');
+  const locale = useLocale();
 
   return (
     <section className="py-28 sm:py-36 px-6 bg-gradient-to-b from-neutral-200 to-neutral-50">
@@ -13,7 +14,7 @@ export default function ServicesCTA() {
             {t('h2')}
           </h2>
           <a
-            href="mailto:hello@todea.co.kr"
+            href={`/${locale}/contact`}
             className="inline-block bg-brand text-white text-[13px] font-semibold px-7 py-3.5 rounded-full hover:opacity-80 transition-opacity"
           >
             {t('cta')}

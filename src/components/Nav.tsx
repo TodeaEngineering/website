@@ -70,7 +70,7 @@ export default function Nav() {
               </div>
             </div>
 
-            <a href="mailto:hello@todea.co.kr" className="text-[13px] font-semibold bg-brand text-white px-5 py-2 rounded-full hover:opacity-80 transition-opacity">
+            <a href={`/${locale}/contact`} className="text-[13px] font-semibold bg-brand text-white px-5 py-2 rounded-full hover:opacity-80 transition-opacity">
               {t('contact')}
             </a>
           </div>
@@ -162,7 +162,7 @@ export default function Nav() {
             {/* CTA */}
             <div className="px-6 pt-6">
               <a
-                href="mailto:hello@todea.co.kr"
+                href={`/${locale}/contact`}
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center justify-center text-[15px] font-semibold bg-brand text-white px-5 py-3.5 rounded-full"
               >

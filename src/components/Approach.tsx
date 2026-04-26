@@ -7,43 +7,43 @@ export default function Approach() {
   const t = useTranslations('Approach');
 
   return (
-    <section id="approach" className="py-24 sm:py-32 px-6 bg-neutral-50">
+    <section
+      id="approach"
+      className="py-24 sm:py-32 px-6 bg-gradient-to-b from-neutral-50 via-neutral-50 to-white"
+    >
       <div className="max-w-[1200px] mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
-          <FadeIn>
+        <FadeIn>
+          <div className="mb-14">
             <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
               {t('label')}
             </p>
-            <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight mb-6">
+            <h2 className="text-3xl sm:text-[3rem] font-[800] leading-[1.05] tracking-tight">
               {t('h2')}
             </h2>
-            <p className="text-[15px] text-neutral-600 font-light leading-relaxed">{t('desc')}</p>
-          </FadeIn>
+          </div>
+        </FadeIn>
 
-          <FadeIn delay={0.16}>
-            <div>
-              {steps.map((step, i) => (
-                <div
-                  key={step}
-                  className={`border-t border-neutral-200 py-7 group ${i === steps.length - 1 ? 'border-b' : ''}`}
-                >
-                  <div className="flex items-start gap-5">
-                    <span className="text-[11px] font-bold text-brand/50 mt-1 w-6 shrink-0">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <div>
-                      <h3 className="text-[15px] font-bold mb-1 group-hover:translate-x-0.5 transition-transform duration-300">
-                        {t(`${step}_t`)}
-                      </h3>
-                      <p className="text-[14px] text-neutral-600 font-light leading-relaxed">
-                        {t(`${step}_d`)}
-                      </p>
-                    </div>
-                  </div>
+        <div className="grid sm:grid-cols-2 gap-5">
+          {steps.map((step, i) => (
+            <FadeIn key={step} delay={i * 0.06}>
+              <div className="group relative h-full bg-white border border-neutral-200 rounded-2xl p-7 sm:p-8 hover:border-black transition-colors duration-300 overflow-hidden">
+                <div className="absolute top-0 right-0 text-[140px] sm:text-[160px] font-[800] leading-none text-black/[0.03] tracking-tighter pointer-events-none select-none -mr-3 -mt-2">
+                  {String(i + 1).padStart(2, '0')}
                 </div>
-              ))}
-            </div>
-          </FadeIn>
+                <div className="relative">
+                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-black text-white text-[12px] font-bold tracking-[.05em] mb-6">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="text-[20px] sm:text-[22px] font-bold tracking-tight mb-3 leading-tight">
+                    {t(`${step}_t`)}
+                  </h3>
+                  <p className="text-[14px] text-neutral-600 font-light leading-relaxed">
+                    {t(`${step}_d`)}
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
         </div>
       </div>
     </section>
