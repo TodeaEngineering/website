@@ -38,6 +38,9 @@ export default function Nav() {
             <a href={`/${locale}/services`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('services')}
             </a>
+            <a href={`/${locale}/about`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
+              {t('about')}
+            </a>
             <a href={`/${locale}/blog`} className="text-[13px] text-neutral-600 hover:text-black transition-colors">
               {t('blog')}
             </a>
@@ -107,6 +110,16 @@ export default function Nav() {
               className="flex items-center justify-between px-6 py-4 text-[15px] text-neutral-800 border-b border-neutral-100 active:bg-neutral-50"
             >
               <span>{t('services')}</span>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" aria-hidden="true" className="text-neutral-300">
+                <path d="M1.5 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </a>
+            <a
+              href={`/${locale}/about`}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between px-6 py-4 text-[15px] text-neutral-800 border-b border-neutral-100 active:bg-neutral-50"
+            >
+              <span>{t('about')}</span>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none" aria-hidden="true" className="text-neutral-300">
                 <path d="M1.5 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
