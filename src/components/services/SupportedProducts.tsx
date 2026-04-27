@@ -54,12 +54,6 @@ const groups: { key: string; products: Product[] }[] = [
     ],
   },
   {
-    key: 'g8',
-    products: [
-      { name: 'Istio', img: '/icons/istio.svg' },
-    ],
-  },
-  {
     key: 'g6',
     products: [
       { name: 'Terraform', img: '/icons/terraform.svg' },

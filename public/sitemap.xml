@@ -233,28 +233,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
   </url>
   <url>
-    <loc>https://todea.co.kr/en/blog/linkerd-explained</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-  </url>
-  <url>
-    <loc>https://todea.co.kr/en/blog/linkerd-on-openshift</loc>
-    <lastmod>2026-04-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
-  </url>
-  <url>
     <loc>https://todea.co.kr/en/blog/service-mesh-explained</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -275,28 +253,6 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/kubernetes-1-36-release"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/kubernetes-1-36-release"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
-  </url>
-  <url>
-    <loc>https://todea.co.kr/ko/blog/linkerd-explained</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-  </url>
-  <url>
-    <loc>https://todea.co.kr/ko/blog/linkerd-on-openshift</loc>
-    <lastmod>2026-04-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
   </url>
   <url>
     <loc>https://todea.co.kr/ko/blog/service-mesh-explained</loc>
@@ -321,28 +277,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
   </url>
   <url>
-    <loc>https://todea.co.kr/ja/blog/linkerd-explained</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-  </url>
-  <url>
-    <loc>https://todea.co.kr/ja/blog/linkerd-on-openshift</loc>
-    <lastmod>2026-04-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
-  </url>
-  <url>
     <loc>https://todea.co.kr/ja/blog/service-mesh-explained</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -363,28 +297,6 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/kubernetes-1-36-release"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/kubernetes-1-36-release"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/kubernetes-1-36-release"/>
-  </url>
-  <url>
-    <loc>https://todea.co.kr/zh/blog/linkerd-explained</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-explained"/>
-  </url>
-  <url>
-    <loc>https://todea.co.kr/zh/blog/linkerd-on-openshift</loc>
-    <lastmod>2026-04-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://todea.co.kr/zh/blog/linkerd-on-openshift"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/linkerd-on-openshift"/>
   </url>
   <url>
     <loc>https://todea.co.kr/zh/blog/service-mesh-explained</loc>

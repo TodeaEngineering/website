@@ -17,7 +17,6 @@ const techs = [
   { name: 'Cert-Manager', img: '/icons/cert-manager.svg' },
   { name: 'CoreDNS', img: '/icons/coredns.svg' },
   { name: 'Vault', img: '/icons/vault.svg' },
-  { name: 'Istio', img: '/icons/istio.svg' },
   { name: 'ArgoCD', img: '/icons/argocd.svg' },
   { name: 'Flux', img: '/icons/flux.svg' },
   { name: 'GitHub Actions', img: '/icons/githubactions.svg' },
