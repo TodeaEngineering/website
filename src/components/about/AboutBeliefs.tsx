@@ -9,12 +9,12 @@ export default function AboutBeliefs() {
   return (
     <section className="py-24 sm:py-32 px-6 bg-gradient-to-b from-neutral-50 via-neutral-50 to-white border-t border-neutral-100">
       <div className="max-w-[1200px] mx-auto">
-        <div className="mb-16">
+        <div className="text-center max-w-[760px] mx-auto mb-16">
           <FadeIn>
             <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
               {t('label')}
             </p>
-            <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight max-w-[760px]">
+            <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight">
               {t('h2')}
             </h2>
           </FadeIn>

@@ -55,12 +55,14 @@ export default function AboutHero() {
       <section className="py-24 sm:py-32 px-6 bg-white border-t border-neutral-100">
         <div className="max-w-[760px] mx-auto">
           <FadeIn>
-            <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
-              {t('story_label')}
-            </p>
-            <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight">
-              {t('story_h2')}
-            </h2>
+            <div className="text-center">
+              <p className="text-[11px] font-semibold tracking-[.2em] text-neutral-600 uppercase mb-3">
+                {t('story_label')}
+              </p>
+              <h2 className="text-3xl sm:text-[2.8rem] font-[800] leading-[1.1] tracking-tight">
+                {t('story_h2')}
+              </h2>
+            </div>
           </FadeIn>
 
           <FadeIn delay={0.16}>
