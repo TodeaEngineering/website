@@ -1,12 +1,23 @@
 import { useTranslations, useLocale } from 'next-intl';
+import HeroNodeGraph from './HeroNodeGraph';
 
 export default function Hero() {
   const t = useTranslations('Hero');
   const locale = useLocale();
 
   return (
-    <section className="min-h-screen flex items-center pt-[60px] px-6 bg-gradient-to-br from-neutral-200 via-neutral-50 to-neutral-200">
-      <div className="max-w-[1200px] mx-auto w-full py-20 sm:py-28">
+    <section className="relative min-h-screen flex items-center pt-[60px] px-6 bg-neutral-50 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <HeroNodeGraph />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 80% at 20% 50%, rgba(250,250,250,0.96) 0%, rgba(250,250,250,0.85) 30%, rgba(250,250,250,0.4) 55%, rgba(250,250,250,0) 80%)',
+          }}
+        />
+      </div>
+      <div className="relative max-w-[1200px] mx-auto w-full py-20 sm:py-28">
         <p
           className="opacity-0 animate-rise text-[13px] text-neutral-600 tracking-wide mb-8"
           style={{ animationDelay: '0.1s' }}
