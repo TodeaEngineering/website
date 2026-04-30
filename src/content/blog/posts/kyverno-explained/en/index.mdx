@@ -1,0 +1,108 @@
+---
+title: "Kyverno Explained: Why Modern Platforms Need Policy-as-Code"
+description: "A practitioner's guide to what Kyverno actually does, what it takes off your platform team's plate, and how its CEL-native CRDs and admission architecture deliver it."
+date: "2026-03-25"
+author: "Todea Engineering"
+authorRole: "Cloud Native Practice"
+category: "Cloud Native"
+image: "/blog/kyverno-explained/en-cover.svg"
+tags: ["kyverno", "policy-as-code", "kubernetes", "admission-control", "cel", "platform-engineering"]
+---
+
+Pods running as root. The `latest` tag deployed everywhere, unpinned to a digest and unsigned. A fragile Bash script that bootstraps new namespaces with default `NetworkPolicies`, `ResourceQuota`, and pull secrets, guaranteed to break on the next update. An expensive EKS LoadBalancer spun up for a quick demo and promptly forgotten.
+
+This is the operational overhead platform teams used to manage by hand, and every new team and cluster multiplies the technical debt. This is where Kyverno comes in, pulling it all into one place.
+
+Built as an open-source Kubernetes-native policy engine, Kyverno expresses policy as YAML, and increasingly CEL, evaluated at admission and continuously audited against running workloads. Trusted in production by Coinbase, LinkedIn, and Spotify, and serving as the default policy engine for the U.S. Department of Defense's Platform One, Kyverno officially reached [CNCF Graduation](https://github.com/cncf/toc/issues/1967) yesterday.
+
+## What Kyverno actually is
+
+Kyverno is an open-source Kubernetes-native policy engine that expresses policy as Kubernetes resources. Unlike OPA/Gatekeeper, which asks you to learn Rego before you can write a rule, Kyverno policies are YAML, and support CEL written against the same API objects you already understand.
+
+The developer/sre team write a `ValidatingPolicy` the same way they write a `Deployment`, applies it with `kubectl`, and gets violations back as standard Kubernetes events and `PolicyReport` resources. There is no separate language, no separate query model, no separate mental stack.
+
+## How it works
+
+Kyverno is built on Kubernetes' dynamic admission controller architecture, with a background scanner layered on top. Policies evaluate at three points in a resource's lifecycle:
+
+1. **Admission**: When a developer or GitOps tool, CI/CD pipeline submits a resource, the API server fires admission webhooks. Kyverno's webhook receives the request, evaluates matching policies, and returns `allow`, `deny`, or a mutated resource, in the request path.
+2. **Reconciliation**: Background controllers watch for resources that should exist (cleanup policies, generation rules) and reconcile them on a loop, separate from admission.
+3. **The new reality**: Kyverno's reporting subsystem scans existing resources against current policies on a schedule, surfacing violations in workloads that were created before a policy existed or that drifted afterward.
+
+The application code is unchanged. Every resource that flows through the API server is checked, mutated, and recorded.
+
+![Kyverno CEL evaluation flow](/blog/kyverno-explained/en-cel-flow.svg)
+
+## Policy types
+
+Kyverno introduced five CEL-native CRDs in recent releases. They are separate kinds, and each one of them tells the API server what to do with the result:
+
+- **`ValidatingPolicy`**: Validates resources against a CEL expression. The CEL-native successor to the validate rule in `ClusterPolicy`, which still ships and keeps working.
+- **`MutatingPolicy`**: Mutates resources during admission using CEL-evaluated `applyConfiguration` (server-side apply) or `jsonPatch` expressions, mirroring upstream Kubernetes `MutatingAdmissionPolicy`. Strategic-merge and raw JSON 6902 patches remain available in the legacy `ClusterPolicy` mutate rule.
+- **`GeneratingPolicy`**: Generates downstream resources when a trigger resource is created, namespace defaults, network policies, RBAC bindings.
+- **`ImageValidatingPolicy`**: Validates container images against trusted attestors (Cosign, Notary, sigstore TUF) and in-toto attestations as first-class inputs. SBOMs are supported as one attestation payload type.
+- **`DeletingPolicy`**: Deletes resources matching a selector on a schedule. Useful for ephemeral environments and cleanup workflows.
+
+Each of the five kinds also ships with a `Namespaced…` equivalent (`NamespacedValidatingPolicy`, `NamespacedMutatingPolicy`, `NamespacedGeneratingPolicy`, `NamespacedImageValidatingPolicy`, `NamespacedDeletingPolicy`). This matters for multi-tenancy: tenant teams can author and manage policy inside their own namespace without cluster-admin, while platform owners keep the cluster-scoped kinds for guardrails that have to apply everywhere.
+
+A close look at the CEL means these have roughly the maturity of the analogous Validating Admission Policy in upstream Kubernetes, with the API server doing more of the work. Kyverno wraps that with the surrounding policy engine, reporting, exceptions, generation, image validation, that VAP alone does not provide.
+
+The legacy `ClusterPolicy` and `CleanupPolicy` kinds keep working today, but they are on a clock. [Kyverno 1.17](https://kyverno.io/blog/2026/02/02/announcing-kyverno-release-1.17/) officially marked them as deprecated; v1.18 and v1.19 ship critical fixes only; v1.20 (October 2026) is the planned removal. Treat the migration to the CEL-native CRDs as a dated workstream, not an "eventually", new policies should be written against the CEL-native kinds unless there is a specific reason not to.
+
+## When to use ValidatingAdmissionPolicy instead
+
+Kubernetes 1.30+ ships `ValidatingAdmissionPolicy` as a built-in, no-controller-required CEL validator. For some teams, that is enough. For most, it isn't.
+
+| Capability / Feature | Built-in `ValidatingAdmissionPolicy` | Kyverno `ValidatingPolicy` (CEL) |
+|---|---|---|
+| Primary function | Synchronous validation at admission | Validation, mutation, generation, deletion |
+| Enforcement points | Admission only | Admission, background scans, pipelines, CLI |
+| Payloads | Kubernetes objects | Kubernetes objects, plus any JSON/YAML |
+| CEL library | Basic | Extended (HTTP calls, image verification, Kubernetes lookups) |
+| External data | — | Kubernetes resources or HTTP calls |
+| Policy bindings | Manual | Automatic |
+| Background scans | ✗ | Periodic, plus on policy change |
+| Reporting & audit | None natively | `PolicyReport` CRDs / OpenReports API |
+| Exceptions | None natively | Fine-grained `PolicyException` |
+| Image signature verification | ✗ | ✓ |
+| Auto-generation | — | Pod controllers, `ValidatingAdmissionPolicy` |
+| Testing | — | Kyverno CLI (unit), Chainsaw (e2e) |
+| Architecture | Built into the API server (no controller) | Requires Kyverno controller |
+
+If the only thing you need is a synchronous validate at admission time, VAP is the lighter-weight option and you should use it. If you need any of the rest, you need a policy engine, and Kyverno is the one with the smallest gap between "policy as YAML" and "policy as code".
+
+## Operational reality
+
+- **Rollout, not install.** Kyverno in `Audit` mode on day one is the right default. The temptation is to ship a policy in `Enforce` and discover at 2am that a controller you forgot about can't reconcile because its ServiceAccount fails your label policy. Run in Audit for at least a week, watch the `PolicyReport` resources, fix the violations you find in the workloads, then flip to Enforce. 
+
+- **Mutation is not a security control.** `MutatingPolicy` is excellent for setting defaults, image pull secrets, resource requests, standard labels, and a poor substitute for validation. A user who can submit a pod spec can submit one your mutation never sees, because admission ordering and exemptions exist. Anything that has to be true gets a `ValidatingPolicy`. 
+
+## A practical recommendation
+
+If you are evaluating a policy engine for a Kubernetes platform and you do not already have a strong reason to pick OPA/Gatekeeper, pilot Kyverno first. The install fits in an afternoon. If it does what you need, you just saved a quarter of operational work. If it doesn't, you have a clear, documented reason to go somewhere else.
+
+## Frequently Asked Questions
+
+### What is Kyverno, and where does it sit in Kubernetes admission flow?
+Kyverno is a Kubernetes-native policy engine (README.md). It runs as an admission controller — its webhook server (pkg/webhooks/server.go) registers itself as both a ValidatingAdmissionWebhook and MutatingAdmissionWebhook, so the kube-apiserver forwards every AdmissionReview through Kyverno before persisting the object. Handlers in pkg/webhooks/handlers/ evaluate matching policies and return allow/deny/patch responses. It sits after authn/authz and built-in admission plugins, alongside other dynamic admission webhooks.
+
+### Should I start with legacy ClusterPolicy or the newer CEL-based policy types?
+Use the CEL-based types for new work. The legacy kyverno.io/v1 ClusterPolicy/Policy (api/kyverno/v1/clusterpolicy_types.go) bundles validate/mutate/generate/verifyImages with JMESPath matching. The newer policies.kyverno.io/v1beta1 group splits these into per-purpose CEL CRDs — ValidatingPolicy, MutatingPolicy, GeneratingPolicy, ImageValidatingPolicy — implemented under pkg/cel/policies/. They align with upstream Kubernetes' CEL-based ValidatingAdmissionPolicy and are the forward direction. Stick with ClusterPolicy only if you need a feature not yet ported, or to maintain existing rules.
+
+### How do Audit and Enforce differ, and what do background scans do?
+validationFailureAction (api/kyverno/v1/spec_types.go) is per-policy/rule with optional namespace overrides:
+
+Enforce — webhook returns denied on a failing rule, so the request is rejected at admission.
+Audit (default) — request is admitted; the failure is recorded as a result instead of blocking.
+spec.background: true (default) enables the background controller (cmd/background-controller/main.go), which periodically re-evaluates existing cluster resources against policies and writes results to PolicyReport/ClusterPolicyReport CRDs (api/policyreport/v1alpha2/). This catches resources created before a policy existed and resources that mutated outside the admission path — without touching the admission verdict.
+
+### How do generate rules work, and how do I keep generated resources synchronized?
+A generate rule (api/kyverno/v1/common_types.go) creates downstream resources triggered by a source event (e.g. new namespace → default NetworkPolicy/RoleBinding/Secret). Two flavors:
+
+data — inline manifest, materialized by pkg/background/generate/data.go.
+clone / cloneList — copy from an existing resource, handled by pkg/background/generate/clone.go.
+Triggering and reconciliation flow through UpdateRequest CRDs driven by pkg/background/generate/controller.go. To keep the downstream in lockstep:
+
+synchronize: true — controller watches source + generated resource; manual edits to the downstream are reverted, source changes propagate, and removing the rule deletes the generated resources (unless orphanDownstreamOnPolicyDelete: true).
+generateExisting: true — applies the rule to resources that already existed when the policy was created/updated, not just new ones.
+With synchronize: false, Kyverno creates the resource once and walks away — fine for one-shot bootstrap, wrong if you want drift correction.

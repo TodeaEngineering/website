@@ -34,15 +34,22 @@ function getPosts() {
   const slugs = readDirSafe(BLOG_DIR);
   const posts = [];
   for (const slug of slugs) {
-    // Use the first available locale's frontmatter for the date (post date is the same across translations)
+    let date;
+    let draft = false;
+    const locales = [];
     for (const locale of LOCALES) {
       const file = path.join(BLOG_DIR, slug, locale, 'index.mdx');
       if (!fs.existsSync(file)) continue;
       const { data } = matter(fs.readFileSync(file, 'utf-8'));
-      if (data.draft) break;
-      posts.push({ slug, date: data.date });
-      break;
+      if (data.draft) {
+        draft = true;
+        break;
+      }
+      locales.push(locale);
+      if (!date) date = data.date;
     }
+    if (draft || locales.length === 0) continue;
+    posts.push({ slug, date, locales });
   }
   return posts;
 }
@@ -57,24 +64,25 @@ function getLegalDocDate(dir) {
   return null;
 }
 
-function alternateLinks(pathSuffix) {
-  const links = LOCALES.map(
+function alternateLinks(pathSuffix, locales = LOCALES) {
+  const links = locales.map(
     (loc) => `    <xhtml:link rel="alternate" hreflang="${loc}" href="${BASE_URL}/${loc}${pathSuffix}"/>`
   );
+  const xDefault = locales.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : locales[0];
   links.push(
-    `    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/${DEFAULT_LOCALE}${pathSuffix}"/>`
+    `    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/${xDefault}${pathSuffix}"/>`
   );
   return links.join('\n');
 }
 
-function urlBlock({ loc, lastmod, changefreq, priority, pathSuffix }) {
+function urlBlock({ loc, lastmod, changefreq, priority, pathSuffix, locales }) {
   return [
     '  <url>',
     `    <loc>${loc}</loc>`,
     `    <lastmod>${lastmod}</lastmod>`,
     `    <changefreq>${changefreq}</changefreq>`,
     `    <priority>${priority}</priority>`,
-    alternateLinks(pathSuffix),
+    alternateLinks(pathSuffix, locales),
     '  </url>',
   ].join('\n');
 }
@@ -95,6 +103,16 @@ function build() {
       changefreq: 'monthly',
       priority: '1.0',
       pathSuffix: '',
+    });
+  }
+
+  for (const locale of LOCALES) {
+    entries.push({
+      loc: `${BASE_URL}/${locale}/about`,
+      lastmod: today,
+      changefreq: 'monthly',
+      priority: '0.9',
+      pathSuffix: '/about',
     });
   }
 
@@ -130,12 +148,14 @@ function build() {
 
   for (const locale of LOCALES) {
     for (const post of posts) {
+      if (!post.locales.includes(locale)) continue;
       entries.push({
         loc: `${BASE_URL}/${locale}/blog/${post.slug}`,
         lastmod: isoDate(post.date),
         changefreq: 'monthly',
         priority: '0.7',
         pathSuffix: `/blog/${post.slug}`,
+        locales: post.locales,
       });
     }
   }

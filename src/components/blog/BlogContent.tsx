@@ -17,7 +17,7 @@ const components = {
     <div className="my-10 sm:overflow-x-auto">
       <table
         {...props}
-        className="block w-full my-0 sm:table sm:w-full sm:border-collapse sm:table-fixed [&_th:first-child]:sm:w-[30%] [&_th:nth-child(2)]:sm:w-[12%]"
+        className="block w-full my-0 sm:table sm:w-full sm:border-collapse sm:table-fixed [&_th:first-child]:sm:w-[24%] [&_th:nth-child(2)]:sm:w-[34%]"
       />
     </div>
   ),
@@ -41,6 +41,14 @@ const components = {
   ),
   tr: (props: ComponentPropsWithoutRef<'tr'>) => (
     <tr {...props} className="group block sm:table-row py-5 border-b border-neutral-200 last:border-b-0 sm:py-0 sm:border-0" />
+  ),
+  // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+  img: (props: ComponentPropsWithoutRef<'img'>) => (
+    <img
+      {...props}
+      alt={props.alt ?? ''}
+      className="my-8 block h-auto max-w-full relative left-1/2 -translate-x-1/2 rounded-md xl:max-w-[calc(100%+150px)] 2xl:max-w-[calc(100%+250px)]"
+    />
   ),
 };
 
