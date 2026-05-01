@@ -1,0 +1,244 @@
+---
+title: "Kyverno 详解：现代平台为何需要 Policy-as-Code"
+description: "实践者指南：Kyverno 究竟做什么、能从平台团队的工作里替你卸下哪些负担,以及它如何通过 CEL 原生的 CRD 与准入架构来交付这些能力。"
+date: "2026-03-25"
+author: "Todea Engineering"
+authorRole: "云原生实践"
+category: "云原生"
+image: "/blog/kyverno-explained/en-cover.svg"
+tags: ["kyverno", "policy-as-code", "kubernetes", "admission-control", "cel", "platform-engineering"]
+---
+
+以 root 身份运行 Pod。把镜像以 `latest` 标签到处部署,既不锁版本、也不签名,更没有摘要追溯。靠一段 Bash 脚本去给新命名空间引导默认的 `NetworkPolicy`、`ResourceQuota` 和拉取凭据,几乎可以肯定下一次更新就会失败。为了一次演示拉起一个昂贵的 EKS LoadBalancer,然后被遗忘在那里持续吃掉预算。
+
+过去平台团队都是靠手工处理这些运维负担,每多一个团队、多一个集群,堆叠的只是技术债。Kyverno 把所有这些都收拢到一个统一系统里来解决。
+
+Kyverno 是一款开源、Kubernetes 原生的策略引擎。它让你用 YAML、现在也可以用 CEL 来编写策略,这些策略会在资源被创建时执行检查,并对运行中的工作负载进行定期审计。Coinbase、LinkedIn、Spotify 这些公司,以及美国国防部(DoD),都在生产环境中使用 Kyverno。Kyverno 在 2026 年 3 月的 KubeCon Amsterdam 上达到了 [CNCF 毕业(Graduation)](https://github.com/cncf/toc/issues/1967) 阶段。
+
+## Kyverno 究竟是什么
+
+Kyverno 是一款 Kubernetes 的开源策略引擎,允许你把策略当作 Kubernetes 资源来编写。与 OPA 或 Gatekeeper 不同——它们要求你在写规则之前学习 Rego——Kyverno 使用 YAML 并支持 CEL,所以你可以继续操作那些早就熟悉的 API 对象。
+
+开发者或 SRE 可以像写 Deployment 一样写一个 `ValidatingPolicy`,用 kubectl 应用,然后通过标准的 Kubernetes 事件和 `PolicyReport` 资源看到违规情况。无需学习新的语言、查询模型或思考方式。
+
+## 工作原理
+
+Kyverno 构建在 Kubernetes 动态准入控制器(dynamic admission controller)架构之上,并在其之上叠加了一个后台扫描器。策略会在资源生命周期的三个时间点被评估:
+
+1. **Admission(准入)**: 当开发者、GitOps 工具或 CI/CD 流水线提交资源时,API server 会触发准入 webhook。Kyverno 的 webhook 检查请求、应用匹配的策略,并在请求路径上返回放行(allow)、拒绝(deny)或修改后的资源(mutated resource)。
+
+2. **Reconciliation(协调)**: 后台控制器持续观察那些应当存在的资源(清理策略、生成规则),在与准入分离的循环里把它们调谐到位。
+
+3. **新的现实**: Kyverno 的报告系统按照计划周期性地用当前策略扫描已有资源,把那些在策略落地之前就已创建、或后来被改动过的工作负载的违规情况暴露出来。
+
+你的应用代码不变。所有经过 API server 的资源都会被检查、修改并被记录。
+
+![Kyverno CEL 评估流程](/blog/kyverno-explained/zh-cel-flow.svg)
+
+## 策略类型
+
+Kyverno 的 CEL 原生策略类型从 v1.14 开始逐步引入,在 v1.17 加入 Namespaced 版本后进一步扩展。至此,`policies.kyverno.io` 这个 group 一共有 11 个 CRD(5 个集群作用域、5 个命名空间作用域,再加上 `PolicyException`)。每种类型都告诉 API server 该如何处理策略的结果:
+
+- **`ValidatingPolicy`**: 用 CEL 表达式对资源进行校验。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-team-label
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  validations:
+    - expression: "has(object.metadata.labels) && 'team' in object.metadata.labels"
+      message: "Pods must carry a 'team' label."
+```
+
+- **`MutatingPolicy`**: 类似 Kubernetes 的 `MutatingAdmissionPolicy`,在准入阶段使用基于 CEL 的 `applyConfiguration` 或 `jsonPatch` 表达式来修改资源。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: default-run-as-non-root
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >
+          Object{
+            spec: Object.spec{
+              securityContext: Object.spec.securityContext{
+                runAsNonRoot: true
+              }
+            }
+          }
+```
+
+- **`GeneratingPolicy`**: 当某个触发资源被创建时,生成下游资源——比如命名空间默认配置、网络策略或 RBAC 绑定。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: GeneratingPolicy
+metadata:
+  name: default-deny-on-namespace
+spec:
+  evaluation:
+    synchronize:
+      enabled: true
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["namespaces"]
+  variables:
+    - name: targetNs
+      expression: "object.metadata.name"
+    - name: downstream
+      expression: >-
+        [
+          {
+            "kind": dyn("NetworkPolicy"),
+            "apiVersion": dyn("networking.k8s.io/v1"),
+            "metadata": dyn({
+              "name": "default-deny"
+            }),
+            "spec": dyn({
+              "podSelector": dyn({}),
+              "policyTypes": dyn(["Ingress", "Egress"])
+            })
+          }
+        ]
+  generate:
+    - expression: generator.Apply(variables.targetNs, variables.downstream)
+```
+
+- **`ImageValidatingPolicy`**: 对照 Cosign、Notary 或 sigstore TUF 这类受信 attestor 来检查容器镜像,并支持 in-toto attestations。SBOM 也作为一种 attestation payload 类型受支持。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: require-signed-images
+spec:
+  validationActions: [Deny]
+  webhookConfiguration:
+    timeoutSeconds: 30
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  matchImageReferences:
+    - glob: "ghcr.io/kyverno/test-verify-image*"
+  attestors:
+    - name: kyvernoCosign
+      cosign:
+        key:
+          data: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8nXRh950IZbRj8Ra/N9sbqOPZrfM
+            5/KAQN0/KjHcorm/J5yctVd7iEcnessRQjU917hmKO6JWVGHpDguIyakZA==
+            -----END PUBLIC KEY-----
+  validations:
+    - expression: >-
+        images.containers.map(image, verifyImageSignatures(image, [attestors.kyvernoCosign])).all(e, e > 0)
+      message: "Images from ghcr.io/kyverno/test-verify-image must be signed by the Kyverno project key."
+```
+
+- **`DeletingPolicy`**: 按照设定好的时间表,移除匹配选择器的资源。这对临时环境和清理任务很有用。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: DeletingPolicy
+metadata:
+  name: cleanup-stale-ephemeral-pods
+spec:
+  schedule: "0 2 * * *"
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    namespaceSelector:
+      matchLabels:
+        environment: test
+  conditions:
+    - name: olderThan48h
+      expression: "time.now() - timestamp(object.metadata.creationTimestamp) > duration('48h')"
+    - name: ephemeralOrFinished
+      expression: >-
+        (has(object.metadata.labels) && 'ephemeral' in object.metadata.labels && object.metadata.labels.ephemeral == 'true') || (has(object.status) && has(object.status.phase) && (object.status.phase == 'Succeeded' || object.status.phase == 'Failed'))
+```
+
+Namespaced 版本(`NamespacedValidatingPolicy`、`NamespacedMutatingPolicy`、`NamespacedGeneratingPolicy`、`NamespacedImageValidatingPolicy`、`NamespacedDeletingPolicy`)对多租户场景很重要。各团队可以在自己的命名空间内创建并管理策略,不需要 cluster-admin 权限,而平台所有者则用集群作用域的类型去发布那些必须全局适用的策略。
+
+这些基于 CEL 的策略,成熟度大致与 Kubernetes 的 `ValidatingAdmissionPolicy` 相当,把更多的工作交给了 API server 来处理。Kyverno 在此基础上增加了策略引擎、报告、例外、生成与镜像校验等 VAP 没有的功能。
+
+老的 `ClusterPolicy` 和 `CleanupPolicy` 类型目前还能用,但已经在被分阶段淘汰。[Kyverno 1.17](https://kyverno.io/blog/2026/02/02/announcing-kyverno-release-1.17/) 把它们标记为 deprecated,会在 2026 年下半年被移除。请尽早规划向 CEL 原生 CRD 的迁移,新策略也尽量直接用这些类型来写,除非有特别的理由不这样做。
+
+## 什么时候应该用 ValidatingAdmissionPolicy 替代
+
+Kubernetes 1.30 及以后版本内置了 `ValidatingAdmissionPolicy`——一个不需要单独控制器的内建 CEL 校验器。对于一些团队来说够用,但对大多数团队并不够。
+
+| 能力 / 特性 | 内建 `ValidatingAdmissionPolicy` | Kyverno `ValidatingPolicy`(CEL) |
+|---|---|---|
+| 主要功能 | 准入时同步校验 | 校验、变更、生成、删除 |
+| 适用点 | 仅准入 | 准入、后台扫描、流水线、CLI |
+| 载荷 | Kubernetes 对象 | Kubernetes 对象,以及任意 JSON/YAML |
+| CEL 库 | 基础 | 扩展(HTTP 调用、镜像校验、Kubernetes 查询) |
+| 外部数据 | ✕ | Kubernetes 资源或 HTTP 调用 |
+| 策略绑定 | 手动 | 自动 |
+| 后台扫描 | ✕ | 定期,加上策略变更时触发 |
+| 报告与审计 | ✕ | `PolicyReport` + `EphemeralReport` CRD |
+| 例外处理 | ✕ | 细粒度的 `PolicyException` |
+| 镜像签名校验 | ✕ | ✓ |
+| 自动生成 | ✕ | Pod 控制器、`ValidatingAdmissionPolicy` |
+| 测试 | ✕ | Kyverno CLI(单元)、Chainsaw(端到端) |
+| 架构 | 内置于 API server(无需控制器) | 需要 Kyverno 控制器 |
+
+如果你只需要在准入时校验资源,VAP 是更轻量的选择,也是正确选择。如果你需要更多功能,你就需要一个策略引擎,而 Kyverno 在「用 YAML 写策略」和「把策略当代码对待」这两件事之间提供了最贴近的匹配。
+
+## 实际运维
+
+- **不是装上就完事,而是逐步推开。** 建议以审计(audit)模式启动 Kyverno。在 CEL 原生类型上使用 `validationActions: [Audit]`,在旧的 `ClusterPolicy` 上使用 `failureAction: Audit`(旧的 Enforce 对应于 Deny)。不要一上来就部署 deny 策略——如果控制器自身的 ServiceAccount 不满足标签要求,这会把它们打挂。先以 audit 模式跑至少一周,审视 `PolicyReport` 资源,把违规处理掉,然后再切到 deny。
+
+- **变更(Mutation)不是安全控制。** `MutatingPolicy` 用来设置默认值、镜像拉取凭据、资源 request 以及标准标签很合适,但它替代不了校验。一个能提交 Pod spec 的用户,完全可能因为准入顺序或豁免规则,提交一个你的 mutation 根本不会处理的 spec。所有「必须始终成立」的事情都应该用 `ValidatingPolicy`。
+
+## 实用建议
+
+如果你正在为一个 Kubernetes 平台评估策略引擎,而又没有强烈倾向选择 OPA/Gatekeeper,那就先把 Kyverno 试一遍。安装一个下午能搞定。如果它能满足你的需求,那你就省下了一个季度的运维工作量。如果不能,你也有了一个清晰且有据可查的理由去选别的。
+
+## 常见问题
+
+### Kyverno 是什么,它在 Kubernetes 准入流程里位于哪里?
+
+Kyverno 是一款 Kubernetes 原生的策略引擎,作为准入控制器运行,通过 webhook 拦截每一个 API 请求,在资源被持久化之前对其进行校验、变更或生成。
+
+### 我应该从老的 ClusterPolicy 开始,还是从新的 CEL 策略类型开始?
+
+新工作请使用基于 CEL 的类型(ValidatingPolicy、MutatingPolicy、GeneratingPolicy、ImageValidatingPolicy)。ClusterPolicy 还能用,但从 Kyverno 1.17 起已被标记为 deprecated。
+
+### Audit 和 Enforce 有什么区别,后台扫描又做什么?
+
+Deny(在旧的 `ClusterPolicy` 中称为 Enforce)在准入阶段直接拒绝失败的请求;Audit 会放行请求但记录失败。后台扫描会按计划重新评估已有资源,并把结果写入中间形态的 `EphemeralReport`,Kyverno 的 reports 控制器再把它们汇总到运维人员实际使用的 PolicyReport 资源中。
+
+### 生成规则是怎么工作的,我又该如何让生成出来的资源保持同步?
+
+生成规则会基于触发事件创建下游资源。在新的 `GeneratingPolicy` 上,把 `spec.evaluation.synchronize.enabled: true` 打开,Kyverno 就会保持下游资源同步——手动改动会被回退,源端变化会传播过去。把它保持在禁用状态(默认),Kyverno 就只在第一次生成,之后再不去碰。旧 `ClusterPolicy` 的等价开关是更简单的布尔值 `spec.rules[].generate.synchronize: true`。

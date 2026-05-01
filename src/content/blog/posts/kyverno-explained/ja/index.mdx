@@ -1,0 +1,244 @@
+---
+title: "Kyverno解説：モダンプラットフォームがPolicy-as-Codeを必要とする理由"
+description: "Kyvernoが実際に何をするのか、プラットフォームチームの負担をどう軽減するのか、そしてCELネイティブのCRDとアドミッションアーキテクチャがそれをどう実現するのかについての実務者ガイド。"
+date: "2026-03-25"
+author: "Todea Engineering"
+authorRole: "クラウドネイティブ・プラクティス"
+category: "クラウドネイティブ"
+image: "/blog/kyverno-explained/en-cover.svg"
+tags: ["kyverno", "policy-as-code", "kubernetes", "admission-control", "cel", "platform-engineering"]
+---
+
+Podをrootで実行する。`latest`タグでイメージをあちこちにデプロイし、ピン留めもされず、署名もされず、ダイジェストへの追跡もない。新しい名前空間にデフォルトの`NetworkPolicy`、`ResourceQuota`、プルシークレットをセットアップするためにBashスクリプトに頼り、次のアップデートでほぼ確実に壊れる。デモのために高価なEKSのLoadBalancerを立ち上げ、忘れ去られたまま居座って予算を消耗していく。
+
+プラットフォームチームはかつて、こうした運用上のオーバーヘッドを手作業で処理しており、新しいチームやクラスタが増えるたびに技術的負債が積み上がっていきました。Kyvernoはこれらすべてを一つのシステムの下にまとめることで、その問題を解決します。
+
+Kyvernoはオープンソースの、Kubernetesネイティブなポリシーエンジンです。YAMLで、そして今やCELでもポリシーを記述でき、リソースが作成された時点でチェックされ、実行中のワークロードに対しても定期的に監査されます。Coinbase、LinkedIn、Spotifyといった企業や、米国国防総省（DoD）もKyvernoを本番環境で使用しています。Kyvernoは2026年3月のKubeCon Amsterdamで[CNCF Graduation](https://github.com/cncf/toc/issues/1967)に到達しました。
+
+## Kyvernoとは実際には何か
+
+KyvernoはKubernetesのオープンソースポリシーエンジンで、ポリシーをKubernetesリソースとして記述できます。ルールを書く前にRegoを学ぶ必要があるOPAやGatekeeperとは異なり、KyvernoはYAMLを使いCELもサポートしているため、すでに馴染みのある同じAPIオブジェクトで作業できます。
+
+開発者やSREは、Deploymentを書くようにそのまま`ValidatingPolicy`を書き、kubectlで適用し、違反を標準のKubernetesイベントや`PolicyReport`リソースとして確認できます。新しい言語、クエリモデル、考え方を学ぶ必要はありません。
+
+## 仕組み
+
+KyvernoはKubernetesの動的アドミッションコントローラのアーキテクチャ上に構築されており、その上にバックグラウンドスキャナが重ねられています。ポリシーはリソースのライフサイクルの3つのポイントで評価されます：
+
+1. **Admission（アドミッション）**: 開発者、GitOpsツール、またはCI/CDパイプラインがリソースを送信すると、APIサーバーがアドミッションWebhookを起動します。KyvernoのWebhookはリクエストをチェックし、一致するポリシーを適用し、リクエストパス上で許可（allow）、拒否（deny）、または変更後のリソース（mutated resource）を返します。
+
+2. **Reconciliation（リコンサイル）**: バックグラウンドコントローラは、存在すべきリソース（クリーンアップポリシー、生成ルール）を監視し、アドミッションとは別のループで一致させ続けます。
+
+3. **新しい現実**: Kyvernoのレポーティングシステムは、既存のリソースを現在のポリシーに対して定期的にスケジュールスキャンし、ポリシーが導入される前に作成された、あるいは後から変更されたワークロードの違反を表面化します。
+
+アプリケーションのコードは変わりません。APIサーバーを通過するすべてのリソースがチェックされ、変更され、記録されます。
+
+![Kyverno CEL評価フロー](/blog/kyverno-explained/ja-cel-flow.svg)
+
+## ポリシータイプ
+
+KyvernoのCELネイティブなポリシータイプはv1.14から段階的に導入され、v1.17でNamespaced版が追加されて拡張されました。これにより`policies.kyverno.io`グループは合計11個のCRD（クラスタースコープ5個、ネームスペーススコープ5個、加えて`PolicyException`）を持つことになります。各タイプはAPIサーバーに対し、ポリシーの結果をどう扱うかを指示します：
+
+- **`ValidatingPolicy`**: CEL式に対してリソースを検証します。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-team-label
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  validations:
+    - expression: "has(object.metadata.labels) && 'team' in object.metadata.labels"
+      message: "Pods must carry a 'team' label."
+```
+
+- **`MutatingPolicy`**: Kubernetesの`MutatingAdmissionPolicy`に似た形で、CELベースの`applyConfiguration`または`jsonPatch`式を使ってアドミッション中にリソースを変更します。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: default-run-as-non-root
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >
+          Object{
+            spec: Object.spec{
+              securityContext: Object.spec.securityContext{
+                runAsNonRoot: true
+              }
+            }
+          }
+```
+
+- **`GeneratingPolicy`**: トリガーリソースが作成されたときに下流のリソースを作成します。例えばネームスペースのデフォルト、ネットワークポリシー、RBACバインディングなどです。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: GeneratingPolicy
+metadata:
+  name: default-deny-on-namespace
+spec:
+  evaluation:
+    synchronize:
+      enabled: true
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["namespaces"]
+  variables:
+    - name: targetNs
+      expression: "object.metadata.name"
+    - name: downstream
+      expression: >-
+        [
+          {
+            "kind": dyn("NetworkPolicy"),
+            "apiVersion": dyn("networking.k8s.io/v1"),
+            "metadata": dyn({
+              "name": "default-deny"
+            }),
+            "spec": dyn({
+              "podSelector": dyn({}),
+              "policyTypes": dyn(["Ingress", "Egress"])
+            })
+          }
+        ]
+  generate:
+    - expression: generator.Apply(variables.targetNs, variables.downstream)
+```
+
+- **`ImageValidatingPolicy`**: Cosign、Notary、sigstore TUFのような信頼できるattestorに対してコンテナイメージをチェックし、in-toto attestationsをサポートします。SBOMもattestationペイロードの一種としてサポートされています。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: require-signed-images
+spec:
+  validationActions: [Deny]
+  webhookConfiguration:
+    timeoutSeconds: 30
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  matchImageReferences:
+    - glob: "ghcr.io/kyverno/test-verify-image*"
+  attestors:
+    - name: kyvernoCosign
+      cosign:
+        key:
+          data: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8nXRh950IZbRj8Ra/N9sbqOPZrfM
+            5/KAQN0/KjHcorm/J5yctVd7iEcnessRQjU917hmKO6JWVGHpDguIyakZA==
+            -----END PUBLIC KEY-----
+  validations:
+    - expression: >-
+        images.containers.map(image, verifyImageSignatures(image, [attestors.kyvernoCosign])).all(e, e > 0)
+      message: "Images from ghcr.io/kyverno/test-verify-image must be signed by the Kyverno project key."
+```
+
+- **`DeletingPolicy`**: 設定したスケジュールでセレクタに一致するリソースを削除します。一時的な環境やクリーンアップタスクに役立ちます。
+
+```yaml
+apiVersion: policies.kyverno.io/v1
+kind: DeletingPolicy
+metadata:
+  name: cleanup-stale-ephemeral-pods
+spec:
+  schedule: "0 2 * * *"
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    namespaceSelector:
+      matchLabels:
+        environment: test
+  conditions:
+    - name: olderThan48h
+      expression: "time.now() - timestamp(object.metadata.creationTimestamp) > duration('48h')"
+    - name: ephemeralOrFinished
+      expression: >-
+        (has(object.metadata.labels) && 'ephemeral' in object.metadata.labels && object.metadata.labels.ephemeral == 'true') || (has(object.status) && has(object.status.phase) && (object.status.phase == 'Succeeded' || object.status.phase == 'Failed'))
+```
+
+Namespaced版（`NamespacedValidatingPolicy`、`NamespacedMutatingPolicy`、`NamespacedGeneratingPolicy`、`NamespacedImageValidatingPolicy`、`NamespacedDeletingPolicy`）はマルチテナンシーにとって重要です。チームはクラスタ管理者権限なしで自分のネームスペースにポリシーを作成・管理でき、一方プラットフォームオーナーはどこにでも適用すべきポリシーにはクラスタースコープの型を使います。
+
+これらのCELベースのポリシーは、Kubernetesの`ValidatingAdmissionPolicy`と同程度に成熟しており、APIサーバーが処理の多くを担います。Kyvernoはポリシーエンジン、レポート、例外、生成、イメージ検証など、VAPには含まれない機能を追加しています。
+
+古い`ClusterPolicy`と`CleanupPolicy`の型は今のところまだ動作しますが、段階的に廃止される方向です。[Kyverno 1.17](https://kyverno.io/blog/2026/02/02/announcing-kyverno-release-1.17/)で非推奨（deprecated）となり、2026年後半に削除される予定です。CELネイティブのCRDへの移行を早めに計画し、特別な理由がない限り新しいポリシーはこれらの型で書きましょう。
+
+## ValidatingAdmissionPolicyを代わりに使うべきとき
+
+Kubernetes 1.30以降は、別途コントローラを必要としない組み込みのCELバリデータとして`ValidatingAdmissionPolicy`が含まれています。一部のチームにはこれで十分ですが、ほとんどのチームにはそうではありません。
+
+| 機能 / 項目 | 組み込み `ValidatingAdmissionPolicy` | Kyverno `ValidatingPolicy`（CEL） |
+|---|---|---|
+| 主な機能 | アドミッション時の同期検証 | 検証、変更、生成、削除 |
+| 適用ポイント | アドミッションのみ | アドミッション、バックグラウンドスキャン、パイプライン、CLI |
+| ペイロード | Kubernetesオブジェクト | Kubernetesオブジェクトに加え、任意のJSON/YAML |
+| CELライブラリ | 基本 | 拡張（HTTP呼び出し、イメージ検証、Kubernetesルックアップ） |
+| 外部データ | ✕ | KubernetesリソースまたはHTTP呼び出し |
+| ポリシーバインディング | 手動 | 自動 |
+| バックグラウンドスキャン | ✕ | 定期実行に加えポリシー変更時 |
+| レポートと監査 | ✕ | `PolicyReport` + `EphemeralReport` CRD |
+| 例外処理 | ✕ | きめ細かい `PolicyException` |
+| イメージ署名検証 | ✕ | ✓ |
+| 自動生成 | ✕ | Podコントローラ、`ValidatingAdmissionPolicy` |
+| テスト | ✕ | Kyverno CLI（ユニット）、Chainsaw（e2e） |
+| アーキテクチャ | APIサーバー内蔵（コントローラ不要） | Kyvernoコントローラが必要 |
+
+アドミッション時にリソースを検証するだけで十分ならば、VAPの方が軽量で正解です。それ以上の機能が必要なら、ポリシーエンジンを使いたくなるでしょう。Kyvernoは「ポリシーをYAMLで書き、それをコードとして扱う」という発想に最も近いマッチを提供してくれます。
+
+## 運用面の現実
+
+- **インストールではなくロールアウト**: KyvernoをAuditモードで開始することを推奨します。CELネイティブの型では`validationActions: [Audit]`を、レガシーな`ClusterPolicy`では`failureAction: Audit`を使ってください（レガシーのEnforceはDenyに相当）。Denyポリシーをいきなりデプロイするのは避けましょう。コントローラのServiceAccountがラベル要件を満たしていないと、コントローラを動作不能にしてしまうおそれがあるためです。少なくとも1週間はAuditモードで運用し、`PolicyReport`リソースを確認して違反に対応してから、Denyに切り替えましょう。
+
+- **Mutationはセキュリティコントロールではない**: `MutatingPolicy`はデフォルト値、イメージプルシークレット、リソースリクエスト、標準ラベルの設定にうまく機能しますが、検証の代わりにはなりません。Pod specを送信できるユーザーは、アドミッションの順序や除外設定の関係で、あなたのMutationが処理しないspecを送信できる可能性があります。常に真であるべきものは`ValidatingPolicy`を使うべきです。
+
+## 実践的な推奨事項
+
+Kubernetesプラットフォーム向けにポリシーエンジンを評価していて、OPA/Gatekeeperを選ぶ強い理由がまだないなら、まずKyvernoをパイロットしてみてください。インストールは午後一回で済みます。必要な機能をカバーしているなら、四半期分の運用作業を節約したことになります。そうでなければ、別のところに移るための明確で文書化された理由が手に入ります。
+
+## よくある質問
+
+### Kyvernoとは何で、Kubernetesのアドミッションフローのどこに位置しますか？
+
+KyvernoはKubernetesネイティブのポリシーエンジンで、アドミッションコントローラとして動作し、Webhookを通じてすべてのAPIリクエストをインターセプトし、リソースが永続化される前に検証、変更、または生成を行います。
+
+### レガシーのClusterPolicyから始めるべきですか、それとも新しいCELベースのポリシータイプから始めるべきですか？
+
+新規の作業にはCELベースの型（ValidatingPolicy、MutatingPolicy、GeneratingPolicy、ImageValidatingPolicy）を使ってください。ClusterPolicyはまだ動きますが、Kyverno 1.17以降は非推奨となっています。
+
+### AuditとEnforceはどう違い、バックグラウンドスキャンは何をしますか？
+
+Deny（レガシーの`ClusterPolicy`ではEnforceと呼ばれます）はアドミッションで失敗したリクエストを拒否します。Auditはそれを許可しますが失敗を記録します。バックグラウンドスキャンは、既存のリソースをスケジュールに従って再評価し、結果を中間表現の`EphemeralReport`に書き込みます。Kyvernoのreportsコントローラはこれを集約し、運用者が利用するPolicyReportリソースに変換します。
+
+### Generateルールはどう動作し、生成されたリソースをどう同期させ続けますか？
+
+Generateルールはトリガーイベントから下流のリソースを作成します。新しい`GeneratingPolicy`では`spec.evaluation.synchronize.enabled: true`を設定すると、Kyvernoは下流のリソースを連動させ続けます。手動編集は元に戻され、ソースの変更は伝播します。無効（デフォルト）のままなら、Kyvernoは一度生成したらそのままにします。レガシーな`ClusterPolicy`の同等機能はより単純な`spec.rules[].generate.synchronize: true`のブール値です。
