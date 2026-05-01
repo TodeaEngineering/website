@@ -38,11 +38,9 @@ export default async function HomePage({
     ],
     areaServed: ['Asia Pacific', 'EMEA'],
     serviceType: [
-      'Platform Engineering',
-      'Kubernetes Consulting',
-      'Cloud Migration',
-      'Observability',
-      'Security & Compliance',
+      'Platform Readiness Review',
+      'Implementation Project',
+      'Managed Platform',
     ],
     knowsAbout: [
       'Kubernetes', 'Terraform', 'ArgoCD',

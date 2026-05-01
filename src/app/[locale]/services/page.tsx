@@ -77,11 +77,9 @@ export default async function ServicesPage({
       '@type': 'OfferCatalog',
       name: 'Todea Services',
       itemListElement: [
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Platform Engineering' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Managed Operations' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Observability' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Security & Compliance' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Cloud Migration' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Platform Readiness Review' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Implementation Project' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Managed Platform' } },
       ],
     },
   };
