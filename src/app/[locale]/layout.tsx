@@ -61,7 +61,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       },
     },
     icons: {
-      icon: [{ url: '/favicons/favicon.svg', type: 'image/svg+xml' }],
+      icon: [
+        { url: '/favicon.ico', sizes: 'any' },
+        { url: '/favicons/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/favicons/favicon-48.png', sizes: '48x48', type: 'image/png' },
+      ],
+      apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     },
     openGraph: {
       title: meta.title,
