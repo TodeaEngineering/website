@@ -77,12 +77,17 @@ export default async function BlogPostPage({
   const post = getPostBySlug(slug, locale as Locale);
   if (!post) notFound();
 
+  const imagePath = post.image ?? `/blog/${post.slug}/${locale}-cover.svg`;
+  const imageUrl = imagePath.startsWith('http') ? imagePath : `${BASE_URL}${imagePath}`;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.description,
+    image: imageUrl,
     datePublished: post.date,
+    dateModified: post.date,
     author: {
       '@type': 'Person',
       name: post.author,

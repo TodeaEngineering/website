@@ -8,22 +8,26 @@ import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
 
-const localeMetadata: Record<string, { title: string; description: string }> = {
+const localeMetadata: Record<string, { title: string; description: string; ogLocale: string }> = {
   en: {
     title: 'Contact · Todea',
     description: 'Get in touch with Todea — Seoul-based cloud native infrastructure consulting.',
+    ogLocale: 'en_US',
   },
   ko: {
     title: '문의 · Todea',
     description: 'Todea에 문의하세요. 서울 기반의 클라우드 네이티브 인프라 컨설팅.',
+    ogLocale: 'ko_KR',
   },
   ja: {
     title: 'お問い合わせ · Todea',
     description: 'Todeaへのお問い合わせ。ソウル拠点のクラウドネイティブインフラコンサルティング。',
+    ogLocale: 'ja_JP',
   },
   zh: {
     title: '联系我们 · Todea',
     description: '联系 Todea — 位于首尔的云原生基础设施咨询公司。',
+    ogLocale: 'zh_CN',
   },
 };
 
@@ -57,6 +61,7 @@ export async function generateMetadata({
       description: meta.description,
       url: `${BASE_URL}/${locale}/contact`,
       siteName: 'Todea',
+      locale: meta.ogLocale,
       type: 'website',
       images: [{ url: '/linkedin.png', width: 400, height: 400, alt: 'Todea' }],
     },

@@ -72,14 +72,20 @@ export default async function BlogIndexPage({
       name: 'Todea',
       url: BASE_URL,
     },
-    blogPost: posts.map((post) => ({
-      '@type': 'BlogPosting',
-      headline: post.title,
-      description: post.description,
-      datePublished: post.date,
-      author: { '@type': 'Person', name: post.author },
-      url: `${BASE_URL}/${locale}/blog/${post.slug}`,
-    })),
+    blogPost: posts.map((post) => {
+      const imagePath = post.image ?? `/blog/${post.slug}/${locale}-cover.svg`;
+      const imageUrl = imagePath.startsWith('http') ? imagePath : `${BASE_URL}${imagePath}`;
+      return {
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: post.description,
+        image: imageUrl,
+        datePublished: post.date,
+        dateModified: post.date,
+        author: { '@type': 'Person', name: post.author },
+        url: `${BASE_URL}/${locale}/blog/${post.slug}`,
+      };
+    }),
   };
 
   return (
