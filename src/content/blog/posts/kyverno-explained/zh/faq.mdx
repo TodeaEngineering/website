@@ -1,0 +1,15 @@
+
+## 常见问题
+
+### Kyverno 是什么,它在 Kubernetes 准入流程里位于哪里?
+
+Kyverno 是一款 Kubernetes 原生的策略引擎,作为准入控制器运行,通过 webhook 拦截每一个 API 请求,在资源被持久化之前对其进行校验、变更或生成。
+
+### 我应该从老的 ClusterPolicy 开始,还是从新的 CEL 策略类型开始?
+
+新工作请使用基于 CEL 的类型(ValidatingPolicy、MutatingPolicy、GeneratingPolicy、ImageValidatingPolicy)。ClusterPolicy 还能用,但从 Kyverno 1.17 起已被标记为 deprecated。
+
+### Audit 和 Enforce 有什么区别,后台扫描又做什么?
+
+Deny(在旧的 `ClusterPolicy` 中称为 Enforce)在准入阶段直接拒绝失败的请求;Audit 会放行请求但记录失败。后台扫描会按计划重新评估已有资源,并把结果写入中间形态的 `EphemeralReport`,Kyverno 的 reports 控制器再把它们汇总到运维人员实际使用的 PolicyReport 资源中。
+

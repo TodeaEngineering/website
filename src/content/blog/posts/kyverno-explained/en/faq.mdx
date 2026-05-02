@@ -1,0 +1,15 @@
+
+## Frequently Asked Questions
+
+### What is Kyverno, and where does it sit in Kubernetes admission flow?
+
+Kyverno is a Kubernetes-native policy engine that runs as an admission controller, intercepting every API request via webhooks to validate, mutate, or generate resources before they are persisted.
+
+### Should I start with legacy ClusterPolicy or the newer CEL-based policy types?
+
+Use the CEL-based types (ValidatingPolicy, MutatingPolicy, GeneratingPolicy, ImageValidatingPolicy) for new work. ClusterPolicy still works but is deprecated as of Kyverno 1.17.
+
+### How do Audit and Enforce differ, and what do background scans do?
+
+Deny (called Enforce in legacy `ClusterPolicy`) rejects failing requests at admission; Audit admits them but records the failure. Background scans re-evaluate existing resources on a schedule and write results to `EphemeralReport` intermediaries, which Kyverno's reports controller aggregates into the PolicyReport resources operators consume.
+

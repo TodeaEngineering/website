@@ -1,0 +1,15 @@
+
+## よくある質問
+
+### Kubernetes 1.36は本番クラスターへのアップグレードとして安全ですか？
+
+ほとんどのチームにとっては安全です。1.36は安定した成熟機能を束ねた統合リリースです。アップグレード前に、マニフェスト内の`gitRepo`（削除済み）と`service.spec.externalIPs`を必ず確認してください。
+
+### `service.spec.externalIPs`からの移行はすぐに行う必要がありますか？
+
+すぐに移行する必要はありません。削除はv1.43で予定されていますが、今から着手するのがベストです。LoadBalancer ServiceまたはGateway APIリソースに移行してください。
+
+### DRA AdminAccessのStable昇格はGPU・AIプラットフォームにどう影響しますか？
+
+`ResourceClaim`に`adminAccess: true`を設定することで、共有GPUに対するデバッグや調査用の特権付きクレームを発行できるようになりました。許可されるのは`admin-access`ラベルが付いたネームスペースに限られます。
+

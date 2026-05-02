@@ -76,3 +76,4 @@ The deprecation worth treating as a real migration project is **`service.spec.ex
 Kubernetes 1.36 is mainly a consolidation release across two tracks: Kubernetes as an accelerator-native platform, with maturing DRA governance, HPA scale-to-zero, and more workload-aware scheduling; and Kubernetes as a least-privilege platform, with fine-grained kubelet authorization reaching GA, user namespaces going Stable, and externalIPs now on the deprecation path.
 
 That makes the action list fairly straightforward. Audit any `nodes/proxy` permissions and migrate to fine-grained kubelet subresources. Search your manifests for `service.spec.externalIPs`, which is now deprecated, and `gitRepo`, which is removed in 1.36 and will break any pods that still depend on it. If you use accelerators, spin up a non-production cluster with DRA enabled and develop a position on AdminAccess and device taints. Most other changes can be handled as part of the normal upgrade process.
+

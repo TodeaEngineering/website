@@ -1,0 +1,15 @@
+
+## Frequently Asked Questions
+
+### Why does the default Linkerd install fail on OpenShift?
+
+OpenShift SCCs block it: container UIDs fall outside allowed ranges, and the init container needs NET_ADMIN and NET_RAW.
+
+### Should I use Linkerd CNI or proxy-init on OpenShift?
+
+Use CNI. It sets iptables at node level, so apps don’t need NET_ADMIN/NET_RAW. Proxy-init requires those in every namespace.
+
+### Do meshed application workloads need a custom SCC on OpenShift?
+
+Yes. The proxy runs as UID 2102, outside project ranges, so each ServiceAccount must use a minimal SCC allowing that UID.
+

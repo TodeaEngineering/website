@@ -1,0 +1,15 @@
+
+## よくある質問
+
+### なぜデフォルトのLinkerdインストールはOpenShiftで失敗するのですか？
+
+OpenShiftのSCCがブロックします：コンテナのUIDが許可された範囲外であり、initコンテナが`NET_ADMIN`と`NET_RAW`を必要とするためです。
+
+### OpenShiftではLinkerd CNIとproxy-initのどちらを使うべきですか？
+
+CNIを使ってください。ノードレベルでiptablesを設定するため、アプリは`NET_ADMIN`/`NET_RAW`を必要としません。proxy-initはすべてのネームスペースでこれらを必要とします。
+
+### メッシュ化されたアプリケーションワークロードはOpenShiftでカスタムSCCを必要としますか？
+
+はい。プロキシはUID 2102で動作し、プロジェクトの範囲外です。そのため各ServiceAccountがそのUIDを許可する最小SCCを使用する必要があります。
+

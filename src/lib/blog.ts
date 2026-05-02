@@ -29,6 +29,8 @@ export interface PostMeta extends PostFrontmatter {
 
 export interface Post extends PostMeta {
   content: string;
+  faq: string | null;
+  cta: string | null;
 }
 
 function safeReadDir(dir: string): string[] {
@@ -65,6 +67,39 @@ function readPostFile(slug: string, locale: Locale): { content: string; data: Po
 }
 
 /**
+ * Reads the sibling faq.mdx for a slug + locale, falling back to English.
+ * Returns null if no FAQ file exists in any locale.
+ */
+function readFaqFile(slug: string, locale: Locale): string | null {
+  return readSiblingMdx(slug, locale, 'faq.mdx');
+}
+
+/**
+ * Reads the sibling cta.mdx for a slug + locale (no cross-locale fallback —
+ * the CTA contains locale-specific service links, so the EN copy must not
+ * be served on /ko, /ja, /zh).
+ */
+function readCtaFile(slug: string, locale: Locale): string | null {
+  const filePath = path.join(BLOG_DIR, slug, locale, 'cta.mdx');
+  if (!fs.existsSync(filePath)) return null;
+  return matter(fs.readFileSync(filePath, 'utf-8')).content;
+}
+
+function readSiblingMdx(slug: string, locale: Locale, filename: string): string | null {
+  const localePath = path.join(BLOG_DIR, slug, locale, filename);
+  if (fs.existsSync(localePath)) {
+    return matter(fs.readFileSync(localePath, 'utf-8')).content;
+  }
+  if (locale !== FALLBACK_LOCALE) {
+    const fallbackPath = path.join(BLOG_DIR, slug, FALLBACK_LOCALE, filename);
+    if (fs.existsSync(fallbackPath)) {
+      return matter(fs.readFileSync(fallbackPath, 'utf-8')).content;
+    }
+  }
+  return null;
+}
+
+/**
  * Returns the post for a slug + locale, falling back to English if not present.
  * Returns null if the post does not exist in any locale.
  */
@@ -82,7 +117,9 @@ export function getPostBySlug(slug: string, locale: Locale): Post | null {
   const { content, data } = result;
   if (data.draft) return null;
 
-  const stats = readingTime(content);
+  const faq = readFaqFile(slug, fallback ? FALLBACK_LOCALE : locale);
+  const cta = readCtaFile(slug, locale);
+  const stats = readingTime(content + (faq ?? ''));
 
   return {
     slug,
@@ -98,6 +135,8 @@ export function getPostBySlug(slug: string, locale: Locale): Post | null {
     category: data.category,
     draft: data.draft ?? false,
     content,
+    faq,
+    cta,
     readingTimeMinutes: Math.max(1, Math.round(stats.minutes)),
   };
 }

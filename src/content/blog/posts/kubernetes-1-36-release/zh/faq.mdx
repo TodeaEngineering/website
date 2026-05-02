@@ -1,0 +1,15 @@
+
+## 常见问题
+
+### Kubernetes 1.36 升级到生产集群安全吗?
+
+对大多数团队来说是安全的。1.36 是一次把稳定、成熟特性整合在一起的版本。升级之前,请在 manifest 里检查一下 `gitRepo`(已被移除)和 `service.spec.externalIPs`。
+
+### 我必须立刻把 `service.spec.externalIPs` 迁移掉吗?
+
+不需要立刻迁移。计划在 v1.43 移除,但越早开始越好。迁移到 LoadBalancer Service 或 Gateway API 资源。
+
+### DRA AdminAccess 进入 Stable 对 GPU 和 AI 平台意味着什么?
+
+在 `ResourceClaim` 上设置 `adminAccess: true`,你就能对共享 GPU 提交用于调试或检查的特权请求。这种请求只允许在带有 admin-access 标签的命名空间里创建。
+

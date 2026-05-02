@@ -1,0 +1,15 @@
+
+## 常见问题
+
+### Linkerd 和 Istio 有什么区别?
+
+Linkerd 小、快、运维上无聊。Istio 范围更广,可插拔。如果你想让它别挡路,选 Linkerd;如果你需要扩展性,选 Istio。
+
+### Linkerd 默认会对服务间流量加密吗?
+
+会。一旦工作负载被纳入网格,Pod 之间所有 TCP 流量都用 mTLS 加密,使用自动签发并每 24 小时轮换的短期工作负载证书。
+
+### Linkerd 和 Istio 哪个更容易调试?
+
+Linkerd 更容易调试——代理简单,admin 接口固定。Istio 能做深入的 Envoy 追踪,但复杂得多。Ambient 简化了 L4,但 L7 仍依赖 Envoy。
+

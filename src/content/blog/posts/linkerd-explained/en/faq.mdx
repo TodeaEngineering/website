@@ -1,0 +1,15 @@
+
+## Frequently Asked Questions
+
+### How is Linkerd different from Istio?
+
+Linkerd is small, fast, and operationally boring. Istio is broader and pluggable. Pick Linkerd to stay out of the way, Istio when you need extensibility.
+
+### Does Linkerd encrypt service-to-service traffic by default?
+
+Yes. Once a workload is meshed, all TCP traffic between pods is encrypted with mTLS, using short-lived workload certificates issued and rotated automatically every 24 hours.
+
+### Is Linkerd or Istio easier to debug?
+
+Linkerd is easier to debug with a simple proxy and fixed admin interface. Istio enables deep Envoy tracing but is more complex. Ambient simplifies L4, but L7 still depends on Envoy.
+

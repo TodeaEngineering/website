@@ -1,0 +1,15 @@
+
+## 자주 묻는 질문
+
+### Kyverno란 무엇이며, Kubernetes 어드미션 흐름의 어디에 위치하나요?
+
+Kyverno는 어드미션 컨트롤러로 동작하는 Kubernetes 네이티브 정책 엔진입니다. 웹훅을 통해 모든 API 요청을 가로채어 리소스가 영속화되기 전에 검증, 변형, 또는 생성을 수행합니다.
+
+### 레거시 ClusterPolicy로 시작해야 할까요, 아니면 새로운 CEL 기반 정책 유형으로 시작해야 할까요?
+
+새로운 작업에는 CEL 기반 유형(ValidatingPolicy, MutatingPolicy, GeneratingPolicy, ImageValidatingPolicy)을 사용하세요. ClusterPolicy도 여전히 동작하지만 Kyverno 1.17부터 deprecated 상태입니다.
+
+### Audit과 Enforce는 어떻게 다르며, 백그라운드 스캔은 무엇을 하나요?
+
+Deny(레거시 `ClusterPolicy`에서는 Enforce라고 부름)는 어드미션에서 실패하는 요청을 거부합니다. Audit은 요청을 허용하지만 실패를 기록합니다. 백그라운드 스캔은 정해진 일정에 따라 기존 리소스를 재평가하고 결과를 `EphemeralReport` 중간 산출물에 기록합니다. Kyverno의 reports 컨트롤러는 이를 운영자가 사용하는 PolicyReport 리소스로 집계합니다.
+

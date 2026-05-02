@@ -1,0 +1,15 @@
+
+## 자주 묻는 질문
+
+### 왜 기본 Linkerd 설치가 OpenShift에서 실패하나요?
+
+OpenShift SCC가 차단합니다: 컨테이너 UID가 허용 범위를 벗어나고, init 컨테이너가 `NET_ADMIN`과 `NET_RAW`를 필요로 하기 때문입니다.
+
+### OpenShift에서는 Linkerd CNI와 proxy-init 중 어느 것을 써야 하나요?
+
+CNI를 사용하세요. 노드 레벨에서 iptables를 설정하므로 앱은 `NET_ADMIN`/`NET_RAW`가 필요 없습니다. proxy-init는 모든 네임스페이스에서 이를 요구합니다.
+
+### 메시화된 애플리케이션 워크로드는 OpenShift에서 커스텀 SCC가 필요한가요?
+
+예. 프록시는 UID 2102로 실행되어 프로젝트 범위를 벗어나므로, 각 ServiceAccount는 해당 UID를 허용하는 최소 SCC를 사용해야 합니다.
+

@@ -18,7 +18,7 @@ const components = {
     <div className="my-10 sm:overflow-x-auto">
       <table
         {...props}
-        className="block w-full my-0 sm:table sm:w-full sm:border-collapse sm:table-fixed [&_th:first-child]:sm:w-[24%] [&_th:nth-child(2)]:sm:w-[34%]"
+        className="block w-full my-0 sm:table sm:w-full sm:border-collapse sm:table-auto"
       />
     </div>
   ),

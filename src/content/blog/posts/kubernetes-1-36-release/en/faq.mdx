@@ -1,0 +1,15 @@
+
+## Frequently Asked Questions
+
+### Is Kubernetes 1.36 a safe upgrade for production clusters?
+
+For most teams, yes. Version 1.36 brings together stable, mature features. Before you upgrade, check your manifests for `gitRepo` (which has been removed) and `service.spec.externalIPs`.
+
+### Do I have to migrate off `service.spec.externalIPs` immediately?
+
+No, you do not need to migrate right away. Removal is planned for v1.43, but it is best to start now. Migrate to a LoadBalancer Service or a Gateway API resource.
+
+### How does DRA AdminAccess moving to Stable affect GPU and AI platforms?
+
+You can now make privileged debugging or inspection claims on shared GPUs by setting `adminAccess: true` on a `ResourceClaim`. Allowed only in namespaces with the admin-access label.
+

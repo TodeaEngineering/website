@@ -76,3 +76,4 @@ Kubernetes [v1.36、コードネーム*Haru*](https://kubernetes.io/blog/2026/04
 Kubernetes 1.36は主に2つのトラックにまたがる統合リリースです。アクセラレーターネイティブなプラットフォームとしてのKubernetes(DRAガバナンスの成熟、HPAのゼロスケール、より多くのワークロード認識スケジューリング)、そして最小権限プラットフォームとしてのKubernetes(きめ細かいkubelet認可のGA到達、user namespacesのStable化、externalIPsの非推奨化への移行)です。
 
 そのため、アクションリストはかなり単純明快です。`nodes/proxy`権限を監査し、きめ細かいkubeletサブリソースに移行してください。マニフェスト内に、非推奨になった`service.spec.externalIPs`と、1.36で削除され、依然として依存するあらゆるPodを壊す`gitRepo`がないか検索してください。アクセラレーターを使うなら、DRAを有効化した非本番クラスターを立ち上げ、AdminAccessとdevice taintsについての方針を策定してください。その他の変更のほとんどは、通常のアップグレードプロセスの一部として対応できます。
+

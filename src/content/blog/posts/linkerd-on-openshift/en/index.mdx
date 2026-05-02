@@ -272,3 +272,4 @@ The **CNI path** concentrates the privilege in one place: a single DaemonSet in 
 The **proxy-init path** spreads the privilege out: every meshed application namespace needs its ServiceAccounts bound to an SCC that grants `NET_ADMIN` and `NET_RAW`. You are operating that grant forever, for every new app team that onboards.
 
 Pick CNI unless your cluster administrators forbid DaemonSets that write to host CNI paths. In that case, proxy-init with a custom SCC is the honest fallback. Just build the per-namespace SCC grant into your namespace-provisioning automation from day one, or it will bite you six months in.
+

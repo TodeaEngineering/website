@@ -76,3 +76,4 @@ Kubernetes [v1.36，代号 *Haru*](https://kubernetes.io/blog/2026/04/22/kuberne
 Kubernetes 1.36 主要是一次沿两条线推进的巩固型版本:作为加速器原生平台的 Kubernetes，日趋成熟的 DRA 治理、HPA scale-to-zero,以及更具工作负载感知的调度;以及作为最小权限平台的 Kubernetes，细粒度 kubelet 授权到达 GA、user namespaces 进入 Stable、externalIPs 走上废弃之路。
 
 所以行动清单其实相当直接。审计任何 `nodes/proxy` 权限,迁移到细粒度的 kubelet 子资源。在 manifest 中搜索现在已经被废弃的 `service.spec.externalIPs`,以及在 1.36 中被移除、会让仍依赖它的 Pod 直接挂掉的 `gitRepo`。如果你用加速器,在非生产集群上启用 DRA,把关于 AdminAccess 和设备 taints 的立场先摸清楚。其他大多数变更都可以作为常规升级流程的一部分来处理。
+

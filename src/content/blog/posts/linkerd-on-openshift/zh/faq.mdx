@@ -1,0 +1,15 @@
+
+## 常见问题
+
+### 为什么默认的 Linkerd 安装在 OpenShift 上会失败?
+
+OpenShift 的 SCC 把它拦下了:容器 UID 落在允许范围之外,而 init 容器需要 `NET_ADMIN` 和 `NET_RAW`。
+
+### 在 OpenShift 上应该用 Linkerd CNI 还是 proxy-init?
+
+用 CNI。它在节点层面设置 iptables,应用不需要 `NET_ADMIN`/`NET_RAW`。proxy-init 则要求每个命名空间都拥有这些能力。
+
+### 在 OpenShift 上,被纳入网格的应用工作负载需要自定义 SCC 吗?
+
+需要。代理以 UID 2102 运行,落在项目分配范围之外,所以每个 ServiceAccount 都必须使用一个允许该 UID 的最小 SCC。
+

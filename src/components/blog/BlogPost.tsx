@@ -1,6 +1,8 @@
 import { format, parseISO } from 'date-fns';
 import { useTranslations, useLocale } from 'next-intl';
 import BlogContent from './BlogContent';
+import BlogCTA from './BlogCTA';
+import BlogFAQ from './BlogFAQ';
 import type { Post } from '@/lib/blog';
 
 export default function BlogPost({ post }: { post: Post }) {
@@ -93,6 +95,8 @@ export default function BlogPost({ post }: { post: Post }) {
       {/* Content */}
       <div className="max-w-[820px] mx-auto px-6">
         <BlogContent source={post.content} />
+        {post.cta && <BlogCTA source={post.cta} />}
+        {post.faq && <BlogFAQ source={post.faq} />}
       </div>
 
       {/* Back to list */}

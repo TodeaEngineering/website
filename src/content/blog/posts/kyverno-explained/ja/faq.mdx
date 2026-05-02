@@ -1,0 +1,15 @@
+
+## よくある質問
+
+### Kyvernoとは何で、Kubernetesのアドミッションフローのどこに位置しますか？
+
+KyvernoはKubernetesネイティブのポリシーエンジンで、アドミッションコントローラとして動作し、Webhookを通じてすべてのAPIリクエストをインターセプトし、リソースが永続化される前に検証、変更、または生成を行います。
+
+### レガシーのClusterPolicyから始めるべきですか、それとも新しいCELベースのポリシータイプから始めるべきですか？
+
+新規の作業にはCELベースの型（ValidatingPolicy、MutatingPolicy、GeneratingPolicy、ImageValidatingPolicy）を使ってください。ClusterPolicyはまだ動きますが、Kyverno 1.17以降は非推奨となっています。
+
+### AuditとEnforceはどう違い、バックグラウンドスキャンは何をしますか？
+
+Deny（レガシーの`ClusterPolicy`ではEnforceと呼ばれます）はアドミッションで失敗したリクエストを拒否します。Auditはそれを許可しますが失敗を記録します。バックグラウンドスキャンは、既存のリソースをスケジュールに従って再評価し、結果を中間表現の`EphemeralReport`に書き込みます。Kyvernoのreportsコントローラはこれを集約し、運用者が利用するPolicyReportリソースに変換します。
+
