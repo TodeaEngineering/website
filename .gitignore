@@ -30,5 +30,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# wrangler
+worker-configuration.d.ts
+.wrangler/
+
 # marketing todos
 /marketing
