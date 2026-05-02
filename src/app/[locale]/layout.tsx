@@ -114,7 +114,6 @@ export default async function LocaleLayout({
         <meta name="naver-site-verification" content="d62232868655b0d90718afa157ba294ee71dd601" />
         <link rel="preload" href="/Logo.svg" as="image" type="image/svg+xml" />
         <meta name="theme-color" content="#000000" />
-        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
       </head>
       <body className="bg-white text-black font-sora antialiased">

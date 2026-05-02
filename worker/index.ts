@@ -53,30 +53,51 @@ function buildCSP(nonce: string): string {
   ].join('; ');
 }
 
+const SECURITY_HEADERS: Record<string, string> = {
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+};
+
+function applySecurityHeaders(headers: Headers): void {
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    headers.set(key, value);
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === '/') {
       const locale = pickLocale(request.headers.get('Accept-Language'));
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: `${url.origin}/${locale}${url.search}`,
-          Vary: 'Accept-Language',
-          'Cache-Control': 'public, max-age=0, must-revalidate',
-        },
+      const headers = new Headers({
+        Location: `${url.origin}/${locale}${url.search}`,
+        Vary: 'Accept-Language',
+        'Cache-Control': 'public, max-age=0, must-revalidate',
       });
+      applySecurityHeaders(headers);
+      return new Response(null, { status: 302, headers });
     }
 
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get('content-type') || '';
     if (!contentType.toLowerCase().includes('text/html')) {
-      return response;
+      const headers = new Headers(response.headers);
+      applySecurityHeaders(headers);
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
     }
 
     const nonce = generateNonce();
     const headers = new Headers(response.headers);
     headers.set('Content-Security-Policy', buildCSP(nonce));
+    applySecurityHeaders(headers);
 
     const rewritten = new Response(response.body, {
       status: response.status,
