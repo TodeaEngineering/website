@@ -3,7 +3,7 @@ import { Sora, Noto_Sans_KR, Noto_Sans_JP, Noto_Sans_SC } from 'next/font/google
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing';
+import { routing, localeToHreflang } from '@/i18n/routing';
 import CookieConsent from '@/components/CookieConsent';
 import '../globals.css';
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const meta = localeMetadata[locale] || localeMetadata.en;
   const alternateLanguages: Record<string, string> = {};
   for (const loc of routing.locales) {
-    alternateLanguages[loc] = `${BASE_URL}/${loc}`;
+    alternateLanguages[localeToHreflang(loc)] = `${BASE_URL}/${loc}`;
   }
 
   return {
@@ -109,7 +109,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${sora.variable} ${notoKR.variable} ${notoJP.variable} ${notoSC.variable}`}>
+    <html lang={localeToHreflang(locale)} className={`${sora.variable} ${notoKR.variable} ${notoJP.variable} ${notoSC.variable}`}>
       <head>
         <meta name="naver-site-verification" content="d62232868655b0d90718afa157ba294ee71dd601" />
         <link rel="preload" href="/Logo.svg" as="image" type="image/svg+xml" />

@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import BlogContent from '@/components/blog/BlogContent';
-import { routing } from '@/i18n/routing';
+import { routing, localeToHreflang } from '@/i18n/routing';
 import { getLegalDocument } from '@/lib/legal';
 import type { Locale } from '@/lib/blog';
 
@@ -25,7 +25,7 @@ export async function generateMetadata({
 
   const languages: Record<string, string> = {};
   for (const loc of routing.locales) {
-    languages[loc] = `${BASE_URL}/${loc}/privacy`;
+    languages[localeToHreflang(loc)] = `${BASE_URL}/${loc}/privacy`;
   }
   languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/privacy`;
 

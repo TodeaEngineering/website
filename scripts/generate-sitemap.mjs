@@ -11,6 +11,9 @@ const ROOT = path.resolve(new URL('.', import.meta.url).pathname, '..');
 const BASE_URL = 'https://todea.co.kr';
 const LOCALES = ['en', 'ko', 'ja', 'zh'];
 const DEFAULT_LOCALE = 'en';
+// Keep in sync with localeToHreflang in src/i18n/routing.ts.
+// `zh` → `zh-Hans` because we ship Simplified (Noto Sans SC).
+const LOCALE_TO_HREFLANG = { en: 'en', ko: 'ko', ja: 'ja', zh: 'zh-Hans' };
 const BLOG_DIR = path.join(ROOT, 'src/content/blog/posts');
 const LEGAL_DOCS = [
   { slug: 'privacy', dir: path.join(ROOT, 'src/content/privacy'), priority: '0.5' },
@@ -66,7 +69,8 @@ function getLegalDocDate(dir) {
 
 function alternateLinks(pathSuffix, locales = LOCALES) {
   const links = locales.map(
-    (loc) => `    <xhtml:link rel="alternate" hreflang="${loc}" href="${BASE_URL}/${loc}${pathSuffix}"/>`
+    (loc) =>
+      `    <xhtml:link rel="alternate" hreflang="${LOCALE_TO_HREFLANG[loc] ?? loc}" href="${BASE_URL}/${loc}${pathSuffix}"/>`
   );
   const xDefault = locales.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : locales[0];
   links.push(

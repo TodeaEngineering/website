@@ -6,6 +6,7 @@ import AboutBeliefs from '@/components/about/AboutBeliefs';
 import AboutCompany from '@/components/about/AboutCompany';
 import CTA from '@/components/CTA';
 import Footer from '@/components/Footer';
+import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
 
@@ -40,11 +41,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const meta = localeMetadata[locale] || localeMetadata.en;
 
+  const languages: Record<string, string> = {};
+  for (const loc of routing.locales) {
+    languages[localeToHreflang(loc)] = `${BASE_URL}/${loc}/about`;
+  }
+  languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/about`;
+
   return {
     title: meta.title,
     description: meta.description,
     alternates: {
       canonical: `${BASE_URL}/${locale}/about`,
+      languages,
     },
     openGraph: {
       title: meta.title,

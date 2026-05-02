@@ -8,7 +8,7 @@ import SupportedProducts from '@/components/services/SupportedProducts';
 import SupportTiers from '@/components/services/SupportTiers';
 import ServicesCTA from '@/components/services/ServicesCTA';
 import { getPageMeta } from '@/lib/page-meta';
-import { routing } from '@/i18n/routing';
+import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
 
@@ -26,7 +26,7 @@ export async function generateMetadata({
 
   const languages: Record<string, string> = {};
   for (const loc of routing.locales) {
-    languages[loc] = `${BASE_URL}/${loc}/services`;
+    languages[localeToHreflang(loc)] = `${BASE_URL}/${loc}/services`;
   }
   languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/services`;
 

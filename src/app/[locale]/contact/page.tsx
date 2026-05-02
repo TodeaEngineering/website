@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import Contact from '@/components/Contact';
-import { routing } from '@/i18n/routing';
+import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
 
@@ -41,7 +41,7 @@ export async function generateMetadata({
 
   const languages: Record<string, string> = {};
   for (const loc of routing.locales) {
-    languages[loc] = `${BASE_URL}/${loc}/contact`;
+    languages[localeToHreflang(loc)] = `${BASE_URL}/${loc}/contact`;
   }
   languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/contact`;
 

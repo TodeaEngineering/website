@@ -5,7 +5,7 @@ import Nav from '@/components/Nav';
 import BlogPost from '@/components/blog/BlogPost';
 import Footer from '@/components/Footer';
 import { getAllSlugs, getPostBySlug, type Locale } from '@/lib/blog';
-import { routing } from '@/i18n/routing';
+import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
 
   const languages: Record<string, string> = {};
   for (const loc of routing.locales) {
-    languages[loc] = `${BASE_URL}/${loc}/blog/${post.slug}`;
+    languages[localeToHreflang(loc)] = `${BASE_URL}/${loc}/blog/${post.slug}`;
   }
   languages['x-default'] = `${BASE_URL}/${routing.defaultLocale}/blog/${post.slug}`;
 
