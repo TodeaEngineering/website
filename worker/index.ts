@@ -1,3 +1,12 @@
+declare class HTMLRewriter {
+  on(selector: string, handlers: { element?: (element: HTMLRewriterElement) => void }): HTMLRewriter;
+  transform(response: Response): Response;
+}
+interface HTMLRewriterElement {
+  setAttribute(name: string, value: string): HTMLRewriterElement;
+  getAttribute(name: string): string | null;
+}
+
 interface Env {
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
@@ -22,6 +31,28 @@ function pickLocale(acceptLanguage: string | null): string {
   return DEFAULT_LOCALE;
 }
 
+function generateNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let binary = '';
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
+}
+
+function buildCSP(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://www.google-analytics.com https://challenges.cloudflare.com https://static.cloudflareinsights.com`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com",
+    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://challenges.cloudflare.com https://cloudflareinsights.com",
+    "frame-src https://challenges.cloudflare.com",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ');
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -36,6 +67,29 @@ export default {
         },
       });
     }
-    return env.ASSETS.fetch(request);
+
+    const response = await env.ASSETS.fetch(request);
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('text/html')) {
+      return response;
+    }
+
+    const nonce = generateNonce();
+    const headers = new Headers(response.headers);
+    headers.set('Content-Security-Policy', buildCSP(nonce));
+
+    const rewritten = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+
+    return new HTMLRewriter()
+      .on('script', {
+        element(element) {
+          element.setAttribute('nonce', nonce);
+        },
+      })
+      .transform(rewritten);
   },
 };
