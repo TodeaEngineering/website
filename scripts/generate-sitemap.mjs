@@ -3,6 +3,7 @@
  * Generates public/sitemap.xml from blog post frontmatter.
  * Run with: npm run sitemap
  */
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
@@ -20,6 +21,17 @@ const LEGAL_DOCS = [
 ];
 const OUTPUT = path.join(ROOT, 'public/sitemap.xml');
 
+// Sources that influence each static page's rendered output. lastmod is the
+// most recent commit touching any of these paths — Google discounts lastmod
+// values that always match build date, so we anchor to real content edits.
+const PAGE_SOURCES = {
+  home: ['src/app/[locale]/page.tsx', 'src/content/homepage'],
+  about: ['src/app/[locale]/about/page.tsx', 'src/content/about'],
+  services: ['src/app/[locale]/services/page.tsx', 'src/content/services'],
+  contact: ['src/app/[locale]/contact/page.tsx'],
+  blogIndex: ['src/app/[locale]/blog/page.tsx', 'src/content/blog/page'],
+};
+
 function readDirSafe(dir) {
   try {
     return fs.readdirSync(dir).filter((e) => fs.statSync(path.join(dir, e)).isDirectory());
@@ -31,6 +43,25 @@ function readDirSafe(dir) {
 function isoDate(input) {
   const d = typeof input === 'string' ? new Date(input) : input;
   return d.toISOString().split('T')[0];
+}
+
+function lastCommitDate(paths) {
+  const existing = paths.filter((p) => fs.existsSync(path.join(ROOT, p)));
+  if (existing.length === 0) return null;
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', ...existing], {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return out ? isoDate(out) : null;
+  } catch {
+    return null;
+  }
+}
+
+function pageLastmod(key, fallback) {
+  return lastCommitDate(PAGE_SOURCES[key]) ?? fallback;
 }
 
 function getPosts() {
@@ -98,12 +129,20 @@ function build() {
     ? isoDate(posts.reduce((a, b) => (a.date > b.date ? a : b)).date)
     : today;
 
+  const homeLastmod = pageLastmod('home', today);
+  const aboutLastmod = pageLastmod('about', today);
+  const servicesLastmod = pageLastmod('services', today);
+  const contactLastmod = pageLastmod('contact', today);
+  const blogIndexSourceDate = pageLastmod('blogIndex', today);
+  const blogIndexLastmod =
+    blogIndexSourceDate > latestPostDate ? blogIndexSourceDate : latestPostDate;
+
   const entries = [];
 
   for (const locale of LOCALES) {
     entries.push({
       loc: `${BASE_URL}/${locale}`,
-      lastmod: today,
+      lastmod: homeLastmod,
       changefreq: 'monthly',
       priority: '1.0',
       pathSuffix: '',
@@ -113,7 +152,7 @@ function build() {
   for (const locale of LOCALES) {
     entries.push({
       loc: `${BASE_URL}/${locale}/about`,
-      lastmod: today,
+      lastmod: aboutLastmod,
       changefreq: 'monthly',
       priority: '0.9',
       pathSuffix: '/about',
@@ -123,7 +162,7 @@ function build() {
   for (const locale of LOCALES) {
     entries.push({
       loc: `${BASE_URL}/${locale}/services`,
-      lastmod: today,
+      lastmod: servicesLastmod,
       changefreq: 'monthly',
       priority: '0.9',
       pathSuffix: '/services',
@@ -133,7 +172,7 @@ function build() {
   for (const locale of LOCALES) {
     entries.push({
       loc: `${BASE_URL}/${locale}/blog`,
-      lastmod: latestPostDate,
+      lastmod: blogIndexLastmod,
       changefreq: 'weekly',
       priority: '0.8',
       pathSuffix: '/blog',
@@ -143,7 +182,7 @@ function build() {
   for (const locale of LOCALES) {
     entries.push({
       loc: `${BASE_URL}/${locale}/contact`,
-      lastmod: today,
+      lastmod: contactLastmod,
       changefreq: 'yearly',
       priority: '0.7',
       pathSuffix: '/contact',

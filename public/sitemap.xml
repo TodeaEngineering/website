@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://todea.co.kr/en</loc>
-    <lastmod>2026-05-02</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ko</loc>
-    <lastmod>2026-05-02</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -25,7 +25,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ja</loc>
-    <lastmod>2026-05-02</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -36,7 +36,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/zh</loc>
-    <lastmod>2026-05-02</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en"/>
@@ -135,7 +135,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/en/blog</loc>
-    <lastmod>2026-04-23</lastmod>
+    <lastmod>2026-05-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -146,7 +146,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ko/blog</loc>
-    <lastmod>2026-04-23</lastmod>
+    <lastmod>2026-05-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -157,7 +157,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/ja/blog</loc>
-    <lastmod>2026-04-23</lastmod>
+    <lastmod>2026-05-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
@@ -168,7 +168,7 @@
   </url>
   <url>
     <loc>https://todea.co.kr/zh/blog</loc>
-    <lastmod>2026-04-23</lastmod>
+    <lastmod>2026-05-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog"/>
