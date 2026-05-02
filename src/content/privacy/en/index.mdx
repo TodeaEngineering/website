@@ -19,7 +19,7 @@ The Site does not offer newsletter sign-up or account registration. We process p
 **c. Information collected automatically when you visit the Site.**
 
 - Standard server access information: IP address, user-agent string, referrer, requested URL, and timestamp. Collected by our hosting provider for security and reliability.
-- Cookie consent state: a single value (`granted` or `declined`) stored in your browser's `localStorage` under the key `cookie-consent`. This stays on your device and is not transmitted to us.
+- Cookie consent state: a record of your choice (`granted` or `denied`) together with the timestamp of that choice, stored in your browser's `localStorage` under the key `cookie-consent`. This stays on your device and is not transmitted to us. We treat the stored value as expired after 12 months and re-request your consent.
 - Google Analytics (only if you accept analytics cookies): client identifier, page views, approximate location derived from IP, device and browser metadata. Analytics is **disabled by default** and only activates after you click "Accept" in the cookie banner.
 
 We do not collect special-category data (health, beliefs, biometric, etc.) and we do not knowingly collect information from children under 14.
@@ -48,7 +48,7 @@ Personal information may be transferred outside the Republic of Korea to these p
 
 - **Email correspondence and contact-form submissions:** kept for as long as needed to handle the enquiry and any follow-up business relationship, then deleted.
 - **Server access logs:** retained by the hosting provider for a short rolling window (typically up to 90 days).
-- **Cookie consent value:** stored in your browser until you clear it or change your selection.
+- **Cookie consent value:** stored in your browser until you clear it, change your selection, or 12 months pass (after which we re-request your consent).
 - **Google Analytics data:** retained according to the property's configured retention window (currently 14 months) and then automatically deleted.
 
 ## 5. Your rights

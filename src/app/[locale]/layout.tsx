@@ -5,6 +5,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing, localeToHreflang } from '@/i18n/routing';
 import CookieConsent from '@/components/CookieConsent';
+import { CONSENT_TTL_MS } from '@/lib/consent';
 import '../globals.css';
 
 const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
@@ -129,7 +130,7 @@ export default async function LocaleLayout({
         </NextIntlClientProvider>
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});gtag('js',new Date());gtag('config','G-G8K3GV4DB2');if(localStorage.getItem('cookie-consent')==='granted'){gtag('consent','update',{analytics_storage:'granted'});var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2';document.head.appendChild(s);}`,
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});gtag('js',new Date());gtag('config','G-G8K3GV4DB2');try{var c=JSON.parse(localStorage.getItem('cookie-consent')||'null');if(c&&c.choice==='granted'&&typeof c.timestamp==='number'&&Date.now()-c.timestamp<${CONSENT_TTL_MS}){gtag('consent','update',{analytics_storage:'granted'});var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2';document.head.appendChild(s);}}catch(e){}`,
           }}
         />
       </body>
