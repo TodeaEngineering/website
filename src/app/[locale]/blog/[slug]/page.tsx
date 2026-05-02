@@ -9,6 +9,13 @@ import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
 
+const BREADCRUMB_LABELS: Record<string, { home: string; blog: string }> = {
+  en: { home: 'Home', blog: 'Blog' },
+  ko: { home: '홈', blog: '블로그' },
+  ja: { home: 'ホーム', blog: 'ブログ' },
+  zh: { home: '首页', blog: '博客' },
+};
+
 export function generateStaticParams() {
   const slugs = getAllSlugs();
   const params: { locale: string; slug: string }[] = [];
@@ -104,6 +111,31 @@ export default async function BlogPostPage({
     keywords: post.tags?.join(', '),
   };
 
+  const breadcrumbLabels = BREADCRUMB_LABELS[locale] ?? BREADCRUMB_LABELS.en;
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: breadcrumbLabels.home,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: breadcrumbLabels.blog,
+        item: `${BASE_URL}/${locale}/blog`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: post.title,
+      },
+    ],
+  };
+
   const faqEntries = post.faq ? parseFaqEntries(post.faq) : [];
   const faqJsonLd =
     faqEntries.length > 0
@@ -126,6 +158,10 @@ export default async function BlogPostPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       {faqJsonLd && (
         <script
