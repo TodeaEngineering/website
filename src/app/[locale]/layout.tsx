@@ -127,10 +127,9 @@ export default async function LocaleLayout({
           {children}
           <CookieConsent />
         </NextIntlClientProvider>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});var c=localStorage.getItem('cookie-consent');if(c==='granted'){gtag('consent','update',{analytics_storage:'granted'});}gtag('js',new Date());gtag('config','G-G8K3GV4DB2');`,
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});gtag('js',new Date());gtag('config','G-G8K3GV4DB2');if(localStorage.getItem('cookie-consent')==='granted'){gtag('consent','update',{analytics_storage:'granted'});var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2';document.head.appendChild(s);}`,
           }}
         />
       </body>

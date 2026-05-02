@@ -23,6 +23,12 @@ export default function CookieConsent() {
   function accept() {
     localStorage.setItem('cookie-consent', 'granted');
     window.gtag?.('consent', 'update', { analytics_storage: 'granted' });
+    if (!document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-G8K3GV4DB2';
+      document.head.appendChild(s);
+    }
     setVisible(false);
   }
 
