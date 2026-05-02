@@ -35,7 +35,7 @@ export default function BlogImage(props: ComponentPropsWithoutRef<'img'>) {
         aria-label={alt ? `Zoom in on ${alt}` : 'Zoom in on image'}
         className="my-8 block relative left-1/2 -translate-x-1/2 max-w-full xl:max-w-[calc(100%+150px)] 2xl:max-w-[calc(100%+250px)] cursor-zoom-in p-0 bg-transparent border-0"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img {...props} alt={alt} className="my-0 block h-auto w-full rounded-md" />
       </button>
       {mounted && open
@@ -58,7 +58,7 @@ export default function BlogImage(props: ComponentPropsWithoutRef<'img'>) {
               >
                 ×
               </button>
-              {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 {...props}
                 alt={alt}

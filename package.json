@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "find out -name .DS_Store -delete",
     "start": "next start",
+    "lint": "eslint .",
     "sitemap": "node scripts/generate-sitemap.mjs"
   },
   "dependencies": {
@@ -27,6 +29,8 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.2.4",
     "postcss": "^8.5.13",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.0"

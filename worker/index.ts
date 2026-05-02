@@ -76,7 +76,7 @@ export default {
       const headers = new Headers({
         Location: `${url.origin}/${locale}${url.search}`,
         Vary: 'Accept-Language',
-        'Cache-Control': 'public, max-age=0, must-revalidate',
+        'Cache-Control': 'private, no-store',
       });
       applySecurityHeaders(headers);
       return new Response(null, { status: 302, headers });
