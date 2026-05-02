@@ -33,6 +33,51 @@ export interface Post extends PostMeta {
   cta: string | null;
 }
 
+export interface FaqEntry {
+  question: string;
+  answer: string;
+}
+
+/**
+ * Extracts Q/A pairs from an FAQ MDX body. Treats every `### …` heading as a
+ * question and the prose that follows (until the next `###` or EOF) as the
+ * answer. Returns plain text suitable for FAQPage JSON-LD.
+ */
+export function parseFaqEntries(faq: string): FaqEntry[] {
+  const entries: FaqEntry[] = [];
+  let currentQuestion: string | null = null;
+  let answerLines: string[] = [];
+
+  const flush = () => {
+    if (currentQuestion === null) return;
+    const answer = stripInlineMarkdown(answerLines.join('\n').trim());
+    if (answer) entries.push({ question: stripInlineMarkdown(currentQuestion), answer });
+  };
+
+  for (const line of faq.split('\n')) {
+    const match = /^###\s+(.+?)\s*$/.exec(line);
+    if (match) {
+      flush();
+      currentQuestion = match[1];
+      answerLines = [];
+    } else if (currentQuestion !== null) {
+      answerLines.push(line);
+    }
+  }
+  flush();
+  return entries;
+}
+
+function stripInlineMarkdown(text: string): string {
+  return text
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function safeReadDir(dir: string): string[] {
   try {
     return fs.readdirSync(dir).filter((entry) => {

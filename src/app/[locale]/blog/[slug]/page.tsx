@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import Nav from '@/components/Nav';
 import BlogPost from '@/components/blog/BlogPost';
 import Footer from '@/components/Footer';
-import { getAllSlugs, getPostBySlug, type Locale } from '@/lib/blog';
+import { getAllSlugs, getPostBySlug, parseFaqEntries, type Locale } from '@/lib/blog';
 import { routing, localeToHreflang } from '@/i18n/routing';
 
 const BASE_URL = 'https://todea.co.kr';
@@ -104,12 +104,35 @@ export default async function BlogPostPage({
     keywords: post.tags?.join(', '),
   };
 
+  const faqEntries = post.faq ? parseFaqEntries(post.faq) : [];
+  const faqJsonLd =
+    faqEntries.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faqEntries.map(({ question, answer }) => ({
+            '@type': 'Question',
+            name: question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: answer,
+            },
+          })),
+        }
+      : null;
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
       <Nav />
       <main id="main">
         <BlogPost post={post} />
