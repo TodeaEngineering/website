@@ -1,0 +1,190 @@
+---
+title: "What Platform Teams Can Expect From Crossplane v2.2"
+description: "Crossplane v2.2 guide covering pipeline debugging, metadata validation, dependency aware runtime config and impacts on building Kubernetes control planes"
+date: "2026-04-04"
+author: "Todea Engineering"
+authorRole: "Cloud Native Practice"
+category: "Cloud Native"
+image: "/blog/crossplane-explained/en-cover.svg"
+tags: ["crossplane", "kubernetes", "platform-engineering", "control-plane", "iac", "gitops"]
+---
+
+A developer submits a ticket to request a database. Three days later, the platform team responds, but the configuration isn’t quite right. The developer files another ticket and waits again. By the third week, the database might finally be ready. This cycle repeats across every team and environment, creating a daily reality that most platform teams recognize: developers lose significant time waiting for infrastructure, while platform teams struggle to keep up with the constant flow of requests.
+
+There are plenty of good tools for provisioning. Terraform is platform-agnostic and widely used. CloudFormation is the go-to option on AWS, and every cloud provider offers its own console and CLI. Each tool does its job well. This article isn’t about choosing the best one. Instead, it looks at the problem from a different perspective.
+
+Crossplane offers a Kubernetes-native approach to managing cloud resources. Instead of setting up infrastructure outside the cluster and then linking it back, Crossplane brings that infrastructure under the same control loop as your applications. This fits naturally with how many teams already work. Paired with GitOps, a pull request becomes the primary way to manage changes, and the cluster continuously reconciles toward the desired state.
+
+The project has moved quickly over the past year. In August 2025, Crossplane v2 introduced big changes, like removing Claims and adding namespaced composite and managed resources. The latest release, v2.2, adds an alpha Pipeline Inspector for troubleshooting, broader CEL validation, and more improvements.
+
+## What Crossplane actually is
+
+![Crossplane overview](/blog/crossplane-explained/en-crossplane-overview.svg)
+
+Crossplane is a control plane framework for platform engineering. You install it into a Kubernetes cluster, known as the management cluster, and that cluster becomes the control plane for everything outside it: cloud accounts, SaaS APIs, internal tools, and even other Kubernetes clusters. All of these are managed through the same Kubernetes API your applications already use. The management cluster itself must be set up separately; Crossplane does not create it for you. Once Crossplane is running, there is no state file and no separate workflow. Drift is fixed by the same reconciliation loop that keeps your `Deployments` healthy.
+
+Crossplane has four major components. You can use all four or only the ones you need.
+
+- **Managed resources (MRs)** map directly to external cloud resources in Kubernetes. For example, an S3 from AWS or a ResourceGroup from Azure is considered an MR. Crossplane uses spec.forProvider as the main reference and keeps the actual cloud resource in sync with it. You create MRs using kubectl, and the provider handles provisioning and reconciliation.
+
+- **Composition** lets you create custom APIs using a function pipeline. There are three main parts to understand:
+  - A `CompositeResourceDefinition` (XRD) defines a schema. It tells Kubernetes, “here’s a new custom API kind I’m creating, and these are its fields.” You can think of it as a CRD with added features for Crossplane.
+  - A `Composition` acts as a recipe. It says, “when someone creates an XR of kind Foo, run this set of functions to create these MRs or other Kubernetes resources.” In version 2, this always uses a function pipeline.
+  - A `Composite Resource` (XR) is an instance of the API you defined with an XRD. When a user creates an XR, Crossplane uses the matching Composition’s pipeline to generate the needed resources. You can write functions in YAML, KCL, Python, or Go.
+- **Operations** run function pipelines to completion, similar to a Kubernetes Job. There are three modes: Operation (one-time), CronOperation (scheduled), and WatchOperation (event-driven). Operations are currently in alpha.
+
+- The **package manager** handles installing and updating providers, configurations, and functions.
+
+## How a Crossplane request flows
+
+There are two entry points into this flow, depending on what you're applying.
+
+When a developer or a pipeline creates an XR in a namespace, the composition engine watches it, runs the configured function pipeline, and creates the needed resources. These resources can be other Kubernetes resources, managed resources, or both.
+
+When a user applies an MR directly, either by itself or as part of a `Composition`, the provider takes over. It monitors the MR through the Kubernetes API, calls the external system to create or update the real resource, and updates the status. After that, it keeps checking: if the real resource changes from `spec.forProvider`, the provider fixes it. All state is stored in etcd, so there is no separate state file.
+
+![Crossplane flow](/blog/crossplane-explained/en-crossplane-flow.svg)
+
+## When to use traditional IaC instead
+
+Crossplane and tools like Terraform or CloudFormation overlap in scope (both can provision a cloud database) and differ in how. The right choice depends on where your platform already lives.
+ 
+| Capability / Feature | Terraform | CloudFormation | Crossplane |
+| --- | --- | --- | --- |
+| Control loop | Manual `apply` (or pipeline) | Manual stack create/update | Continuous reconciliation |
+| Drift handling | Detect with `plan`; correct manually | Detect drift action; correct via stack update | Detected and corrected automatically |
+| State | `tfstate` in a remote backend you secure (e.g., S3 with versioning, HCP Terraform) | AWS-managed (server-side) | Kubernetes API objects in the management cluster's etcd |
+| Workflow | Separate from app deployment | Separate from app deployment | Same as `kubectl apply` |
+| Composition | Modules | Nested stacks, Modules | XRDs + Compositions + functions |
+| Languages | HCL, JSON | YAML, JSON | YAML, Go, Python, KCL, CUE, HCL (via composition functions) |
+| Built-in policy | Variable validation and pre/postconditions (OSS); Sentinel and OPA integration in HCP Terraform / Enterprise | cfn-guard, Hooks | XRD CEL validations (incl. metadata in v2.2) |
+| Multi-cloud | Provider per cloud, separate state | AWS-first (third-party types via the CloudFormation registry) | One control plane, one API surface |
+| Footprint | A binary | AWS-managed service (CLI/SDK only) | A Kubernetes control plane (Crossplane core, providers, functions) backed by etcd |
+| Operates outside Kubernetes | ✓ | ✓ | ✕ — requires a management cluster |
+
+If your team does not use Kubernetes, Crossplane is not the best place to start. Terraform is simpler and does not need a control plane. But if you are on Kubernetes, especially if you already use Argo CD or Flux, it is easy to manage your infrastructure in the same way. Crossplane is the closest option for writing infrastructure as code and handling it like the rest of your declarative cluster state.
+
+## What new with v2.2
+
+v2.2 adds five things you'll notice in practice and one that quietly improves reliability. Each one closes a specific gap that platform teams have been hitting in production.
+
+- **Pipeline inspector (alpha)**: `Composition` functions are powerful, but they have always been hard to debug. If a pipeline acts up on a running control plane, you could only see what each function got and returned by writing tests, running `crossplane render` locally, or adding your own instrumentation. v2.2 adds the pipeline inspector. When you turn on the feature flag, the Crossplane controller intercepts every `RunFunctionRequest` and `RunFunctionResponse` and forwards them over gRPC to a Unix socket you set up. A sidecar read from this socket and handle the data however you need: stream it to stdout during development or send it to an audit pipeline in production. To use it, add `--enable-pipeline-inspector` to Crossplane. The default socket path is `/var/run/pipeline-inspector/socket`, but you can change it with `--pipeline-inspector-socket`.
+
+  ```yaml
+  # Enable the pipeline inspector feature flag
+  args:
+    - --enable-pipeline-inspector
+    - --pipeline-inspector-socket=/var/run/pipeline-inspector/socket
+
+  # Inject the pipeline inspector sidecar
+  sidecarsCrossplane:
+    - name: pipeline-inspector
+      image: xpkg.crossplane.io/crossplane/inspector-sidecar:v0.0.3
+      args:
+        - --socket-path=/var/run/pipeline-inspector/socket
+        - --max-recv-msg-size=8388608  # 8MB
+      volumeMounts:
+        - name: pipeline-inspector-socket
+          mountPath: /var/run/pipeline-inspector
+      resources:
+        requests: { cpu: 10m, memory: 64Mi }
+        limits:   { cpu: 100m, memory: 128Mi }
+
+  # Add the shared volume for Unix socket communication
+  extraVolumesCrossplane:
+    - name: pipeline-inspector-socket
+      emptyDir: {}
+
+  extraVolumeMountsCrossplane:
+    - name: pipeline-inspector-socket
+      mountPath: /var/run/pipeline-inspector
+  ```
+
+- **XRD validation outside `spec`**: XRD validation outside `x-kubernetes-validations`, (which are Kubernetes' CEL-based validation rules) used to only work on fields under an XR's `spec`. If you wanted to enforce rules like "all Database names must start with db-", you had to use an external admission controller such as Kyverno, OPA/Gatekeeper, or a custom webhook. With v2.2, that restriction is gone. Now, you can write CEL rules outside of `spec`, and the API server enforces them at admission time. 
+
+  ```yaml
+  apiVersion: apiextensions.crossplane.io/v1
+  kind: CompositeResourceDefinition
+  metadata:
+    name: databases.platform.example.org
+  spec:
+    group: platform.example.org
+    names:
+      kind: Database
+      plural: databases
+    versions:
+      - name: v1alpha1
+        served: true
+        referenceable: true
+        schema:
+          openAPIV3Schema:
+            type: object
+            x-kubernetes-validations:
+              - rule: "self.metadata.name.startsWith('db-')"
+                message: "Database names must start with 'db-'"
+            properties:
+              spec:
+                type: object
+                properties:
+                  region:
+                    type: string
+  ```
+
+- **`ImageConfig` runtime for dependencies**: A Crossplane package, including Providers, runs as a Deployment. To customize the Deployment, such as by adding service account annotations, pod labels, or container arguments, use a `DeploymentRuntimeConfig` and reference it from the package. 
+
+```
+kind: Provider
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/provider-azure-network:v1.0.0
+  runtimeConfigRef:
+    name: azure-workload-identity
+```
+
+This approach works well when you install the package directly. However, Crossplane can also install packages as dependencies. In that case, you could not get Workload Identity or any other runtime customization onto providers installed as dependencies.
+
+`ImageConfig` is a cluster-scoped resource that matches packages based on their image prefix, not on which Provider or Configuration object created them. In v2.2, a new field was added: `spec.runtime.configRef`. With this change, Crossplane applies the `DeploymentRuntimeConfig` to any package whose image is matched, regardless of how it was installed.
+
+
+  ```yaml
+  apiVersion: pkg.crossplane.io/v1beta1
+  kind: ImageConfig
+  metadata:
+    name: azure-workload-identity
+  spec:
+    matchImages:
+      - prefix: xpkg.crossplane.io/crossplane-contrib/provider-azure-
+      - prefix: xpkg.crossplane.io/crossplane-contrib/provider-family-azure
+    runtime:
+      configRef:
+        name: azure-workload-identity
+  ```
+
+  Every Azure family provider, whether installed directly or added as a dependency, receives the runtime config.
+
+- **`RequiredSchemas` for functions**: Composition and functions sometimes need the OpenAPI schema of a resource to validate inputs, make schema-aware decisions, or generate resources dynamically. Before v2.2 you could ask Crossplane for the corresponding CRD as a `RequiredResource`, parse it, and extract the schema yourself, but only for custom resources, since built-in kinds like Deployment don't have a CRD. v2.2 introduces `RequiredSchemas` on the `RunFunctionResponse` thich returns the schema for any kind, built-in or custom. 
+
+- **`crossplane beta trace` improvements**: You can now pass a kind (and optionally a namespace) instead of a single resource and get the dependency tree for every instance. And `--watch` (alias `-w`) keeps the output live, the way `kubectl get -w` does. 
+
+- **Function packages no longer install bundled CRDs**: CRDs included in a function package are not applied to the cluster anymore. Also, packages with unknown or disallowed kinds now install successfully and simply skip those objects. Previously, the install would fail in these cases.
+
+- **The package cache layout has changed**: Cache filenames now come from the package’s OCI source and digest instead of the PackageRevision’s Kubernetes name. This change affects side-loading used by some provider e2e suites.
+
+## Operational reality
+
+- **The management cluster is your state.** Crossplane does not use an external state file. All XRDs, Compositions, XRs, and managed resources are stored in the management cluster’s etcd. If you lose that cluster without backups, your cloud resources keep running, but Crossplane loses track of them and stops reconciling. Silent drift can build up. Treat the management cluster like any production-critical Kubernetes cluster: use a highly available control plane, back up etcd, and avoid running it on your laptop. Local k3s or kind clusters are fine for learning, demos, or the Get Started guide, but not for important state. This is the trade-off for not having a Terraform state file: you solve one operational problem but gain another that is easier to overlook.
+
+- **Upgrade through v2.1, not directly.** Crossplane performs CRD migrations with each minor version upgrade, so skipping versions can cause you to miss important migrations. If you are on v1.x, use the Crossplane v2 upgrade guide. If you are on v2.1, upgrade directly to v2.2.
+
+- **v1.20 is not yet end-of-life.** v1.20 is still supported and has not reached end-of-life yet. However, since you are on a maintenance-only branch, it’s a good time to start planning your upgrade to v2.x.
+
+- **Pipeline inspector is alpha.** The flag is off by default and the contract may still change. Sidecar image versioning is also not stable yet. Try it in development, since function pipelines are much easier to understand when you can see them, but do not add it to your incident-response runbook yet.
+
+- **Namespaced MRs are not yet universal.** AWS managed resources are fully namespaced. The Upbound Azure provider, which is widely used, and GCP are currently rolling out this feature.
+
+- **v2 removed several things.** Native patch-and-transform composition, the `ControllerConfig` type, external secret stores, composite resource connection details, and the default registry for packages are no longer available. Most users can upgrade without breaking changes, but if you use these features, you will need to do some cleanup. Before upgrading, run `kubectl get pkg` and make sure every package uses a fully qualified image, such as `registry.example.com/repo/package:tag`.
+
+## A practical recommendation
+
+If you are considering a control plane for your Kubernetes platform and do not have a strong reason to stick with Terraform, try Crossplane v2.2 first. The Get Started guide can be completed in an afternoon on any Kubernetes cluster. If Crossplane meets your needs, you can manage both application and infrastructure workflows with one declarative model. If not, you will have a clear, documented reason to keep your current tools.
+
+If you are already using Crossplane v2.1, upgrade to v2.2. Features like server-side apply on the MRD controller, dependency-aware runtime config, schema access for functions, and better trace output are valuable even if you do not use the pipeline inspector. If you are still on v1.x, pin to v1.20, migrate any deprecated features, then upgrade to v2.x and continue from there. v2 offers good backward compatibility, but the deprecations are real.

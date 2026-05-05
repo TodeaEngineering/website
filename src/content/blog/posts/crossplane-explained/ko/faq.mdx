@@ -1,0 +1,13 @@
+## 자주 묻는 질문
+
+### Crossplane은 Terraform의 대체재인가요?
+
+아닙니다. Terraform은 Kubernetes 바깥에서 동작하는 더 단순한 워크플로 도구입니다. Crossplane은 지속적으로 동작하는 컨트롤 플레인이며, 이미 Kubernetes와 GitOps를 쓰고 있다면 더 적합합니다.
+
+### Crossplane을 쓰려면 Composition을 꼭 사용해야 하나요?
+
+아닙니다. 프로바이더와 Managed Resource를 직접 사용할 수도 있습니다. Composition은 선택 사항으로, 상위 수준의 재사용 가능한 추상을 만드는 데 도움이 됩니다.
+
+### v2 라인에서 어떤 변경 사항을 미리 계획해야 하나요?
+
+기본적으로 네임스페이스화된 리소스, 임의의 K8s 리소스를 지원하는 Composition, 네임스페이스와 RBAC로 대체된 Claims, 워크플로를 가능하게 하는 Operations입니다. Legacy 모드는 v1을 계속 지원합니다.

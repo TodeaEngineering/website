@@ -1,0 +1,190 @@
+---
+title: "プラットフォームチームがCrossplane v2.2に期待できること"
+description: "Crossplane v2.2ガイド。パイプラインデバッグ、メタデータ検証、依存関係対応のランタイム設定、そしてKubernetesコントロールプレーン構築への影響を解説。"
+date: "2026-04-04"
+author: "Todea Engineering"
+authorRole: "クラウドネイティブ・プラクティス"
+category: "クラウドネイティブ"
+image: "/blog/crossplane-explained/ja-cover.svg"
+tags: ["crossplane", "kubernetes", "platform-engineering", "control-plane", "iac", "gitops"]
+---
+
+開発者がデータベースをリクエストするチケットを起票します。3日後、プラットフォームチームから返信が来ますが、設定が少し違っています。開発者は別のチケットを起票して、また待ちます。3週目になって、ようやくデータベースが使えるようになるかもしれません。このサイクルがすべてのチームと環境で繰り返され、ほとんどのプラットフォームチームが見覚えのある日常を生み出します。開発者はインフラを待つことで多くの時間を失い、プラットフォームチームは絶え間なく流れ込むリクエストの処理に追われます。
+
+プロビジョニングのための優れたツールはたくさんあります。Terraformはプラットフォーム非依存で広く使われています。CloudFormationはAWSでの定番選択肢で、各クラウドプロバイダーは独自のコンソールとCLIを提供しています。それぞれのツールは仕事をきちんとこなします。この記事はベストなツールを選ぶためのものではありません。代わりに、別の視点から問題を見ていきます。
+
+Crossplaneはクラウドリソースを管理するためのKubernetesネイティブなアプローチを提供します。クラスターの外でインフラをセットアップしてから接続し直すのではなく、Crossplaneはアプリケーションと同じコントロールループの下にインフラを取り込みます。これは多くのチームがすでに行っている働き方に自然に馴染みます。GitOpsと組み合わせれば、プルリクエストが変更管理の主要な手段となり、クラスターは継続的に望ましい状態へと収束していきます。
+
+このプロジェクトはこの1年で急速に進化してきました。2025年8月、Crossplane v2はClaimsの削除や名前空間付きCompositeおよびManaged Resourceの追加など、大きな変更を導入しました。最新のリリースであるv2.2は、トラブルシューティング用のalpha版Pipeline Inspector、より広範なCEL検証、その他の改善を加えています。
+
+## Crossplaneとは何か
+
+![Crossplaneの概要](/blog/crossplane-explained/ja-crossplane-overview.svg)
+
+Crossplaneはプラットフォームエンジニアリングのためのコントロールプレーンフレームワークです。Kubernetesクラスター(管理クラスターと呼ばれます)にインストールすると、そのクラスターは、その外にあるすべてのもの——クラウドアカウント、SaaS API、社内ツール、さらには他のKubernetesクラスターまで——のコントロールプレーンとなります。これらすべてが、アプリケーションがすでに使っているのと同じKubernetes APIを通じて管理されます。管理クラスター自体は別途セットアップする必要があります。Crossplaneがそれを作成してくれるわけではありません。一度Crossplaneが動き出せば、ステートファイルも別ワークフローもありません。ドリフトは、`Deployment`を健全な状態に保つのと同じ調整ループによって修正されます。
+
+Crossplaneには4つの主要コンポーネントがあります。4つすべてを使うことも、必要なものだけを使うこともできます。
+
+- **Managed Resources(MR)**は、外部クラウドリソースに直接マッピングされるKubernetesオブジェクトです。例えば、AWSのS3やAzureのResourceGroupはMRと見なされます。Crossplaneは`spec.forProvider`をメインのリファレンスとして使い、実際のクラウドリソースをそれと同期させます。MRはkubectlで作成し、プロバイダーがプロビジョニングと調整を処理します。
+
+- **Composition**を使うと、関数パイプラインを使ってカスタムAPIを作れます。理解すべき主要なパートは3つあります。
+  - `CompositeResourceDefinition`(XRD)はスキーマを定義します。Kubernetesに対して「これが私が作る新しいカスタムAPIの種類で、これがそのフィールドです」と伝えます。Crossplane用の機能を加えたCRDだと考えてもよいでしょう。
+  - `Composition`はレシピのように振る舞います。「誰かが種類Fooの`XR`を作成したら、これらの関数群を実行してこれらのMRや他のKubernetesリソースを作成する」と言います。バージョン2では、これは常に関数パイプラインを使います。
+  - `Composite Resource`(XR)は、XRDで定義したAPIのインスタンスです。ユーザーがXRを作成すると、Crossplaneは対応するCompositionのパイプラインを使って必要なリソースを生成します。関数はYAML、KCL、Python、Goで書けます。
+- **Operations**は、Kubernetes Jobと同じように関数パイプラインを最後まで実行します。3つのモードがあります。Operation(一回限り)、CronOperation(スケジュール実行)、WatchOperation(イベント駆動)です。Operationsは現在alphaです。
+
+- **パッケージマネージャー**は、プロバイダー、コンフィグレーション、関数のインストールと更新を扱います。
+
+## Crossplaneのリクエストはどう流れるか
+
+このフローには、適用するものに応じて2つのエントリーポイントがあります。
+
+開発者やパイプラインがある名前空間でXRを作成すると、コンポジションエンジンがそれを監視し、設定された関数パイプラインを実行して、必要なリソースを作成します。これらのリソースは他のKubernetesリソース、Managed Resource、またはその両方になり得ます。
+
+ユーザーがMRを直接(単独でまたは`Composition`の一部として)適用すると、プロバイダーが引き継ぎます。プロバイダーはKubernetes APIを通じてMRを監視し、外部システムを呼び出して実際のリソースを作成または更新し、ステータスを更新します。その後、チェックを続けます。実際のリソースが`spec.forProvider`から変わったら、プロバイダーがそれを修正します。すべての状態はetcdに保存されるので、別のステートファイルはありません。
+
+![Crossplaneのフロー](/blog/crossplane-explained/ja-crossplane-flow.svg)
+
+## 従来のIaCを使うべきとき
+
+Crossplaneは、TerraformやCloudFormationのようなツールとスコープで重なります(どちらもクラウドデータベースをプロビジョニングできます)が、その方法が異なります。正しい選択は、プラットフォームがすでにどこにあるかによって決まります。
+ 
+| 機能 / 特性 | Terraform | CloudFormation | Crossplane |
+| --- | --- | --- | --- |
+| コントロールループ | 手動の`apply`(またはパイプライン) | 手動のスタック作成/更新 | 継続的な調整 |
+| ドリフト処理 | `plan`で検出、手動修正 | ドリフト検出アクション、スタック更新で修正 | 自動検出・自動修正 |
+| ステート | セキュアにしたリモートバックエンド上の`tfstate`(例：バージョニング有効のS3、HCP Terraform) | AWS管理(サーバーサイド) | 管理クラスターのetcd内のKubernetes APIオブジェクト |
+| ワークフロー | アプリのデプロイとは別 | アプリのデプロイとは別 | `kubectl apply`と同じ |
+| 抽象化 | モジュール | ネステッドスタック、モジュール | XRD + Composition + 関数 |
+| 言語 | HCL、JSON | YAML、JSON | YAML、Go、Python、KCL、CUE、HCL(コンポジション関数経由) |
+| 組み込みポリシー | 変数の検証と事前条件・事後条件(OSS)、HCP Terraform / EnterpriseでのSentinelおよびOPA連携 | cfn-guard、Hooks | XRD CEL検証(v2.2でメタデータも対応) |
+| マルチクラウド | クラウドごとのプロバイダー、別々のステート | AWSファースト(サードパーティ型はCloudFormationレジストリ経由) | 1つのコントロールプレーン、1つのAPIサーフェス |
+| フットプリント | 1つのバイナリ | AWS管理サービス(CLI/SDKのみ) | etcdに支えられたKubernetesコントロールプレーン(Crossplaneコア、プロバイダー、関数) |
+| Kubernetes外で動作 | ✓ | ✓ | ✕ — 管理クラスターが必要 |
+
+チームがKubernetesを使っていない場合、Crossplaneは始めるのに最適な場所ではありません。Terraformはよりシンプルで、コントロールプレーンも不要です。しかし、Kubernetesを使っている、特にすでにArgo CDやFluxを使っているなら、インフラを同じやり方で管理するのは簡単です。Crossplaneは、Infrastructure as Codeを書き、宣言的なクラスター状態の他の部分と同じように扱うのに最も近い選択肢です。
+
+## v2.2の新機能
+
+v2.2は実際に使う中で気づく5つの機能と、ひっそりと信頼性を改善する2つを追加します。それぞれが、プラットフォームチームが本番で直面してきた特定のギャップを埋めます。
+
+- **Pipeline Inspector(alpha)**: `Composition`関数は強力ですが、デバッグが常に難しい問題でした。動作中のコントロールプレーンでパイプラインがおかしくなった場合、各関数が何を受け取り何を返したかを見るには、テストを書くか、ローカルで`crossplane render`を実行するか、独自の計装を追加するしかありませんでした。v2.2はパイプラインインスペクターを追加します。フィーチャーフラグを有効にすると、Crossplaneコントローラーはすべての`RunFunctionRequest`と`RunFunctionResponse`を傍受し、設定したUnixソケットにgRPC経由で転送します。サイドカーがこのソケットから読み取り、必要に応じてデータを処理します。開発時にはstdoutにストリーム、本番では監査パイプラインに送信、といった具合です。使うには、Crossplaneに`--enable-pipeline-inspector`を追加します。デフォルトのソケットパスは`/var/run/pipeline-inspector/socket`ですが、`--pipeline-inspector-socket`で変更できます。
+
+  ```yaml
+  # パイプラインインスペクターのフィーチャーフラグを有効化
+  args:
+    - --enable-pipeline-inspector
+    - --pipeline-inspector-socket=/var/run/pipeline-inspector/socket
+
+  # パイプラインインスペクターサイドカーを注入
+  sidecarsCrossplane:
+    - name: pipeline-inspector
+      image: xpkg.crossplane.io/crossplane/inspector-sidecar:v0.0.3
+      args:
+        - --socket-path=/var/run/pipeline-inspector/socket
+        - --max-recv-msg-size=8388608  # 8MB
+      volumeMounts:
+        - name: pipeline-inspector-socket
+          mountPath: /var/run/pipeline-inspector
+      resources:
+        requests: { cpu: 10m, memory: 64Mi }
+        limits:   { cpu: 100m, memory: 128Mi }
+
+  # Unixソケット通信用の共有ボリュームを追加
+  extraVolumesCrossplane:
+    - name: pipeline-inspector-socket
+      emptyDir: {}
+
+  extraVolumeMountsCrossplane:
+    - name: pipeline-inspector-socket
+      mountPath: /var/run/pipeline-inspector
+  ```
+
+- **`spec`外のXRD検証**: XRDの`x-kubernetes-validations`(KubernetesのCELベースの検証ルール)による検証は、これまでXRの`spec`配下のフィールドにしか効きませんでした。「すべてのデータベース名は`db-`で始まらなければならない」のようなルールを強制したい場合、Kyverno、OPA/Gatekeeper、独自のwebhookなどの外部Admission Controllerを使う必要がありました。v2.2でこの制約が解除されます。`spec`の外側にCELルールを書け、APIサーバーが受付時にそれを強制できるようになりました。
+
+  ```yaml
+  apiVersion: apiextensions.crossplane.io/v1
+  kind: CompositeResourceDefinition
+  metadata:
+    name: databases.platform.example.org
+  spec:
+    group: platform.example.org
+    names:
+      kind: Database
+      plural: databases
+    versions:
+      - name: v1alpha1
+        served: true
+        referenceable: true
+        schema:
+          openAPIV3Schema:
+            type: object
+            x-kubernetes-validations:
+              - rule: "self.metadata.name.startsWith('db-')"
+                message: "Database names must start with 'db-'"
+            properties:
+              spec:
+                type: object
+                properties:
+                  region:
+                    type: string
+  ```
+
+- **依存関係用の`ImageConfig`ランタイム**: Providerを含むCrossplaneパッケージはDeploymentとして実行されます。サービスアカウントのアノテーション、Podラベル、コンテナ引数の追加など、Deploymentをカスタマイズするには、`DeploymentRuntimeConfig`を使ってパッケージから参照します。
+
+```
+kind: Provider
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/provider-azure-network:v1.0.0
+  runtimeConfigRef:
+    name: azure-workload-identity
+```
+
+このアプローチはパッケージを直接インストールするときはうまくいきます。しかし、Crossplaneはパッケージを依存関係としてインストールすることもあります。その場合、依存関係としてインストールされたプロバイダーには、Workload Identityや他のランタイムカスタマイズを適用することができませんでした。
+
+`ImageConfig`はクラスタースコープのリソースで、どのProviderやConfigurationオブジェクトが作成したかではなく、イメージのプレフィックスに基づいてパッケージをマッチさせます。v2.2では、新しいフィールド`spec.runtime.configRef`が追加されました。この変更により、Crossplaneはイメージがマッチするすべてのパッケージに対して、インストール方法に関係なく`DeploymentRuntimeConfig`を適用します。
+
+
+  ```yaml
+  apiVersion: pkg.crossplane.io/v1beta1
+  kind: ImageConfig
+  metadata:
+    name: azure-workload-identity
+  spec:
+    matchImages:
+      - prefix: xpkg.crossplane.io/crossplane-contrib/provider-azure-
+      - prefix: xpkg.crossplane.io/crossplane-contrib/provider-family-azure
+    runtime:
+      configRef:
+        name: azure-workload-identity
+  ```
+
+  すべてのAzureファミリープロバイダーは、直接インストールされても依存関係として追加されても、ランタイム設定を受け取ります。
+
+- **関数用の`RequiredSchemas`**: Compositionと関数は、入力を検証したり、スキーマを意識した判断をしたり、リソースを動的に生成したりするために、リソースのOpenAPIスキーマを必要とすることがあります。v2.2より前は、対応するCRDを`RequiredResource`としてCrossplaneに要求し、自分でパースしてスキーマを抽出することができましたが、それはカスタムリソースのみでした。Deploymentのような組み込みの種類にはCRDがないからです。v2.2は`RunFunctionResponse`に`RequiredSchemas`を導入し、組み込み・カスタムを問わず、あらゆる種類のスキーマを返します。
+
+- **`crossplane beta trace`の改善**: 単一のリソースの代わりに、種類(と任意で名前空間)を渡せば、すべてのインスタンスの依存関係ツリーを取得できるようになりました。また、`--watch`(エイリアス`-w`)は`kubectl get -w`と同じように出力をライブで保ちます。
+
+- **関数パッケージはバンドルされたCRDをインストールしない**: 関数パッケージに含まれるCRDはクラスターに適用されなくなりました。また、未知または禁止された種類を含むパッケージも正常にインストールされ、それらのオブジェクトは単にスキップされます。これまではこのような場合インストールが失敗していました。
+
+- **パッケージキャッシュのレイアウト変更**: キャッシュのファイル名は、PackageRevisionのKubernetes名ではなく、パッケージのOCIソースとダイジェストから来るようになりました。この変更は、一部のプロバイダーe2eスイートで使われるサイドローディングに影響します。
+
+## 運用上の現実
+
+- **管理クラスターがあなたのステートです。** Crossplaneは外部のステートファイルを使いません。すべてのXRD、Composition、XR、Managed Resourceは管理クラスターのetcdに保存されます。バックアップなしでクラスターを失った場合、クラウドリソースは動き続けますが、Crossplaneはそれらを見失い、調整を停止します。サイレントなドリフトが蓄積する可能性があります。管理クラスターは本番クリティカルなKubernetesクラスターと同じように扱ってください。高可用性のコントロールプレーンを使い、etcdをバックアップし、ノートPCで動かさないこと。ローカルのk3sやkindクラスターは、学習、デモ、Get Startedガイドには問題ありませんが、重要なステートには使えません。これがTerraformのステートファイルを持たないことのトレードオフです。1つの運用上の問題を解決する代わりに、見落としやすい別の問題を抱え込むことになるのです。
+
+- **直接ではなく、v2.1を経由してアップグレードする。** Crossplaneは各マイナーバージョンのアップグレードでCRDマイグレーションを行うため、バージョンを飛ばすと重要なマイグレーションを逃すことになります。v1.xにいるならCrossplane v2アップグレードガイドを使ってください。v2.1にいるなら、v2.2に直接アップグレードしてください。
+
+- **v1.20はまだEOLではありません。** v1.20は依然としてサポート対象で、EOLには達していません。ただし、メンテナンス専用ブランチにいるので、v2.xへのアップグレードを計画し始めるのに良い時期です。
+
+- **Pipeline Inspectorはalphaです。** フラグはデフォルトでオフで、コントラクトはまだ変わる可能性があります。サイドカーイメージのバージョニングもまだ安定していません。関数パイプラインは見えると理解しやすくなるので、開発で試すのは良いですが、まだインシデント対応のRunbookには加えないでください。
+
+- **名前空間付きMRはまだ普遍的ではありません。** AWSのManaged Resourceは完全に名前空間化されています。広く使われているUpbound AzureおよびGCPプロバイダーは、現在この機能を展開中です。
+
+- **v2はいくつかの機能を削除しました。** ネイティブなpatch-and-transformコンポジション、`ControllerConfig`タイプ、外部シークレットストア、コンポジットリソースの接続詳細、パッケージのデフォルトレジストリは、もう使えません。ほとんどのユーザーは破壊的変更なしにアップグレードできますが、これらの機能を使っているならクリーンアップが必要です。アップグレード前に`kubectl get pkg`を実行し、すべてのパッケージが完全修飾イメージ(例：`registry.example.com/repo/package:tag`)を使っていることを確認してください。
+
+## 実用的な推奨
+
+Kubernetesプラットフォーム用のコントロールプレーンを検討中で、Terraformを使い続ける強い理由がないなら、まずCrossplane v2.2を試してください。Get Startedガイドは、どんなKubernetesクラスターでも午後の時間で完了できます。Crossplaneがニーズを満たすなら、アプリケーションとインフラのワークフローを1つの宣言的モデルで管理できます。そうでないなら、現在のツールを残す明確で文書化された理由ができます。
+
+すでにCrossplane v2.1を使っているなら、v2.2にアップグレードしてください。MRDコントローラーのサーバーサイドapply、依存関係対応のランタイム設定、関数のスキーマアクセス、より優れたトレース出力などの機能は、Pipeline Inspectorを使わなくても価値があります。まだv1.xにいるなら、v1.20にピン止めし、非推奨機能を移行してから、v2.xにアップグレードしてそこから続けてください。v2は良い後方互換性を提供しますが、非推奨化は本気で進められます。

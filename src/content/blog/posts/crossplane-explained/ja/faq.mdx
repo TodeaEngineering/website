@@ -1,0 +1,13 @@
+## よくある質問
+
+### CrossplaneはTerraformの代替ですか？
+
+いいえ。TerraformはKubernetesの外で動作する、よりシンプルなワークフローツールです。Crossplaneは継続的に動くコントロールプレーンであり、すでにKubernetesとGitOpsを使っているなら、こちらの方が適しています。
+
+### Crossplaneを使うのにCompositionが必須ですか？
+
+いいえ。プロバイダーとManaged Resourceを直接使うこともできます。Compositionは任意で、より高レベルで再利用可能な抽象を作るのに役立ちます。
+
+### v2系で計画しておくべき変更は何ですか？
+
+デフォルトで名前空間付きのリソース、Compositionが任意のK8sリソースをサポート、Claimsは名前空間とRBACで置き換え、Operationsがワークフローを可能にします。Legacyモードはv1のサポートを継続します。

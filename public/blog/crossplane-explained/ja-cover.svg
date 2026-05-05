@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f10"/>
+      <stop offset="100%" stop-color="#1a1f20"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="800" cy="450" rx="800" ry="500" fill="url(#glow)"/>
+
+  <!-- Reconciliation orbits (concentric rings around the control plane) -->
+  <g stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.2" fill="none">
+    <circle cx="800" cy="450" r="140"/>
+    <circle cx="800" cy="450" r="240"/>
+    <circle cx="800" cy="450" r="340"/>
+  </g>
+
+  <!-- Spokes from control plane to managed resources -->
+  <g stroke="#ffffff" stroke-opacity="0.18" stroke-width="1.2" fill="none">
+    <line x1="800" y1="450" x2="1140" y2="450"/>
+    <line x1="800" y1="450" x2="1040.42" y2="690.42"/>
+    <line x1="800" y1="450" x2="800" y2="790"/>
+    <line x1="800" y1="450" x2="559.58" y2="690.42"/>
+    <line x1="800" y1="450" x2="460" y2="450"/>
+    <line x1="800" y1="450" x2="559.58" y2="209.58"/>
+    <line x1="800" y1="450" x2="800" y2="110"/>
+    <line x1="800" y1="450" x2="1040.42" y2="209.58"/>
+  </g>
+
+  <!-- Mesh lines between adjacent managed resources (octagon perimeter) -->
+  <g stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.2" fill="none">
+    <line x1="1140" y1="450" x2="1040.42" y2="690.42"/>
+    <line x1="1040.42" y1="690.42" x2="800" y2="790"/>
+    <line x1="800" y1="790" x2="559.58" y2="690.42"/>
+    <line x1="559.58" y1="690.42" x2="460" y2="450"/>
+    <line x1="460" y1="450" x2="559.58" y2="209.58"/>
+    <line x1="559.58" y1="209.58" x2="800" y2="110"/>
+    <line x1="800" y1="110" x2="1040.42" y2="209.58"/>
+    <line x1="1040.42" y1="209.58" x2="1140" y2="450"/>
+  </g>
+
+  <!-- Composition pipeline: function chain between control plane and one managed resource -->
+  <g fill="#ffffff" fill-opacity="0.55">
+    <circle cx="868" cy="450" r="4"/>
+    <circle cx="936" cy="450" r="4"/>
+    <circle cx="1004" cy="450" r="4"/>
+    <circle cx="1072" cy="450" r="4"/>
+  </g>
+
+  <!-- Outer vertex rings (managed resources) -->
+  <g stroke="#ffffff" stroke-opacity="0.4" stroke-width="1.4" fill="none">
+    <circle cx="1140" cy="450" r="20"/>
+    <circle cx="1040.42" cy="690.42" r="20"/>
+    <circle cx="800" cy="790" r="20"/>
+    <circle cx="559.58" cy="690.42" r="20"/>
+    <circle cx="460" cy="450" r="20"/>
+    <circle cx="559.58" cy="209.58" r="20"/>
+    <circle cx="800" cy="110" r="20"/>
+    <circle cx="1040.42" cy="209.58" r="20"/>
+  </g>
+
+  <!-- Outer vertex nodes -->
+  <g fill="#ffffff" fill-opacity="0.85">
+    <circle cx="1140" cy="450" r="8"/>
+    <circle cx="1040.42" cy="690.42" r="8"/>
+    <circle cx="800" cy="790" r="8"/>
+    <circle cx="559.58" cy="690.42" r="8"/>
+    <circle cx="460" cy="450" r="8"/>
+    <circle cx="559.58" cy="209.58" r="8"/>
+    <circle cx="800" cy="110" r="8"/>
+    <circle cx="1040.42" cy="209.58" r="8"/>
+  </g>
+
+  <!-- Central control plane (management cluster) -->
+  <circle cx="800" cy="450" r="36" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.6" fill="none"/>
+  <circle cx="800" cy="450" r="22" stroke="#ffffff" stroke-opacity="0.4" stroke-width="1.2" fill="none"/>
+  <circle cx="800" cy="450" r="12" fill="#ffffff" fill-opacity="0.9"/>
+
+  <text x="100" y="820" font-family="'Noto Sans JP', system-ui, -apple-system, sans-serif" font-weight="800" font-size="48" fill="#ffffff" letter-spacing="-1">Crossplane v2.2</text>
+  <text x="100" y="865" font-family="'Noto Sans JP', system-ui, -apple-system, sans-serif" font-weight="400" font-size="20" fill="#a3a3a3" letter-spacing="2">TODEA · CLOUD NATIVE ENGINEERING</text>
+</svg>

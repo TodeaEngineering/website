@@ -1,0 +1,190 @@
+---
+title: "플랫폼 팀이 Crossplane v2.2에서 기대할 수 있는 것"
+description: "Crossplane v2.2 가이드: 파이프라인 디버깅, 메타데이터 검증, 의존성 인식 런타임 구성, 그리고 Kubernetes 컨트롤 플레인 구축에 미치는 영향."
+date: "2026-04-04"
+author: "Todea Engineering"
+authorRole: "클라우드 네이티브 실무"
+category: "클라우드 네이티브"
+image: "/blog/crossplane-explained/ko-cover.svg"
+tags: ["crossplane", "kubernetes", "platform-engineering", "control-plane", "iac", "gitops"]
+---
+
+개발자가 데이터베이스를 요청하는 티켓을 제출합니다. 3일 후 플랫폼 팀이 응답하지만 구성이 정확하지 않습니다. 개발자는 다른 티켓을 제출하고 또 기다립니다. 3주 차가 되어서야 데이터베이스가 마침내 준비될지도 모릅니다. 이 사이클은 모든 팀과 환경에서 반복되며, 대부분의 플랫폼 팀이 익숙해진 일상을 만들어냅니다. 개발자는 인프라를 기다리느라 상당한 시간을 잃고, 플랫폼 팀은 끊임없이 들어오는 요청을 따라잡느라 분투합니다.
+
+프로비저닝을 위한 좋은 도구는 많이 있습니다. Terraform은 플랫폼에 구애받지 않으며 널리 쓰입니다. CloudFormation은 AWS에서 표준 선택지이고, 모든 클라우드 제공자는 자체 콘솔과 CLI를 제공합니다. 각 도구는 자기 일을 잘 해냅니다. 이 글은 가장 좋은 도구를 고르자는 글이 아닙니다. 대신 다른 시각에서 문제를 살펴봅니다.
+
+Crossplane은 클라우드 리소스를 관리하는 Kubernetes 네이티브 접근법을 제공합니다. 클러스터 외부에서 인프라를 설치한 다음 다시 연결하는 대신, Crossplane은 그 인프라를 애플리케이션과 동일한 컨트롤 루프 아래로 가져옵니다. 이는 많은 팀이 이미 일하는 방식과 자연스럽게 어울립니다. GitOps와 결합하면 Pull Request가 변경 관리의 주된 수단이 되고, 클러스터는 원하는 상태로 지속적으로 수렴합니다.
+
+이 프로젝트는 지난 1년 동안 빠르게 발전해왔습니다. 2025년 8월, Crossplane v2는 Claims 제거와 네임스페이스 단위 Composite 및 Managed Resource 추가 같은 큰 변경을 도입했습니다. 최신 릴리스인 v2.2는 트러블슈팅을 위한 alpha Pipeline Inspector, 더 넓은 CEL 검증, 그 외 개선 사항을 추가합니다.
+
+## Crossplane이 실제로 무엇인가
+
+![Crossplane 개요](/blog/crossplane-explained/ko-crossplane-overview.svg)
+
+Crossplane은 플랫폼 엔지니어링을 위한 컨트롤 플레인 프레임워크입니다. 관리 클러스터라고 부르는 Kubernetes 클러스터에 설치하면, 그 클러스터가 외부의 모든 것(클라우드 계정, SaaS API, 사내 도구, 심지어 다른 Kubernetes 클러스터까지)에 대한 컨트롤 플레인이 됩니다. 이 모든 것이 애플리케이션이 이미 사용하는 동일한 Kubernetes API를 통해 관리됩니다. 관리 클러스터 자체는 별도로 설정해야 하며, Crossplane이 만들어 주지 않습니다. Crossplane이 일단 동작하면 상태 파일도 별도 워크플로도 없습니다. 드리프트는 `Deployment`를 정상 상태로 유지하는 동일한 조정 루프로 수정됩니다.
+
+Crossplane에는 4가지 주요 컴포넌트가 있습니다. 4가지를 모두 사용하거나 필요한 것만 사용할 수 있습니다.
+
+- **Managed Resource(MR)**는 외부 클라우드 리소스에 직접 매핑되는 Kubernetes 객체입니다. 예를 들어 AWS의 S3나 Azure의 ResourceGroup은 MR로 간주됩니다. Crossplane은 `spec.forProvider`를 주된 참조로 사용하여 실제 클라우드 리소스를 그것과 동기화시킵니다. MR은 kubectl로 만들고, 프로비저닝과 조정은 프로바이더가 처리합니다.
+
+- **Composition**은 함수 파이프라인으로 커스텀 API를 만들 수 있게 해줍니다. 이해해야 할 주요 부분이 세 가지 있습니다.
+  - `CompositeResourceDefinition`(XRD)은 스키마를 정의합니다. Kubernetes에 "여기 내가 만드는 새 커스텀 API 종류가 있고, 이게 그 필드들이다"라고 알려줍니다. Crossplane을 위해 기능이 추가된 CRD라고 생각해도 좋습니다.
+  - `Composition`은 레시피처럼 동작합니다. "누군가 종류 Foo의 XR을 만들면 이 함수 집합을 실행하여 이 MR이나 다른 Kubernetes 리소스를 만들라"고 말합니다. 버전 2에서는 이것이 항상 함수 파이프라인을 사용합니다.
+  - `Composite Resource`(XR)는 XRD로 정의한 API의 인스턴스입니다. 사용자가 XR을 만들면 Crossplane은 매칭되는 Composition의 파이프라인을 사용해 필요한 리소스를 생성합니다. 함수는 YAML, KCL, Python, Go로 작성할 수 있습니다.
+- **Operations**는 Kubernetes Job처럼 함수 파이프라인을 끝까지 실행합니다. 세 가지 모드가 있습니다. Operation(일회성), CronOperation(스케줄링), WatchOperation(이벤트 기반). Operations는 현재 alpha입니다.
+
+- **패키지 매니저**는 프로바이더, 구성, 함수의 설치와 업데이트를 처리합니다.
+
+## Crossplane 요청은 어떻게 흐르는가
+
+이 흐름에는 적용하는 대상에 따라 두 가지 진입점이 있습니다.
+
+개발자나 파이프라인이 어떤 네임스페이스에 XR을 만들면, 컴포지션 엔진이 이를 감시하고 구성된 함수 파이프라인을 실행하여 필요한 리소스를 만듭니다. 이 리소스는 다른 Kubernetes 리소스, Managed Resource, 또는 둘 다일 수 있습니다.
+
+사용자가 MR을 직접 적용(단독으로 또는 `Composition`의 일부로)하면 프로바이더가 인계받습니다. 프로바이더는 Kubernetes API를 통해 MR을 모니터링하고, 외부 시스템을 호출하여 실제 리소스를 만들거나 업데이트하고, 상태를 갱신합니다. 그 후에도 계속 확인합니다. 실제 리소스가 `spec.forProvider`에서 벗어나면 프로바이더가 그것을 고칩니다. 모든 상태는 etcd에 저장되므로 별도의 상태 파일은 없습니다.
+
+![Crossplane 흐름](/blog/crossplane-explained/ko-crossplane-flow.svg)
+
+## 전통적인 IaC를 사용해야 할 때
+
+Crossplane은 Terraform이나 CloudFormation 같은 도구와 범위에서 겹치지만(둘 다 클라우드 데이터베이스를 프로비저닝할 수 있습니다) 방법이 다릅니다. 올바른 선택은 플랫폼이 이미 어디에 있는지에 달려 있습니다.
+ 
+| 기능 / 특성 | Terraform | CloudFormation | Crossplane |
+| --- | --- | --- | --- |
+| 컨트롤 루프 | 수동 `apply`(또는 파이프라인) | 수동 스택 생성/업데이트 | 지속적 조정 |
+| 드리프트 처리 | `plan`으로 감지, 수동 수정 | 드리프트 감지 액션, 스택 업데이트로 수정 | 자동 감지 및 자동 수정 |
+| 상태 | 보안된 원격 백엔드의 `tfstate`(예: 버전 관리가 활성화된 S3, HCP Terraform) | AWS 관리(서버 측) | 관리 클러스터의 etcd 내 Kubernetes API 객체 |
+| 워크플로 | 앱 배포와 분리 | 앱 배포와 분리 | `kubectl apply`와 동일 |
+| 추상화 | 모듈 | Nested Stack, 모듈 | XRD + Composition + 함수 |
+| 언어 | HCL, JSON | YAML, JSON | YAML, Go, Python, KCL, CUE, HCL(컴포지션 함수 경유) |
+| 내장 정책 | 변수 검증과 사전/사후 조건(OSS), HCP Terraform / Enterprise의 Sentinel 및 OPA 통합 | cfn-guard, Hooks | XRD CEL 검증(v2.2에서 메타데이터까지 지원) |
+| 멀티 클라우드 | 클라우드별 프로바이더, 분리된 상태 | AWS 우선(서드파티 타입은 CloudFormation 레지스트리 경유) | 하나의 컨트롤 플레인, 하나의 API 표면 |
+| 풋프린트 | 단일 바이너리 | AWS 관리 서비스(CLI/SDK만) | etcd로 뒷받침되는 Kubernetes 컨트롤 플레인(Crossplane 코어, 프로바이더, 함수) |
+| Kubernetes 외부 동작 | ✓ | ✓ | ✕ — 관리 클러스터 필요 |
+
+팀이 Kubernetes를 사용하지 않는다면, Crossplane은 시작하기에 가장 좋은 곳이 아닙니다. Terraform이 더 간단하고 컨트롤 플레인이 필요하지도 않습니다. 하지만 Kubernetes를 쓰고 있다면, 특히 이미 Argo CD나 Flux를 쓰고 있다면, 인프라를 같은 방식으로 관리하는 게 쉽습니다. Crossplane은 인프라를 코드로 작성하고 다른 선언적 클러스터 상태처럼 다루는 데 가장 가까운 선택지입니다.
+
+## v2.2의 새로운 기능
+
+v2.2는 실무에서 체감할 다섯 가지와, 조용히 안정성을 개선하는 두 가지를 추가합니다. 각각은 플랫폼 팀이 운영 환경에서 마주쳐온 특정 공백을 메웁니다.
+
+- **Pipeline Inspector(alpha)**: `Composition` 함수는 강력하지만 디버깅이 늘 까다로웠습니다. 동작 중인 컨트롤 플레인에서 파이프라인이 이상하게 행동하면, 각 함수가 무엇을 받고 무엇을 반환했는지 보려면 테스트를 작성하거나, 로컬에서 `crossplane render`를 실행하거나, 자체 계측을 추가하는 수밖에 없었습니다. v2.2는 파이프라인 인스펙터를 추가합니다. 피처 플래그를 켜면 Crossplane 컨트롤러가 모든 `RunFunctionRequest`와 `RunFunctionResponse`를 가로채서, 설정한 Unix 소켓에 gRPC를 통해 전달합니다. 사이드카가 이 소켓에서 읽어 필요한 대로 데이터를 처리합니다. 개발 시에는 stdout으로 스트리밍, 운영 환경에서는 감사 파이프라인으로 보내는 식입니다. 사용하려면 Crossplane에 `--enable-pipeline-inspector`를 추가하세요. 기본 소켓 경로는 `/var/run/pipeline-inspector/socket`이지만 `--pipeline-inspector-socket`으로 바꿀 수 있습니다.
+
+  ```yaml
+  # 파이프라인 인스펙터 피처 플래그 활성화
+  args:
+    - --enable-pipeline-inspector
+    - --pipeline-inspector-socket=/var/run/pipeline-inspector/socket
+
+  # 파이프라인 인스펙터 사이드카 주입
+  sidecarsCrossplane:
+    - name: pipeline-inspector
+      image: xpkg.crossplane.io/crossplane/inspector-sidecar:v0.0.3
+      args:
+        - --socket-path=/var/run/pipeline-inspector/socket
+        - --max-recv-msg-size=8388608  # 8MB
+      volumeMounts:
+        - name: pipeline-inspector-socket
+          mountPath: /var/run/pipeline-inspector
+      resources:
+        requests: { cpu: 10m, memory: 64Mi }
+        limits:   { cpu: 100m, memory: 128Mi }
+
+  # Unix 소켓 통신용 공유 볼륨 추가
+  extraVolumesCrossplane:
+    - name: pipeline-inspector-socket
+      emptyDir: {}
+
+  extraVolumeMountsCrossplane:
+    - name: pipeline-inspector-socket
+      mountPath: /var/run/pipeline-inspector
+  ```
+
+- **`spec` 외부 XRD 검증**: XRD의 `x-kubernetes-validations`(Kubernetes의 CEL 기반 검증 규칙)는 그동안 XR의 `spec` 아래 필드에서만 동작했습니다. "모든 Database 이름은 `db-`로 시작해야 한다" 같은 규칙을 강제하려면 Kyverno, OPA/Gatekeeper, 또는 자체 webhook 같은 외부 admission controller를 써야 했습니다. v2.2에서는 그 제약이 사라집니다. 이제 `spec` 바깥에도 CEL 규칙을 작성할 수 있고, API 서버가 admission 시점에 이를 강제합니다.
+
+  ```yaml
+  apiVersion: apiextensions.crossplane.io/v1
+  kind: CompositeResourceDefinition
+  metadata:
+    name: databases.platform.example.org
+  spec:
+    group: platform.example.org
+    names:
+      kind: Database
+      plural: databases
+    versions:
+      - name: v1alpha1
+        served: true
+        referenceable: true
+        schema:
+          openAPIV3Schema:
+            type: object
+            x-kubernetes-validations:
+              - rule: "self.metadata.name.startsWith('db-')"
+                message: "Database names must start with 'db-'"
+            properties:
+              spec:
+                type: object
+                properties:
+                  region:
+                    type: string
+  ```
+
+- **의존성용 `ImageConfig` 런타임**: 프로바이더를 포함한 Crossplane 패키지는 Deployment로 실행됩니다. 서비스 어카운트 어노테이션, Pod 라벨, 컨테이너 인자 추가 같은 Deployment 커스터마이즈는 `DeploymentRuntimeConfig`를 사용해 패키지에서 참조합니다.
+
+```
+kind: Provider
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/provider-azure-network:v1.0.0
+  runtimeConfigRef:
+    name: azure-workload-identity
+```
+
+이 방식은 패키지를 직접 설치할 때는 잘 동작합니다. 하지만 Crossplane은 패키지를 의존성으로 설치할 수도 있습니다. 그 경우 의존성으로 설치된 프로바이더에는 Workload Identity나 다른 런타임 커스터마이즈를 적용할 수 없었습니다.
+
+`ImageConfig`는 클러스터 스코프 리소스로, 어떤 Provider나 Configuration 객체가 만들었는지가 아니라 이미지 프리픽스를 기준으로 패키지를 매칭합니다. v2.2에서는 새 필드 `spec.runtime.configRef`가 추가되었습니다. 이 변경으로 Crossplane은 이미지가 매칭되는 모든 패키지에 대해, 설치 방식에 관계없이 `DeploymentRuntimeConfig`를 적용합니다.
+
+
+  ```yaml
+  apiVersion: pkg.crossplane.io/v1beta1
+  kind: ImageConfig
+  metadata:
+    name: azure-workload-identity
+  spec:
+    matchImages:
+      - prefix: xpkg.crossplane.io/crossplane-contrib/provider-azure-
+      - prefix: xpkg.crossplane.io/crossplane-contrib/provider-family-azure
+    runtime:
+      configRef:
+        name: azure-workload-identity
+  ```
+
+  모든 Azure 패밀리 프로바이더는 직접 설치되었든 의존성으로 추가되었든 런타임 구성을 받습니다.
+
+- **함수용 `RequiredSchemas`**: Composition과 함수는 입력을 검증하거나, 스키마를 인식하는 결정을 내리거나, 리소스를 동적으로 생성하기 위해 리소스의 OpenAPI 스키마가 필요할 때가 있습니다. v2.2 이전에는 해당 CRD를 `RequiredResource`로 Crossplane에 요청해 직접 파싱하고 스키마를 추출할 수 있었지만, 그건 커스텀 리소스에만 가능했습니다. Deployment 같은 빌트인 종류에는 CRD가 없기 때문입니다. v2.2는 `RunFunctionResponse`에 `RequiredSchemas`를 도입하여, 빌트인이든 커스텀이든 어떤 종류의 스키마든 반환합니다.
+
+- **`crossplane beta trace` 개선**: 이제 단일 리소스 대신 종류(그리고 선택적으로 네임스페이스)를 전달하여 모든 인스턴스의 의존성 트리를 얻을 수 있습니다. 그리고 `--watch`(별칭 `-w`)는 `kubectl get -w`처럼 출력을 라이브로 유지합니다.
+
+- **함수 패키지가 더 이상 번들된 CRD를 설치하지 않음**: 함수 패키지에 포함된 CRD는 더 이상 클러스터에 적용되지 않습니다. 또한 알 수 없거나 허용되지 않은 종류가 포함된 패키지도 정상적으로 설치되며 해당 객체는 그저 건너뜁니다. 이전에는 이런 경우 설치가 실패했습니다.
+
+- **패키지 캐시 레이아웃 변경**: 캐시 파일 이름은 PackageRevision의 Kubernetes 이름이 아니라 패키지의 OCI 소스와 다이제스트에서 옵니다. 이 변경은 일부 프로바이더 e2e 스위트에서 사용되는 사이드 로딩에 영향을 줍니다.
+
+## 운영상의 현실
+
+- **관리 클러스터가 곧 당신의 상태입니다.** Crossplane은 외부 상태 파일을 사용하지 않습니다. 모든 XRD, Composition, XR, Managed Resource는 관리 클러스터의 etcd에 저장됩니다. 백업 없이 그 클러스터를 잃으면, 클라우드 리소스는 계속 동작하지만 Crossplane은 그것들을 추적하지 못해 조정을 멈춥니다. 조용한 드리프트가 쌓일 수 있습니다. 관리 클러스터를 운영 핵심 Kubernetes 클러스터처럼 다루세요. 고가용성 컨트롤 플레인을 사용하고, etcd를 백업하고, 노트북에서 돌리지 마세요. 로컬 k3s나 kind 클러스터는 학습, 데모, Get Started 가이드 용도로는 괜찮지만 중요한 상태에는 적합하지 않습니다. 이것이 Terraform 상태 파일을 두지 않는 트레이드오프입니다. 운영상의 한 문제를 해결하지만 더 놓치기 쉬운 다른 문제를 얻게 됩니다.
+
+- **직접이 아니라 v2.1을 거쳐 업그레이드하세요.** Crossplane은 마이너 버전 업그레이드마다 CRD 마이그레이션을 수행하므로, 버전을 건너뛰면 중요한 마이그레이션을 놓칠 수 있습니다. v1.x를 쓰고 있다면 Crossplane v2 업그레이드 가이드를 사용하세요. v2.1을 쓰고 있다면 v2.2로 바로 업그레이드하세요.
+
+- **v1.20은 아직 EOL이 아닙니다.** v1.20은 여전히 지원되며 EOL에 도달하지 않았습니다. 다만 유지 보수만 받는 브랜치에 있으므로 v2.x 업그레이드 계획을 세우기에 좋은 시점입니다.
+
+- **Pipeline Inspector는 alpha입니다.** 플래그는 기본 비활성이며 API 계약은 아직 변경될 수 있습니다. 사이드카 이미지 버저닝도 아직 안정적이지 않습니다. 함수 파이프라인은 보이면 훨씬 이해하기 쉬워지므로 개발에서 시도해 보되, 아직 인시던트 대응 런북에 추가하지는 마세요.
+
+- **네임스페이스 단위 MR은 아직 보편적이지 않습니다.** AWS Managed Resource는 완전히 네임스페이스화되었습니다. 널리 쓰이는 Upbound Azure 및 GCP 프로바이더는 현재 이 기능을 단계적으로 출시 중입니다.
+
+- **v2는 몇 가지 기능을 제거했습니다.** 네이티브 patch-and-transform 컴포지션, `ControllerConfig` 타입, 외부 시크릿 스토어, 컴포지트 리소스 연결 정보, 패키지의 기본 레지스트리는 더 이상 사용할 수 없습니다. 대부분의 사용자는 파괴적 변경 없이 업그레이드할 수 있지만, 이 기능들을 사용하고 있다면 정리가 필요합니다. 업그레이드 전에 `kubectl get pkg`를 실행해 모든 패키지가 완전 수식 이미지(예: `registry.example.com/repo/package:tag`)를 사용하는지 확인하세요.
+
+## 실용적인 권장 사항
+
+Kubernetes 플랫폼용 컨트롤 플레인을 검토 중이고 Terraform을 고집할 강한 이유가 없다면, 먼저 Crossplane v2.2를 시도해 보세요. Get Started 가이드는 어떤 Kubernetes 클러스터에서든 오후 한나절이면 끝낼 수 있습니다. Crossplane이 요구사항을 충족한다면, 애플리케이션과 인프라 워크플로를 하나의 선언적 모델로 관리할 수 있습니다. 그렇지 않다면, 현재 도구를 유지할 명확한 문서화된 이유가 생깁니다.
+
+이미 Crossplane v2.1을 쓰고 있다면 v2.2로 업그레이드하세요. MRD 컨트롤러의 서버 사이드 apply, 의존성 인식 런타임 구성, 함수의 스키마 접근, 더 나은 trace 출력 같은 기능은 Pipeline Inspector를 쓰지 않더라도 가치가 있습니다. 아직 v1.x라면 v1.20에 핀을 박고, 더 이상 사용되지 않는 기능을 마이그레이션한 다음, v2.x로 업그레이드해서 거기서부터 계속 가세요. v2는 좋은 하위 호환성을 제공하지만, 사용 중단(deprecation)은 빈말이 아니라 실제로 적용됩니다.

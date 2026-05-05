@@ -1,0 +1,13 @@
+## 常见问题
+
+### Crossplane 是 Terraform 的替代品吗？
+
+不是。Terraform 是运行在 Kubernetes 之外的、更简单的工作流工具。Crossplane 是一个持续运行的控制平面；如果你们已经在用 Kubernetes 和 GitOps，它会更合适。
+
+### 用 Crossplane 一定要用 composition 吗？
+
+不必。你可以直接使用 provider 和 managed resource。composition 是可选项，主要用于构建更高层、可复用的抽象。
+
+### v2 系列里有哪些变化是我应该提前规划的？
+
+资源默认按命名空间作用域、composition 支持任意 K8s 资源、Claims 被命名空间和 RBAC 替代、operations 可以承载工作流。Legacy 模式依然支持 v1。

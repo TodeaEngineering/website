@@ -1,0 +1,13 @@
+## Frequently Asked Questions
+
+### Is Crossplane a Terraform replacement?
+
+No. Terraform is a simpler workflow tool outside Kubernetes. Crossplane is a continuous control plane, better if you already use Kubernetes and GitOps.
+
+### Do I have to use compositions to use Crossplane?
+
+No. You can use providers and managed resources directly. Compositions are optional and help create higher-level, reusable abstractions.
+
+### What changed in the v2 line that I should plan for?
+
+Namespaced resources by default, compositions support any K8s resource, claims replaced by RBAC, and operations enable workflows. Legacy mode supports v1.
