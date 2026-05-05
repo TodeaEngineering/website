@@ -5,7 +5,7 @@ date: "2026-04-04"
 author: "Todea Engineering"
 authorRole: "云原生实践"
 category: "云原生"
-image: "/blog/crossplane-explained/zh-cover.svg"
+image: "/blog/crossplane-v2-2-release/zh-cover.svg"
 tags: ["crossplane", "kubernetes", "platform-engineering", "control-plane", "iac", "gitops"]
 ---
 
@@ -19,7 +19,7 @@ Crossplane 提供了一种以 Kubernetes 为原生的方式来管理云资源。
 
 ## Crossplane 实际上是什么
 
-![Crossplane 概览](/blog/crossplane-explained/zh-crossplane-overview.svg)
+![Crossplane 概览](/blog/crossplane-v2-2-release/zh-crossplane-overview.svg)
 
 Crossplane 是面向平台工程的控制平面框架。你把它装进一个被称为管理集群的 Kubernetes 集群，这个集群就成了集群外一切事物的控制平面：云账户、SaaS API、内部工具，乃至其他 Kubernetes 集群。这一切都通过你的应用已经在用的同一套 Kubernetes API 来管理。管理集群本身要单独搭好，Crossplane 不会替你创建。Crossplane 一旦运行起来，就既没有状态文件也没有独立工作流。漂移由那条让 `Deployment` 保持健康的相同协调循环来纠正。
 
@@ -43,7 +43,7 @@ Crossplane 有四个主要组件。你可以全部用上，也可以只用需要
 
 当用户直接（单独地或作为某个 `Composition` 的一部分）apply 一个 MR 时，由 provider 接管。它通过 Kubernetes API 监控这个 MR，调用外部系统去创建或更新真实资源，然后更新状态。之后它会持续巡检：如果真实资源相对 `spec.forProvider` 发生了变化，provider 就把它修回来。所有状态都存在 etcd 里，因此没有独立的状态文件。
 
-![Crossplane 流程](/blog/crossplane-explained/zh-crossplane-flow.svg)
+![Crossplane 流程](/blog/crossplane-v2-2-release/zh-crossplane-flow.svg)
 
 ## 何时反而该用传统 IaC
 

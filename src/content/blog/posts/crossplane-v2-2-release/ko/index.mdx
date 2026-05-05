@@ -5,7 +5,7 @@ date: "2026-04-04"
 author: "Todea Engineering"
 authorRole: "클라우드 네이티브 실무"
 category: "클라우드 네이티브"
-image: "/blog/crossplane-explained/ko-cover.svg"
+image: "/blog/crossplane-v2-2-release/ko-cover.svg"
 tags: ["crossplane", "kubernetes", "platform-engineering", "control-plane", "iac", "gitops"]
 ---
 
@@ -19,7 +19,7 @@ Crossplane은 클라우드 리소스를 관리하는 Kubernetes 네이티브 접
 
 ## Crossplane이 실제로 무엇인가
 
-![Crossplane 개요](/blog/crossplane-explained/ko-crossplane-overview.svg)
+![Crossplane 개요](/blog/crossplane-v2-2-release/ko-crossplane-overview.svg)
 
 Crossplane은 플랫폼 엔지니어링을 위한 컨트롤 플레인 프레임워크입니다. 관리 클러스터라고 부르는 Kubernetes 클러스터에 설치하면, 그 클러스터가 외부의 모든 것(클라우드 계정, SaaS API, 사내 도구, 심지어 다른 Kubernetes 클러스터까지)에 대한 컨트롤 플레인이 됩니다. 이 모든 것이 애플리케이션이 이미 사용하는 동일한 Kubernetes API를 통해 관리됩니다. 관리 클러스터 자체는 별도로 설정해야 하며, Crossplane이 만들어 주지 않습니다. Crossplane이 일단 동작하면 상태 파일도 별도 워크플로도 없습니다. 드리프트는 `Deployment`를 정상 상태로 유지하는 동일한 조정 루프로 수정됩니다.
 
@@ -43,7 +43,7 @@ Crossplane에는 4가지 주요 컴포넌트가 있습니다. 4가지를 모두 
 
 사용자가 MR을 직접 적용(단독으로 또는 `Composition`의 일부로)하면 프로바이더가 인계받습니다. 프로바이더는 Kubernetes API를 통해 MR을 모니터링하고, 외부 시스템을 호출하여 실제 리소스를 만들거나 업데이트하고, 상태를 갱신합니다. 그 후에도 계속 확인합니다. 실제 리소스가 `spec.forProvider`에서 벗어나면 프로바이더가 그것을 고칩니다. 모든 상태는 etcd에 저장되므로 별도의 상태 파일은 없습니다.
 
-![Crossplane 흐름](/blog/crossplane-explained/ko-crossplane-flow.svg)
+![Crossplane 흐름](/blog/crossplane-v2-2-release/ko-crossplane-flow.svg)
 
 ## 전통적인 IaC를 사용해야 할 때
 

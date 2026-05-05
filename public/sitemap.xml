@@ -222,15 +222,15 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/contact"/>
   </url>
   <url>
-    <loc>https://todea.co.kr/en/blog/crossplane-explained</loc>
+    <loc>https://todea.co.kr/en/blog/crossplane-v2-2-release</loc>
     <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-explained"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/en/blog/kubernetes-1-36-release</loc>
@@ -288,15 +288,15 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
   </url>
   <url>
-    <loc>https://todea.co.kr/ko/blog/crossplane-explained</loc>
+    <loc>https://todea.co.kr/ko/blog/crossplane-v2-2-release</loc>
     <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-explained"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/ko/blog/kubernetes-1-36-release</loc>
@@ -354,15 +354,15 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
   </url>
   <url>
-    <loc>https://todea.co.kr/ja/blog/crossplane-explained</loc>
+    <loc>https://todea.co.kr/ja/blog/crossplane-v2-2-release</loc>
     <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-explained"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/ja/blog/kubernetes-1-36-release</loc>
@@ -420,15 +420,15 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/service-mesh-explained"/>
   </url>
   <url>
-    <loc>https://todea.co.kr/zh/blog/crossplane-explained</loc>
+    <loc>https://todea.co.kr/zh/blog/crossplane-v2-2-release</loc>
     <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-explained"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-explained"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://todea.co.kr/ko/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://todea.co.kr/ja/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://todea.co.kr/zh/blog/crossplane-v2-2-release"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://todea.co.kr/en/blog/crossplane-v2-2-release"/>
   </url>
   <url>
     <loc>https://todea.co.kr/zh/blog/kubernetes-1-36-release</loc>

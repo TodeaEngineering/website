@@ -5,7 +5,7 @@ date: "2026-04-04"
 author: "Todea Engineering"
 authorRole: "Cloud Native Practice"
 category: "Cloud Native"
-image: "/blog/crossplane-explained/en-cover.svg"
+image: "/blog/crossplane-v2-2-release/en-cover.svg"
 tags: ["crossplane", "kubernetes", "platform-engineering", "control-plane", "iac", "gitops"]
 ---
 
@@ -19,7 +19,7 @@ The project has moved quickly over the past year. In August 2025, Crossplane v2 
 
 ## What Crossplane actually is
 
-![Crossplane overview](/blog/crossplane-explained/en-crossplane-overview.svg)
+![Crossplane overview](/blog/crossplane-v2-2-release/en-crossplane-overview.svg)
 
 Crossplane is a control plane framework for platform engineering. You install it into a Kubernetes cluster, known as the management cluster, and that cluster becomes the control plane for everything outside it: cloud accounts, SaaS APIs, internal tools, and even other Kubernetes clusters. All of these are managed through the same Kubernetes API your applications already use. The management cluster itself must be set up separately; Crossplane does not create it for you. Once Crossplane is running, there is no state file and no separate workflow. Drift is fixed by the same reconciliation loop that keeps your `Deployments` healthy.
 
@@ -43,7 +43,7 @@ When a developer or a pipeline creates an XR in a namespace, the composition eng
 
 When a user applies an MR directly, either by itself or as part of a `Composition`, the provider takes over. It monitors the MR through the Kubernetes API, calls the external system to create or update the real resource, and updates the status. After that, it keeps checking: if the real resource changes from `spec.forProvider`, the provider fixes it. All state is stored in etcd, so there is no separate state file.
 
-![Crossplane flow](/blog/crossplane-explained/en-crossplane-flow.svg)
+![Crossplane flow](/blog/crossplane-v2-2-release/en-crossplane-flow.svg)
 
 ## When to use traditional IaC instead
 
