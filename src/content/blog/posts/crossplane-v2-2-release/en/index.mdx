@@ -41,9 +41,9 @@ There are two entry points into this flow, depending on what you're applying.
 
 When a developer or a pipeline creates an XR in a namespace, the composition engine watches it, runs the configured function pipeline, and creates the needed resources. These resources can be other Kubernetes resources, managed resources, or both.
 
-When a user applies an MR directly, either by itself or as part of a `Composition`, the provider takes over. It monitors the MR through the Kubernetes API, calls the external system to create or update the real resource, and updates the status. After that, it keeps checking: if the real resource changes from `spec.forProvider`, the provider fixes it. All state is stored in etcd, so there is no separate state file.
-
 ![Crossplane flow](/blog/crossplane-v2-2-release/en-crossplane-flow.svg)
+
+When a user applies an MR directly, either by itself or as part of a `Composition`, the provider takes over. It monitors the MR through the Kubernetes API, calls the external system to create or update the real resource, and updates the status. After that, it keeps checking: if the real resource changes from `spec.forProvider`, the provider fixes it. All state is stored in etcd, so there is no separate state file.
 
 ## When to use traditional IaC instead
 
