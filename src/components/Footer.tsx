@@ -30,6 +30,9 @@ export default function Footer() {
             <p className="text-[13px] text-neutral-400 leading-relaxed max-w-[300px]">
               {t('company_info')}
             </p>
+            <p className="text-[12px] text-neutral-500 leading-relaxed max-w-[300px] mt-2">
+              {t('business_registration')}
+            </p>
           </div>
 
           {/* Sitemap */}

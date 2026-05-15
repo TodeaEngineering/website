@@ -166,6 +166,10 @@ export default function Contact() {
                   <p className={labelCls}>{t('loc_l')}</p>
                   <p className="text-[15px] text-neutral-500 font-light">{t('loc_v')}</p>
                 </div>
+                <div>
+                  <p className={labelCls}>{t('brn_l')}</p>
+                  <p className="text-[15px] text-neutral-500 font-light">{t('brn_v')}</p>
+                </div>
               </div>
             </div>
           </FadeIn>
