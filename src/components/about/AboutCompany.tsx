@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import FadeIn from '../FadeIn';
 
-const fields = ['established', 'registered', 'address', 'contact'] as const;
+const fields = ['established', 'registered', 'brn', 'address', 'contact'] as const;
 
 export default function AboutCompany() {
   const t = useTranslations('AboutCompany');
